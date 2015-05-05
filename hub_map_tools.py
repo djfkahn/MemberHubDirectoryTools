@@ -15,7 +15,7 @@ def ReadMap():
         open_file = open('hub_map.csv')
 
         for line in open_file:
-            fields = line.split(',')
+            fields = line.split('|')
             ## be sure to strip the '\r\n' that Excel adds at the end of lines
             map_d.update({fields[0]:fields[-1][:-2]})
             count += 1
@@ -29,7 +29,7 @@ def ReadMap():
 
 def IsInClassroomHub(map_d, hub_text):
     # return True if hub text is one of the Middle School grade hubs
-    if hub_text in ('6th Grade', '7th Grade', '8th Grade'):
+    if hub_text in ('6', '7', '8'):
         return True
     
     # return True if teacher's name starts the hub text
