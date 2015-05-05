@@ -63,7 +63,10 @@ adult associated with them.
 def FindChildless(direct_d):
     print "This functionality has not been added yet"
 
-def FindHubless(direct_d):
+def FindHubless(arg_list):
+    direct_d = arg_list[0]
+    map_d    = arg_list[1]
+
     child_count = adult_count = 0
 
     for entry in direct_d:
@@ -173,7 +176,7 @@ def RunMenu(direct_d, roster_d, map_d):
     choices = {'1 - Find Missing Email':{'Function':FindMissingEmail,'Arg':direct_d},
                '2 - Find Orphans':{'Function':FindOrphans,'Arg':direct_d},
                '3 - Find Childless':{'Function':FindChildless,'Arg':direct_d},
-               '4 - Find Not In Hub':{'Function':FindHubless,'Arg':direct_d},
+               '4 - Find Not In Hub':{'Function':FindHubless,'Arg':[direct_d,map_d]},
                '5 - Make Import File for Not In Hub':{'Function':MakeImportForHubless,
                                                       'Arg':[direct_d,roster_d,map_d]},
                '6 - Find Not in Directory':{'Function':FindEntriless,
