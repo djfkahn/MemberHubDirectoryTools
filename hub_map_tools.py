@@ -27,6 +27,27 @@ def ReadMap():
         
     return map_d
 
+def IsInClassroomHub(map_d, hub_text):
+    # return True if hub text is one of the Middle School grade hubs
+    if hub_text in ('6th Grade', '7th Grade', '8th Grade'):
+        return True
+    
+    # return True if teacher's name starts the hub text
+    for teacher in map_d.keys():
+        if hub_text[:len(teacher)] == teacher:
+            return True
+    
+    # return False otherwise
+    return False
+    
+def IsAnyHubClassroomHub(map_d, hub_field):
+    hubs = hub_field.split(';')
+    for hub in hubs:
+        if IsInClassroomHub(map_d, hub):
+            return True
+    
+    return False
+    
 def PrintMap(map_d):
     print map_d
 
