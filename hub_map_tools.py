@@ -29,7 +29,7 @@ def ReadMap():
 
 def IsInClassroomHub(map_d, hub_text):
     # return True if hub text is one of the Middle School grade hubs
-    if hub_text in ('6', '7', '8'):
+    if hub_text in ('6th Grade', '7th Grade', '8th Grade', 'SDC'):
         return True
     
     # return True if teacher's name starts the hub text
