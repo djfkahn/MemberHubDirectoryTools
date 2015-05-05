@@ -67,11 +67,11 @@ def FindHubless(direct_d):
     child_count = adult_count = 0
 
     for entry in direct_d:
-        if direct_d[entry]["family_relation"][:5].lower() == "child":
-            if direct_d[entry]["hubs"] == "":
+        if not hub_map_tools.IsAnyHubClassroomHub(map_d, direct_d[entry]["hubs"]):
+            print "%s %s is not in a classroom hub" % (direct_d[entry]["first_name"],direct_d[entry]["last_name"])
+            if direct_d[entry]["family_relation"][:5].lower() == "child":
                 child_count += 1
-        else:
-            if direct_d[entry]["hubs"] == "":
+             else:
                 adult_count += 1
 
     print "Found %d children who are not in at least one hub" % child_count
