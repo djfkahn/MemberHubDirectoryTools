@@ -71,7 +71,7 @@ def FindHubless(direct_d):
             print "%s %s is not in a classroom hub" % (direct_d[entry]["first_name"],direct_d[entry]["last_name"])
             if direct_d[entry]["family_relation"][:5].lower() == "child":
                 child_count += 1
-             else:
+            else:
                 adult_count += 1
 
     print "Found %d children who are not in at least one hub" % child_count
