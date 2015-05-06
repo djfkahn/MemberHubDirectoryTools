@@ -91,13 +91,16 @@ def MakeImportForHubless(arg_list):
     processed_count = hubed_count = hubless_count = 0
 
     for entry in direct_d:
-        if direct_d[entry]["hubs"] == "":
+        if not hub_map_tools.IsAnyHubClassroomHub(map_d, direct_d[entry]["hubs"]):
+            print "%s %s is not in a classroom hub (%s)" % (direct_d[entry]["first_name"],
+                                                            direct_d[entry]["last_name"],
+                                                            direct_d[entry]["hubs"])
             processed_count += 1
             for person in roster_d:
                 if IsSameName(direct_d[entry], roster_d[person]):
 
                     temp = direct_d[entry]
-                    hub_names = "|"
+                    hub_names = temp["hubs"] + "|"
                     for teacher in (roster_d[person]["teacher"].split('|')):
                         hub_names += map_d[teacher] + "|"
                         
@@ -106,13 +109,13 @@ def MakeImportForHubless(arg_list):
                     hubed_count += 1
                     break
             else:
-                print "Did not find match for %s %s." % \
+                print "Did not find match for %s %s in the roster." % \
                           (direct_d[entry]["first_name"], direct_d[entry]["last_name"])
                 hubless_count += 1
 
-    print "Processed %d entries that were not in at least one hub." % processed_count
-    print "Was able to find hubs for %d entries." % hubed_count
-    print "Was not able to find hubs for %d entries." % hubless_count
+    print "Processed %d entries that were not in any classroom hub." % processed_count
+    print "Was able to find classroom hubs for %d entries." % hubed_count
+    print "Was not able to find classroom hubs for %d entries." % hubless_count
 
     import_file_tools.CreateHublessImportFile(update_d)
             
