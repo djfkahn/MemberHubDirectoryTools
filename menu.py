@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-"""This program inputs a MemberHub directory dump, and analyzes it.
+"""Defines the main menu module for a program that inputs a MemberHub directory dump, 
+a school roster, and a hub map to perform analyses on the MemberHub directory.
 """
 
 import directory_tools
@@ -32,38 +33,73 @@ def IsSameName(from_directory, from_roster):
     
     
 def FindMissingEmail(direct_d):
-    """FindMissingEmail finds all the adults in the directory that do not have
-an email address associated with their entry.
-"""
+    """menu.FindMissingEmail
+    INPUTS:
+    - direct_d -- dictionary containing the MemberHub directory
+    OUTPUTS:
+    Prints to standard output the adults in the directory who do not have an
+    email address associated with their entry.
+    ASSUMPTIONS:
+    None.
+    """
     adult_count = no_email_count = 0
     for entry in direct_d:
         if direct_d[entry]["family_relation"][:5].lower() == "adult":
             adult_count += 1
             if direct_d[entry]["email"] == "":
+                print "The entry for %s %s does not have an email address." % \
+                    (direct_d[entry]["first_name"], direct_d[entry]["last_name"])
                 no_email_count += 1
 
     print "Found %d out of %d adults with missing email addresses" % \
           (no_email_count, adult_count)
 
 def FindOrphans(direct_d):
-    """FindOrphans finds all the children in the directory that do not have an
-adult associated with them.
-"""
+    """menu.FindOrphans
+    INPUTS:
+    - direct_d -- dictionary containing the MemberHub directory
+    OUTPUTS:
+    Prints to standard output the children in the directory who do not have an
+    parent associated with their entry.
+    ASSUMPTIONS:
+    None.
+    """
     child_count = orphan_count = 0
 
     for entry in direct_d:
         if direct_d[entry]["family_relation"][:5].lower() == "child":
             child_count += 1
             if direct_d[entry]["parents"] == "":
+                print "The entry for child % %s does not identify parents" % \
+                    (direct_d[entry]["first_name"], direct_d[entry]["last_name"])
                 orphan_count += 1
             
     print "Found %d children without adults in the family out of %d children" % \
           (orphan_count, child_count)
 
 def FindChildless(direct_d):
+    """menu.FindChildless
+    INPUTS:
+    - direct_d -- dictionary containing the MemberHub directory
+    OUTPUTS:
+    Prints to standard output the adults in the directory who do not have a
+    child associated with their entry.
+    ASSUMPTIONS:
+    None.
+    """
     print "This functionality has not been added yet"
 
 def FindHubless(arg_list):
+    """menu.FindHubless
+    INPUTS:
+    - direct_d -- dictionary containing the MemberHub directory
+    - map_d    -- dictionary mapping teacher names to hub IDs
+    OUTPUTS:
+    Prints to standard output the names in the directory who are not members of
+    at least one classroom hub.
+    ASSUMPTIONS:
+    None.
+    """
     direct_d = arg_list[0]
     map_d    = arg_list[1]
 
@@ -83,6 +119,19 @@ def FindHubless(arg_list):
     print "Found %d adults who are not in at least one hub" % adult_count
 
 def MakeImportForHubless(arg_list):
+    """menu.MakeImportForHubless
+    INPUTS:
+    - direct_d -- dictionary containing the MemberHub directory
+    - roster_d -- dictionary containing the school roster
+    - map_d    -- dictionary mapping teacher names to hub IDs
+    OUTPUTS:
+    Prints to standard output the names in the directory who are not members of
+    at least one classroom hub.
+    Creates a comma-separated text file that can be imported into MemberHub to assign
+    hub IDs to existing directory entries.
+    ASSUMPTIONS:
+    None.
+    """
     direct_d = arg_list[0]
     roster_d = arg_list[1]
     map_d    = arg_list[2]
@@ -120,6 +169,16 @@ def MakeImportForHubless(arg_list):
     import_file_tools.CreateHublessImportFile(update_d)
             
 def FindEntriless(arg_list):
+    """menu.FindEntriless
+    INPUTS:
+    - direct_d -- dictionary containing the MemberHub directory
+    - roster_d -- dictionary containing the school roster
+    OUTPUTS:
+    Prints to standard output the names in the school roster who are not in the
+    MemberHub directory.
+    ASSUMPTIONS:
+    None.
+    """
     direct_d = arg_list[0]
     roster_d = arg_list[1]
 
@@ -129,8 +188,6 @@ def FindEntriless(arg_list):
         
         for entry in direct_d:
             if IsSameName(direct_d[entry], roster_d[person]):
-                print "Found %s %s in directory." % \
-                      (roster_d[person]["first_name"], roster_d[person]["last_name"])
                 break
             
         else:
@@ -142,6 +199,18 @@ def FindEntriless(arg_list):
 
 
 def MakeImportNotInDirectory(arg_list):
+    """menu.MakeImportNotInDirectory
+    INPUTS:
+    - direct_d -- dictionary containing the MemberHub directory
+    - roster_d -- dictionary containing the school roster
+    - map_d    -- dictionary mapping teacher names to hub IDs
+    OUTPUTS:
+    Creates a comma-separated text file that can be imported into MemberHub to create
+    directory entries for people who are in the roster, but not already in the directory.
+    Includes hub ID assignments for these people.
+    ASSUMPTIONS:
+    None.
+    """
     direct_d = arg_list[0]
     roster_d = arg_list[1]
     map_d    = arg_list[2]
