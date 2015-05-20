@@ -4,41 +4,49 @@ a dictionary, and display portions of the dictionary for analysis.
 """
 
 def ReadDirectory():
-    """ReadDirectory() reads a MemberHub directory dump to CSV file, and
-outputs a dictionary containing all the directory entries.
-
-This function assumes the directory dump fields are in this order:
-1.  "person_id"
-2.  "last_name"
-3.  "first_name"
-4.  "middle_name"
-5.  "suffix"
-6.  "email"
-7.  "family_id"
-8.  "family_relation"
-9.  "maiden_name"
-10. "born_on"
-11. "gender"
-12. "parents"
-13. "street"
-14. "city"
-15. "state"
-16. "zip"
-17. "home_number"
-18. "work_number"
-19. "work_number_ext"
-20. "fax_number"
-21. "mobile_number":
-22. "mobile_provider"
-23. "allow_sms"
-24. "hubs"
-25. "hubs_administered"
-26. "person_created"
-27. "person_updated"
-28. "account_created"
-29. "account_updated"
-30. "last_login"
-
+    """directory_tools.ReadDirectory
+    INPUTS:
+    Prompts user for name of comma-separated text file containing MemberHub directory dump.
+    OUTPUTS:
+    Dictionary keyed by file line number with values that are dictionaries with the following keys:
+        This function assumes the directory dump fields are in this order:
+        1.  "person_id"
+        2.  "last_name"
+        3.  "first_name"
+        4.  "middle_name"
+        5.  "suffix"
+        6.  "email"
+        7.  "family_id"
+        8.  "family_relation"
+        9.  "maiden_name"
+        10. "born_on"
+        11. "gender"
+        12. "parents"
+        13. "street"
+        14. "city"
+        15. "state"
+        16. "zip"
+        17. "home_number"
+        18. "work_number"
+        19. "work_number_ext"
+        20. "fax_number"
+        21. "mobile_number":
+        22. "mobile_provider"
+        23. "allow_sms"
+        24. "hubs"
+        25. "hubs_administered"
+        26. "person_created"
+        27. "person_updated"
+        28. "account_created"
+        29. "account_updated"
+        30. "last_login"
+    ASSUMPTIONS:
+    1. Each line should contain exactly 30 fields that are separated by just a comma (','),
+    and none of the fields contain commas.
+    2. Lines that contain blank first or last names will be flagged, but not added to the 
+    output dictionary.
+    3. Each line ends in up to 3 new line escape characters, but the last field is last login,
+    which should not be used.
 """
     direct_d = {}   # empty dictionary
 
@@ -49,14 +57,24 @@ This function assumes the directory dump fields are in this order:
     try:
         open_file = open(file_name)
         title_line = open_file.readline()
+        fields = title_line.split(',')
+        if not len(fields) == 30:
+            print "The file %s does not contain 30 fields, and cannot be parsed." % file_name
+            print "The following fields were found:"
+            print fields
+            return {}
 
         for line in open_file:
-            fields = line.split('","')
-            if len(fields) < 2:
-                fields = line.split(',')
+            fields = line.split(',')
+            if not len(fields) == 30:
+                print "Incorrect number of fields found on or near line %d.  Line will not be processed." % (count+1)
+                print "The following fields were read on this line:"
+                print fields
 
-            if fields[1] == "" or fields[2] == "":
+            elif fields[1] == "" or fields[2] == "":
                 print "Found a blank name on or near line %d.  Line will not be procssed." % (count+1)
+                print "The following fields were read on this line:"
+                print fields
 
             else:
                 
