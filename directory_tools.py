@@ -60,17 +60,21 @@ def ReadDirectory():
         fields = title_line.split(',')
         if not len(fields) == 30:
             print "The file %s does not contain 30 fields, and cannot be parsed." % file_name
-            print "Only the following fields were found:"
+            print "The following fields were found:"
             print fields
             return {}
 
         for line in open_file:
             fields = line.split(',')
-            if len(fields) < 2:
-                fields = line.split(',')
+            if not len(fields) == 30:
+                print "Incorrect number of fields found on or near line %d.  Line will not be processed." % (count+1)
+                print "The following fields were read on this line:"
+                print fields
 
-            if fields[1] == "" or fields[2] == "":
+            elif fields[1] == "" or fields[2] == "":
                 print "Found a blank name on or near line %d.  Line will not be procssed." % (count+1)
+                print "The following fields were read on this line:"
+                print fields
 
             else:
                 
