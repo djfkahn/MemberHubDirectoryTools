@@ -21,6 +21,6 @@ Or press <enter> to quit:
 
 ASSUMPTIONS
 1.  Classroom Hub Definitions Map in file called "hub_map.csv"
-Each line in this file maps one teacher name to his/her Hub ID.
+Each line in this file maps one teacher name to his/her Hub ID using the form:  "<teacher name>|<hub id>".
 
 2.  All input files are comma-separated text files, with one entry per line
