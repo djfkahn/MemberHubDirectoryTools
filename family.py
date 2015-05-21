@@ -52,7 +52,7 @@ class Family:
         new_adult = person.Person()
         self.adults += [new_adult.SetFromDirectory(fields)]
     
-     def AddChildFromDirectory(self, fields):
+    def AddChildFromDirectory(self, fields):
         new_child = person.Person()
         self.children += [new_child.SetFromDirectory(fields)]
     
@@ -90,7 +90,7 @@ class Family:
                     num_found += 1
                     break
         
-        return num_found = len(self.adults)
+        return num_found == len(self.adults)
 
     def CombineWith(self, other):
         to_add = []
