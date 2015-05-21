@@ -42,7 +42,7 @@ def ReadRoster():
 def PrintEntries(roster):
     num_to_print = raw_input('Enter number of entries to print: ')
     for x in roster[:int(num_to_print)]:
-        print x.Print()
+        x.Print()
 
 def main():
     roster = ReadRoster()
