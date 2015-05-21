@@ -53,3 +53,5 @@ class Person:
                 self.first_name.lower() == other.first_name.lower() and \
                 self.family_relation[:5].lower() == other.family_relation[:5].lower()
 
+    def Print(self):
+        print "%s %s" % (self.first_name, self.last_name)
