@@ -17,6 +17,13 @@ class Family:
         self.adults += [new_adult.SetFromDirectory(fields)]
     
     def AddAdultsFromCombinedField(self, fields):
+        # for elementary school (< 6th grade) teacher name is retained
+        # for middle school, teacher name is replaced with grade level
+        if int(fields[2]) < 6:
+            teacher = fields[4]
+        else:
+            teacher = fields[2]
+
         parent_count = 1
         parent_num = ""
         parents = fields[3].split(" and ")
@@ -68,3 +75,22 @@ class Family:
                     break
         
         return num_found = len(self.adults)
+
+    def CombineWith(self, other):
+        to_add = []
+        for possible_child in other.children:
+            for existing_child in self.children:
+                if existing_child.IsSame(possible_child):
+                    break
+            else:
+                to_add += [possible_child]
+                
+        self.children += to_add
+        
+    def IsChildless(self):
+        return len(self.children) == 0
+    
+    def IsOrphan(self):
+        return len(self.adults) == 0
+    
+    
