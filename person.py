@@ -39,6 +39,14 @@ class Person:
         self.account_updated = fields[28]
         self.last_login = fields[29][:-3]
     
+    def SetFromRoster(self, last_name, first_name, grade, teacher, name_field, family_relation):
+        self.last_name = last_name
+        self.first_name = first_name
+        self.grade = grade
+        self.teacher = teacher
+        self.name_field = name_field
+        self.family_relation = family_relation
+        self.person_id = " "
 
     def IsSame (self, other):
         return self.last_name.lower()  == other.last_name.lower() and \
