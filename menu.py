@@ -7,35 +7,13 @@ import directory_tools
 import roster_tools
 import hub_map_tools
 import import_file_tools
+import family
+import person
 
-def ContainsName(name_field, first_name, last_name):
-
-    found_name = name_field.find(first_name) >= 0 and \
-                 name_field.find(last_name) >= 0
-
-    return found_name       
-
-def IsSameName(from_directory, from_roster):
-    is_same = False
-    
-    if from_roster["family_relation"][:5].lower() == "child":
-        
-        is_same = from_directory["last_name"]  == from_roster["last_name"] and \
-                  from_directory["first_name"] == from_roster["first_name"]
-
-    else:
-
-        is_same = ContainsName(from_roster["name_field"],
-                               from_directory["first_name"],
-                               from_directory["last_name"])
-
-    return is_same
-    
-    
-def FindMissingEmail(direct_d):
+def FindMissingEmail(directory):
     """menu.FindMissingEmail
     INPUTS:
-    - direct_d -- dictionary containing the MemberHub directory
+    - directory -- list containing the MemberHub directory families
     OUTPUTS:
     Prints to standard output the adults in the directory who do not have an
     email address associated with their entry.
@@ -43,87 +21,107 @@ def FindMissingEmail(direct_d):
     None.
     """
     adult_count = no_email_count = 0
-    for entry in direct_d:
-        if direct_d[entry]["family_relation"][:5].lower() == "adult":
+    for entry_family in directory:
+        for adult in entry_family.GetAdults():
             adult_count += 1
-            if direct_d[entry]["email"] == "":
-                print "The entry for %s %s does not have an email address." % \
-                    (direct_d[entry]["first_name"], direct_d[entry]["last_name"])
+            if adult.DoesNotListEmailAddress():
+                print "The entry for this person does not have an email address:"
+                adult.Print()
                 no_email_count += 1
 
     print "Found %d out of %d adults with missing email addresses" % \
           (no_email_count, adult_count)
 
-def FindOrphans(direct_d):
+def FindOrphans(directory):
     """menu.FindOrphans
     INPUTS:
-    - direct_d -- dictionary containing the MemberHub directory
+    - directory -- list containing the MemberHub directory families
     OUTPUTS:
     Prints to standard output the children in the directory who do not have an
     parent associated with their entry.
     ASSUMPTIONS:
     None.
     """
-    child_count = orphan_count = 0
+    family_count = orphan_count = 0
 
-    for entry in direct_d:
-        if direct_d[entry]["family_relation"][:5].lower() == "child":
-            child_count += 1
-            if direct_d[entry]["parents"] == "":
-                print "The entry for child % %s does not identify parents" % \
-                    (direct_d[entry]["first_name"], direct_d[entry]["last_name"])
-                orphan_count += 1
+    for entry_family in directory:
+        family_count += 1
+        if len(entry_family.GetAdults()) == 0:
+            print "The entry for this family does not identify parents:" 
+            entry_family.Print()
+            orphan_count += 1
             
-    print "Found %d children without adults in the family out of %d children" % \
-          (orphan_count, child_count)
+    print "Found %d families without adults out of %d families" % \
+          (orphan_count, family_count)
 
-def FindChildless(direct_d):
+def FindChildless(directory):
     """menu.FindChildless
     INPUTS:
-    - direct_d -- dictionary containing the MemberHub directory
+    - directory -- list containing the MemberHub directory families
     OUTPUTS:
     Prints to standard output the adults in the directory who do not have a
     child associated with their entry.
     ASSUMPTIONS:
     None.
     """
-    print "This functionality has not been added yet"
+    family_count = childless_count = 0
+
+    for entry_family in directory:
+        family_count += 1
+        if len(entry_family.GetChildren()) == 0:
+            print "The entry for this family does not identify children:" 
+            entry_family.Print()
+            childless_count += 1
+            
+    print "Found %d families without children out of %d families" % \
+          (childless_count, family_count)
 
 def FindHubless(arg_list):
     """menu.FindHubless
     INPUTS:
-    - direct_d -- dictionary containing the MemberHub directory
-    - map_d    -- dictionary mapping teacher names to hub IDs
+    - directory -- list containing the MemberHub directory families
+    - map_d     -- dictionary mapping teacher names to hub IDs
     OUTPUTS:
     Prints to standard output the names in the directory who are not members of
     at least one classroom hub.
     ASSUMPTIONS:
     None.
     """
-    direct_d = arg_list[0]
-    map_d    = arg_list[1]
+    directory = arg_list[0]
+    map_d     = arg_list[1]
+    hubless   = []
 
     child_count = adult_count = 0
 
-    for entry in direct_d:
-        if not hub_map_tools.IsAnyHubClassroomHub(map_d, direct_d[entry]["hubs"]):
-            print "%s %s is not in a classroom hub (%s)" % (direct_d[entry]["first_name"],
-                                                            direct_d[entry]["last_name"],
-                                                            direct_d[entry]["hubs"])
-            if direct_d[entry]["family_relation"][:5].lower() == "child":
-                child_count += 1
-            else:
+    for directory_family in directory:
+        for adult in directory_family.GetAdults():
+            if not hub_map_tools.IsAnyHubClassroomHub(map_d, adult.GetHubs()):
+                print "Found adult not in a classroom hub (%s)" % adult.GetHubs()
+                adult.Print()
                 adult_count += 1
+                hubless.append(adult)
+        
+        for child in directory_family.GetChildren():
+            if not hub_map_tools.IsAnyHubClassroomHub(map_d, child.GetHubs()):
+                print "Found child not in a classroom hub (%s)" % child.GetHubs()
+                child.Print()
+                child_count += 1
+                hubless.append(child)
 
     print "Found %d children who are not in at least one hub" % child_count
     print "Found %d adults who are not in at least one hub" % adult_count
+    
+    return hubless
+
+def PrintHubless(arg_list):
+    discard = FindHubless(arg_list)
 
 def MakeImportForHubless(arg_list):
     """menu.MakeImportForHubless
     INPUTS:
-    - direct_d -- dictionary containing the MemberHub directory
-    - roster_d -- dictionary containing the school roster
-    - map_d    -- dictionary mapping teacher names to hub IDs
+    - directory -- dictionary containing the MemberHub directory
+    - roster    -- dictionary containing the school roster
+    - map_d     -- dictionary mapping teacher names to hub IDs
     OUTPUTS:
     Prints to standard output the names in the directory who are not members of
     at least one classroom hub.
@@ -132,78 +130,83 @@ def MakeImportForHubless(arg_list):
     ASSUMPTIONS:
     None.
     """
-    direct_d = arg_list[0]
-    roster_d = arg_list[1]
-    map_d    = arg_list[2]
-    update_d = {}
+    directory   = arg_list[0]
+    map_d       = arg_list[1]
+    roster      = arg_list[2]
+    hubless     = FindHubless(arg_list)
+    update_hubs = []
 
-    processed_count = hubed_count = hubless_count = 0
+    hubed_count = hubless_count = 0
 
-    for entry in direct_d:
-        if not hub_map_tools.IsAnyHubClassroomHub(map_d, direct_d[entry]["hubs"]):
-            print "%s %s is not in a classroom hub (%s)" % (direct_d[entry]["first_name"],
-                                                            direct_d[entry]["last_name"],
-                                                            direct_d[entry]["hubs"])
-            processed_count += 1
-            for person in roster_d:
-                if IsSameName(direct_d[entry], roster_d[person]):
+    for hubless_person in hubless:
+        for roster_family in roster:
+            found_person = roster_family.FindPersonInFamily(hubless_person)
+            if not found_person == None:
+                hubless_person.SetHubs(found_person)
+                update_hubs.append(hubless_person)
+#                    temp = direct_d[entry]
+#                    hub_names = temp["hubs"] + "|"
+#                    for teacher in (roster_d[person]["teacher"].split('|')):
+#                        hub_names += map_d[teacher] + "|"
+#                        
+#                    temp.update({"hubs":hub_names})
+#                    update_d.update({processed_count:temp})
+                hubed_count += 1
+                break
+        else:
+            print "Did not find match for this person in the roster:"
+            hubless_person.Print()
+            hubless_count += 1
 
-                    temp = direct_d[entry]
-                    hub_names = temp["hubs"] + "|"
-                    for teacher in (roster_d[person]["teacher"].split('|')):
-                        hub_names += map_d[teacher] + "|"
-                        
-                    temp.update({"hubs":hub_names})
-                    update_d.update({processed_count:temp})
-                    hubed_count += 1
-                    break
-            else:
-                print "Did not find match for %s %s in the roster." % \
-                          (direct_d[entry]["first_name"], direct_d[entry]["last_name"])
-                hubless_count += 1
-
-    print "Processed %d entries that were not in any classroom hub." % processed_count
+    print "Processed %d entries that were not in any classroom hub." % len(hubless)
     print "Was able to find classroom hubs for %d entries." % hubed_count
     print "Was not able to find classroom hubs for %d entries." % hubless_count
 
-    import_file_tools.CreateHublessImportFile(update_d)
-            
+    import_file_tools.CreateHublessImportFile(update_hubs)
+
 def FindEntriless(arg_list):
     """menu.FindEntriless
     INPUTS:
-    - direct_d -- dictionary containing the MemberHub directory
-    - roster_d -- dictionary containing the school roster
+    - directory -- list containing the MemberHub directory families
+    - roster    -- list containing the school roster families
     OUTPUTS:
-    Prints to standard output the names in the school roster who are not in the
+    - entriless -- returns list of families in the school roster that could not
+                   be found in the directory
+    Also prints to standard output the names in the school roster who are not in the
     MemberHub directory.
     ASSUMPTIONS:
     None.
     """
-    direct_d = arg_list[0]
-    roster_d = arg_list[1]
+    directory = arg_list[0]
+    roster    = arg_list[1]
+    entriless = []
 
     entriless_count = 0
 
-    for person in roster_d:
+    for roster_family in roster:
         
-        for entry in direct_d:
-            if IsSameName(direct_d[entry], roster_d[person]):
+        for directory_family in direct_d:
+            if directory_family.IsSameFamily(roster_family):
                 break
-            
+
         else:
-            print "Did not find match for %s %s." % \
-                  (roster_d[person]["first_name"], roster_d[person]["last_name"])
+            print "Did not find match for this family."
+            roster_family.Print()
+            entriless.append(roster_family)
             entriless_count += 1
 
     print "Found %d people on the roster who were not in the directory" % entriless_count
+    return entriless
 
+def PrintNotInDirectory(arg_list):
+    discard = FindEntriless(arg_list)
 
 def MakeImportNotInDirectory(arg_list):
     """menu.MakeImportNotInDirectory
     INPUTS:
-    - direct_d -- dictionary containing the MemberHub directory
-    - roster_d -- dictionary containing the school roster
-    - map_d    -- dictionary mapping teacher names to hub IDs
+    - directory -- dictionary containing the MemberHub directory
+    - roster    -- dictionary containing the school roster
+    - map_d     -- dictionary mapping teacher names to hub IDs
     OUTPUTS:
     Creates a comma-separated text file that can be imported into MemberHub to create
     directory entries for people who are in the roster, but not already in the directory.
@@ -211,53 +214,45 @@ def MakeImportNotInDirectory(arg_list):
     ASSUMPTIONS:
     None.
     """
-    direct_d = arg_list[0]
-    roster_d = arg_list[1]
-    map_d    = arg_list[2]
-    update_d = {}
+    directory = arg_list[0]
+    roster    = arg_list[1]
+    map_d     = arg_list[2]
+    entriless = FindEntriless(arg_list)
 
     entriless_count = 0
 
-    for person in roster_d:
-        for entry in direct_d:
-            if IsSameName(direct_d[entry], roster_d[person]):
-                break
-            
-        else:
-            hub_names = "|"
-            for teacher in (roster_d[person]["teacher"].split('|')):
-                hub_names += map_d[teacher] + "|"
-            update_d.update({entriless_count:{"last_name":roster_d[person]["last_name"],
-                                              "first_name":roster_d[person]["first_name"],
-                                              "family_relation":roster_d[person]["family_relation"],
-                                              "person_id":" ",
-                                              "hubs":hub_names}})
-            entriless_count += 1
+    for new_entry in entriless:
+        hub_names = "|"
+#        for teacher in (roster_d[person]["teacher"].split('|')):
+#            hub_names += map_d[teacher] + "|"
+#        update_d.update({entriless_count:{"last_name":roster_d[person]["last_name"],
+#                                          "first_name":roster_d[person]["first_name"],
+#                                          "family_relation":roster_d[person]["family_relation"],
+#                                          "person_id":" ",
+#                                          "hubs":hub_names}})
 
-    print "Found %d people on the roster who were not in the directory" % entriless_count
+    import_file_tools.CreateNewMemberImport(entriless)
 
-    import_file_tools.CreateNewMemberImport(update_d)
-            
 def MakePrompt(choices):
     choice_list = sorted(choices)
     guts = '\n'.join(['(%s)%s' % (choice[0], choice[1:])
                       for choice in choice_list])
     return 'Choose:\n' + guts + '\nOr press <enter> to quit '
 
-def RunMenu(direct_d, roster_d, map_d):
+def RunMenu(directory, roster, map_d):
     """Runs the user interface for dictionary manipulation."""
     # The choices dictionary has function names for values.
-    choices = {'1 - Find Missing Email':{'Function':FindMissingEmail,'Arg':direct_d},
-               '2 - Find Orphans':{'Function':FindOrphans,'Arg':direct_d},
-               '3 - Find Childless':{'Function':FindChildless,'Arg':direct_d},
-               '4 - Find Not In Hub':{'Function':FindHubless,'Arg':[direct_d,map_d]},
+    choices = {'1 - Find Missing Email':{'Function':FindMissingEmail,'Arg':directory},
+               '2 - Find Orphans':{'Function':FindOrphans,'Arg':directory},
+               '3 - Find Childless':{'Function':FindChildless,'Arg':directory},
+               '4 - Find Not In Hub':{'Function':PrintHubless,'Arg':[directory,map_d]},
                '5 - Make Import File for Not In Hub':{'Function':MakeImportForHubless,
-                                                      'Arg':[direct_d,roster_d,map_d]},
-               '6 - Find Not in Directory':{'Function':FindEntriless,
-                                            'Arg':[direct_d,roster_d]},
+                                                      'Arg':[directory,map_d,roster]},
+               '6 - Find Not in Directory':{'Function':PrintNotInDirectory,
+                                            'Arg':[directory,roster]},
                '7 - Make Import File for Not In Directory':
                                            {'Function':MakeImportNotInDirectory,
-                                            'Arg':[direct_d,roster_d,map_d]}}
+                                            'Arg':[directory,roster,map_d]}}
     
     prompt = MakePrompt(choices)
 
@@ -278,10 +273,10 @@ def RunMenu(direct_d, roster_d, map_d):
 
         
 def main():
-    direct_d = directory_tools.ReadDirectory()
-    roster_d = roster_tools.ReadRoster()
-    map_d    = hub_map_tools.ReadMap()
-    RunMenu(direct_d, roster_d, map_d)
+    directory = directory_tools.ReadDirectory()
+    roster    = roster_tools.ReadRoster()
+    map_d     = hub_map_tools.ReadMap()
+    RunMenu(directory, roster, map_d)
 
 if __name__ == '__main__':
     main()
