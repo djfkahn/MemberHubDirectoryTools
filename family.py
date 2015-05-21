@@ -64,10 +64,13 @@ class Family:
         else:
             teacher = fields[2]
 
+        # add adults to the family
         self.AddAdultsFromCombinedField(teacher    = teacher,
                                         name_field = fields[3],
                                         grade      = fields[2])
-                                        
+
+        # add the child to the family
+        new_child = person.Person() 
         self.children = [new_adult.SetFromRoster(last_name  = fields[0],
                                                  first_name = fields[1],
                                                  grade      = fields[2],
