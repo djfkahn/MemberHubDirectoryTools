@@ -52,11 +52,13 @@ class Family:
 
     def AddAdultFromDirectory(self, fields):
         new_adult = person.Person()
-        self.adults += [new_adult.SetFromDirectory(fields)]
+        new_adult.SetFromDirectory(fields)
+        self.adults.append(new_adult)
     
     def AddChildFromDirectory(self, fields):
         new_child = person.Person()
-        self.children += [new_child.SetFromDirectory(fields)]
+        new_child.SetFromDirectory(fields)
+        self.children.append(new_child)
     
     def CreateFromRoster(self, fields):
         # for elementary school (< 6th grade) teacher name is retained
