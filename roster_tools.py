@@ -37,7 +37,7 @@ def ReadRoster():
     finally:
         open_file.close()
         
-    return roster_d
+    return roster
 
 def PrintEntries(roster):
     num_to_print = raw_input('Enter number of entries to print: ')
