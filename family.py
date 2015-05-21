@@ -23,12 +23,13 @@ class Family:
             for name in parents:
                 parent = name.split(' ')
                 new_adult = person.Person()
-                self.adults += [new_adult.SetFromRoster(last_name  = last_name,
-                                                        first_name = parent[0],
-                                                        grade      = grade,
-                                                        teacher    = teacher,
-                                                        name_field = name_field,
-                                                        family_relation = "Adult"+parent_num)]
+                new_adult.SetFromRoster(last_name  = last_name,
+                                        first_name = parent[0],
+                                        grade      = grade,
+                                        teacher    = teacher,
+                                        name_field = name_field,
+                                        family_relation = "Adult"+parent_num)
+                self.adults.append(new_adult)
                 # prepare the parent_tag for the next parent
                 parent_count += 1
                 parent_num = str(parent_count)
@@ -38,12 +39,13 @@ class Family:
             for name in parents:
                 parent = name.split(' ')
                 new_adult = person.Person()
-                self.adults += [new_adult.SetFromRoster(last_name  = parent[-1],
-                                                        first_name = " ".join(parent[0:-1]),
-                                                        grade      = grade,
-                                                        teacher    = teacher,
-                                                        name_field = name_field,
-                                                        family_relation = "Adult"+parent_num)]
+                new_adult.SetFromRoster(last_name  = parent[-1],
+                                        first_name = " ".join(parent[0:-1]),
+                                        grade      = grade,
+                                        teacher    = teacher,
+                                        name_field = name_field,
+                                        family_relation = "Adult"+parent_num)
+                self.adults.append(new_adult)
                 # prepare the parent_tag for the next parent
                 parent_count += 1
                 parent_num = str(parent_count)
@@ -70,13 +72,14 @@ class Family:
                                         grade      = fields[2])
 
         # add the child to the family
-        new_child = person.Person() 
-        self.children = [new_adult.SetFromRoster(last_name  = fields[0],
-                                                 first_name = fields[1],
-                                                 grade      = fields[2],
-                                                 teacher    = teacher,
-                                                 name_field = name_field,
-                                                 family_relation = "Child1")]
+        new_child = person.Person()
+        new_child.SetFromRoster(last_name  = fields[0],
+                                first_name = fields[1],
+                                grade      = fields[2],
+                                teacher    = teacher,
+                                name_field = fields[3],
+                                family_relation = "Child1")
+        self.children.append(new_child)
 
 
     def IsSameFamily(self, other):
@@ -109,4 +112,10 @@ class Family:
     def IsOrphan(self):
         return len(self.adults) == 0
     
-    
+    def Print(self):
+        print "Adults:"
+        for adult in self.adults:
+            adult.Print()
+        print "Children:"
+        for child in self.children:
+            child.Print()
