@@ -91,13 +91,13 @@ def ReadDirectory():
                     new_family = family.Family()
                     families_created += 1
                     
-                if fields[7][:5].lower() == "adult"
+                if fields[7][:5].lower() == "adult":
                     new_family.AddAdultFromDirectory(fields)
                 elif fields[7][:5].lower() == "child":
                     new_family.AddChildFromDirectory(fields)
                 else:
                     print "Found entry in directory that is neither an adult nor a child."
-                    print The following fields were read on this line:"
+                    print "The following fields were read on this line:"
                     print fields
 
         else:
@@ -124,7 +124,7 @@ def Print(directory):
         if start_entry < 0:
             start_entry += end_entry
             
-        for x in directory(start_entry, end_entry):
+        for x in directory[start_entry, end_entry]:
             x.Print()
 
 def main():
