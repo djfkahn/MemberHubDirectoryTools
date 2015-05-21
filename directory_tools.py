@@ -125,7 +125,7 @@ def Print(directory):
         if start_entry < 0:
             start_entry += end_entry
             
-        for x in directory[start_entry, end_entry]:
+        for x in directory[start_entry:end_entry]:
             x.Print()
 
 def main():
