@@ -30,7 +30,7 @@ def ReadRoster():
                     roster_entry.CombineWith(new_family)
                     break
             else:
-                roster += [new_family]
+                roster.append(new_family)
 
         print "%d students processed %d families." % (student_count, len(roster))
 
@@ -39,16 +39,14 @@ def ReadRoster():
         
     return roster_d
 
-def PrintEntries(roster_d):
+def PrintEntries(roster):
     num_to_print = raw_input('Enter number of entries to print: ')
-    for x in roster_d.keys()[:int(num_to_print)]:
-        print roster_d[x]
-
-        
+    for x in roster[:int(num_to_print)]:
+        print x.Print()
 
 def main():
-    roster_d = ReadRoster()
-    PrintEntries(roster_d)
+    roster = ReadRoster()
+    PrintEntries(roster)
 
 if __name__ == '__main__':
     main()
