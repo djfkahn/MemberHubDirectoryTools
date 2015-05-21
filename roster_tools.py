@@ -25,9 +25,9 @@ def ReadRoster():
 
             # if new_family is the same as a family already in the roster, then combine
             # families.  Otherwise, append new_family at the end of the roster.
-            for family in roster:
-                if family.IsSameFamily(new_family):
-                    family.CombineWith(new_family)
+            for roster_entry in roster:
+                if roster_entry.IsSameFamily(new_family):
+                    roster_entry.CombineWith(new_family)
                     break
             else:
                 roster += [new_family]
