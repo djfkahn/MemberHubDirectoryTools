@@ -52,6 +52,7 @@ def ReadDirectory():
 """
     directory  = []   # empty list
     lines_read = lines_processed = families_created = 0
+    new_family = False
 
     # initializing a dictionary
     file_name = raw_input('Enter name of directory dump file: ')
