@@ -3,6 +3,8 @@
 a dictionary, and display portions of the dictionary for analysis.
 """
 
+import family
+
 def ReadDirectory():
     """directory_tools.ReadDirectory
     INPUTS:
@@ -48,9 +50,8 @@ def ReadDirectory():
     3. Each line ends in up to 3 new line escape characters, but the last field is last login,
     which should not be used.
 """
-    direct_d = {}   # empty dictionary
-
-    count = 0
+    directory  = []   # empty list
+    lines_read = lines_processed = families_created = 0
 
     # initializing a dictionary
     file_name = raw_input('Enter name of directory dump file: ')
@@ -62,9 +63,10 @@ def ReadDirectory():
             print "The file %s does not contain 30 fields, and cannot be parsed." % file_name
             print "The following fields were found:"
             print fields
-            return {}
+            return []
 
         for line in open_file:
+            lines_read += 1
             fields = line.split(',')
             if not len(fields) == 30:
                 print "Incorrect number of fields found on or near line %d.  Line will not be processed." % (count+1)
@@ -77,67 +79,57 @@ def ReadDirectory():
                 print fields
 
             else:
-                
-                new_entry = {"person_id":fields[0][1:],
-                             "last_name":fields[1],
-                             "first_name":fields[2],
-                             "middle_name":fields[3],
-                             "suffix":fields[4],
-                             "email":fields[5],
-                             "family_id":fields[6],
-                             "family_relation":fields[7],
-                             "maiden_name":fields[8],
-                             "born_on":fields[9],
-                             "gender":fields[10],
-                             "parents":fields[11],
-                             "street":fields[12],
-                             "city":fields[13],
-                             "state":fields[14],
-                             "zip":fields[15],
-                             "home_number":fields[16],
-                             "work_number":fields[17],
-                             "work_number_ext":fields[18],
-                             "fax_number":fields[19],
-                             "mobile_number":fields[20],
-                             "mobile_provider":fields[21],
-                             "allow_sms":fields[22],
-                             "hubs":fields[23],
-                             "hubs_administered":fields[24],
-                             "person_created":fields[25],
-                             "person_updated":fields[26],
-                             "account_created":fields[27],
-                             "account_updated":fields[28],
-                             "last_login":fields[29][:-3]}
-                   
-                direct_d.update({count:new_entry})
-                
-            count += 1
+                lines_processed += 1
+                # according to MemberHub.com, a new family begins each time the family_relation (field 7)
+                # is not numbered (i.e. just "Adult" or just "Child"), so start a new family when that
+                # condition is detected
+                if fields[7].lower() in ("adult", "child"):
+                    # to start processing a new family, append the family previously worked on (if
+                    # it exists), then instantiate a new Family class
+                    if new_family:
+                        directory.append(new_family)
+                    new_family = family.Family()
+                    families_created += 1
+                    
+                if fields[7][:5].lower() == "adult"
+                    new_family.AddAdultFromDirectory(fields)
+                elif fields[7][:5].lower() == "child":
+                    new_family.AddChildFromDirectory(fields)
+                else:
+                    print "Found entry in directory that is neither an adult nor a child."
+                    print The following fields were read on this line:"
+                    print fields
 
-        print "%d lines read and processed from directory file" % count
+        else:
+            if new_family:
+                directory.append(new_family)
+
+        print "Read %d lines, processed %d lines, and created %d families from directory file" % \
+            (lines_read, lines_processed, families_created)
 
     finally:
         open_file.close()
         
-    return direct_d
+    return directory
 
-def Print(direct_d):
+def Print(directory):
     while True:
         end_entry = int(raw_input('Enter entry at which to stop printing (enter 0 to stop): '))
         if end_entry == 0:
             break
-        elif end_entry > len(direct_d):
-            end_entry = len(direct_d)
+        elif end_entry > len(directory):
+            end_entry = len(directory)
 
         start_entry = int(raw_input('Enter entry from which to start printing: '))
         if start_entry < 0:
             start_entry += end_entry
             
-        for x in range(start_entry, end_entry):
-            print direct_d[x]
+        for x in directory(start_entry, end_entry):
+            x.Print()
 
 def main():
-    direct_d = ReadDirectory()
-    Print(direct_d)
+    directory = ReadDirectory()
+    Print(directory)
 
 if __name__ == '__main__':
     main()
