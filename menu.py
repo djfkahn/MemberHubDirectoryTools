@@ -46,7 +46,7 @@ def FindOrphans(directory):
 
     for entry_family in directory:
         family_count += 1
-        if len(entry_family.GetAdults()) == 0:
+        if entry_family.IsOrphan():
             print "The entry for this family does not identify parents:" 
             entry_family.Print()
             orphan_count += 1
@@ -68,7 +68,7 @@ def FindChildless(directory):
 
     for entry_family in directory:
         family_count += 1
-        if len(entry_family.GetChildren()) == 0:
+        if entry_family.IsChildless():
             print "The entry for this family does not identify children:" 
             entry_family.Print()
             childless_count += 1
