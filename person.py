@@ -2,6 +2,8 @@
 """This module defines the person and family classes.
 """
 
+import hub_map_tools
+
 class Person:
     """Class Person
     TBD - document class
@@ -31,7 +33,8 @@ class Person:
         self.mobile_number = fields[20]
         self.mobile_provider = fields[21]
         self.allow_sms = fields[22]
-        self.hubs = fields[23]
+        hub_name_list = fields[23].split(';')
+        self.hubs = hub_map_tools.ConvertToHubIDList(hub_name_list)
         self.hubs_administered = fields[24]
         self.person_created = fields[25]
         self.person_updated = fields[26]
@@ -39,14 +42,12 @@ class Person:
         self.account_updated = fields[28]
         self.last_login = fields[29][:-3]
     
-    def SetFromRoster(self, last_name, first_name, grade, teacher, name_field, family_relation):
-        self.last_name = last_name
-        self.first_name = first_name
-        self.grade = grade
-        self.teacher = teacher
-        self.name_field = name_field
+    def SetFromRoster(self, last_name, first_name, teacher, family_relation):
+        self.last_name       = last_name
+        self.first_name      = first_name
+        self.hubs            = hub_map_tools.ConvertToHubIDList([teacher])
         self.family_relation = family_relation
-        self.person_id = " "
+        self.person_id       = " "
 
     def IsSame (self, other):
         return self.last_name.lower()  == other.last_name.lower() and \
@@ -57,7 +58,7 @@ class Person:
         return self.hubs
 
     def AddHubID(self, hub_id):
-        self.hubs += "|" + hub_id
+        self.hubs.append(hub_id)
 
     def DoesNotListEmailAddress(self):
         return self.email == ""
