@@ -18,30 +18,12 @@ class Person:
         self.email = fields[5]
         self.family_id = fields[6]
         self.family_relation = fields[7]
-        self.maiden_name = fields[8]
-        self.born_on = fields[9]
-        self.gender = fields[10]
         self.parents = fields[11]
-        self.street = fields[12]
-        self.city = fields[13]
-        self.state = fields[14]
-        self.zip = fields[15]
-        self.home_number = fields[16]
-        self.work_number = fields[17]
-        self.work_number_ext = fields[18]
-        self.fax_number = fields[19]
-        self.mobile_number = fields[20]
-        self.mobile_provider = fields[21]
-        self.allow_sms = fields[22]
         hub_name_list = fields[23].split(';')
         self.hubs = hub_map_tools.ConvertToHubIDList(hub_name_list)
-        self.hubs_administered = fields[24]
-        self.person_created = fields[25]
-        self.person_updated = fields[26]
         self.account_created = fields[27]
         self.account_updated = fields[28]
-        self.last_login = fields[29][:-3]
-    
+
     def SetFromRoster(self, last_name, first_name, teacher, family_relation):
         self.last_name       = last_name
         self.first_name      = first_name
