@@ -12,7 +12,7 @@ class Family:
         self.adults   = []
         self.children = []
     
-    def AddAdultsFromCombinedField(self, teacher, name_field, grade):
+    def AddAdultsFromCombinedField(self, teacher, name_field):
         parent_count = 1
         parent_num = ""
         parents = name_field.split(" and ")
@@ -25,9 +25,7 @@ class Family:
                 new_adult = person.Person()
                 new_adult.SetFromRoster(last_name  = last_name,
                                         first_name = parent[0],
-                                        grade      = grade,
                                         teacher    = teacher,
-                                        name_field = name_field,
                                         family_relation = "Adult"+parent_num)
                 self.adults.append(new_adult)
                 # prepare the parent_tag for the next parent
@@ -41,9 +39,7 @@ class Family:
                 new_adult = person.Person()
                 new_adult.SetFromRoster(last_name  = parent[-1],
                                         first_name = " ".join(parent[0:-1]),
-                                        grade      = grade,
                                         teacher    = teacher,
-                                        name_field = name_field,
                                         family_relation = "Adult"+parent_num)
                 self.adults.append(new_adult)
                 # prepare the parent_tag for the next parent
@@ -70,16 +66,13 @@ class Family:
 
         # add adults to the family
         self.AddAdultsFromCombinedField(teacher    = teacher,
-                                        name_field = fields[3],
-                                        grade      = fields[2])
+                                        name_field = fields[3])
 
         # add the child to the family
         new_child = person.Person()
         new_child.SetFromRoster(last_name  = fields[0],
                                 first_name = fields[1],
-                                grade      = fields[2],
                                 teacher    = teacher,
-                                name_field = fields[3],
                                 family_relation = "Child1")
         self.children.append(new_child)
 
@@ -98,15 +91,19 @@ class Family:
         return num_found == len(self.adults)
 
     def CombineWith(self, other):
-        to_add = []
+        hubs_to_add = []
         for possible_child in other.children:
             for existing_child in self.children:
                 if existing_child.IsSame(possible_child):
                     break
             else:
-                to_add += [possible_child]
-                
-        self.children += to_add
+                hubs_to_add.append(possible_child.GetHubs())
+                self.children.append(possible_child)
+
+        # add hubs of the children just added to the existing adult hubs.
+        for adult in self.adults:
+            for hub in hubs_to_add:
+                adult.AddHubID(hub)
         
     def IsChildless(self):
         return len(self.children) == 0
