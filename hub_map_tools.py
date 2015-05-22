@@ -4,6 +4,15 @@ It assumes the presence of a file called 'hub_map.csv' in the directory from
 which the program is executed.
 """
 
+map_d = {}   # empty dictionary
+
+def ConvertToHubIDList(hub_name_list):
+    hub_id_list = []
+    for hub_name in hub_name_list:
+        hub_id_list.append(map_d[hub_name])
+    
+    return hub_id_list
+
 def ReadMap():
     """hub_map_tools.ReadMap() 
     INPUTS:  
@@ -15,7 +24,6 @@ def ReadMap():
     This function assumes the data file has two fields per line, separated by a "|",
     and that the last two characters of each line are carriage returns symbols.
     """
-    map_d = {}   # empty dictionary
     count = 0
 
     try:
