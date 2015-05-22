@@ -108,8 +108,8 @@ def FindHubless(arg_list):
                 child_count += 1
                 hubless.append(child)
 
-    print "Found %d children who are not in at least one hub" % child_count
-    print "Found %d adults who are not in at least one hub" % adult_count
+    print "Found %d children who are not in a classroom hub." % child_count
+    print "Found %d adults who are not in at least one classroom hub." % adult_count
     
     return hubless
 
@@ -142,15 +142,8 @@ def MakeImportForHubless(arg_list):
         for roster_family in roster:
             found_person = roster_family.FindPersonInFamily(hubless_person)
             if not found_person == None:
-                hubless_person.SetHubs(found_person)
+                hubless_person.SetHubs(found_person.GetHubs())
                 update_hubs.append(hubless_person)
-#                    temp = direct_d[entry]
-#                    hub_names = temp["hubs"] + "|"
-#                    for teacher in (roster_d[person]["teacher"].split('|')):
-#                        hub_names += map_d[teacher] + "|"
-#                        
-#                    temp.update({"hubs":hub_names})
-#                    update_d.update({processed_count:temp})
                 hubed_count += 1
                 break
         else:
@@ -181,8 +174,6 @@ def FindEntriless(arg_list):
     roster    = arg_list[1]
     entriless = []
 
-    entriless_count = 0
-
     for roster_family in roster:
         
         for directory_family in direct_d:
@@ -190,12 +181,11 @@ def FindEntriless(arg_list):
                 break
 
         else:
-            print "Did not find match for this family."
+            print "Did not find this family from the roster in the directory:"
             roster_family.Print()
             entriless.append(roster_family)
-            entriless_count += 1
 
-    print "Found %d people on the roster who were not in the directory" % entriless_count
+    print "Found %d people on the roster who were not in the directory" % len(entriless)
     return entriless
 
 def PrintNotInDirectory(arg_list):
@@ -218,18 +208,6 @@ def MakeImportNotInDirectory(arg_list):
     roster    = arg_list[1]
     map_d     = arg_list[2]
     entriless = FindEntriless(arg_list)
-
-    entriless_count = 0
-
-    for new_entry in entriless:
-        hub_names = "|"
-#        for teacher in (roster_d[person]["teacher"].split('|')):
-#            hub_names += map_d[teacher] + "|"
-#        update_d.update({entriless_count:{"last_name":roster_d[person]["last_name"],
-#                                          "first_name":roster_d[person]["first_name"],
-#                                          "family_relation":roster_d[person]["family_relation"],
-#                                          "person_id":" ",
-#                                          "hubs":hub_names}})
 
     import_file_tools.CreateNewMemberImport(entriless)
 
