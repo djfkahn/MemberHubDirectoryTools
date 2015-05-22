@@ -53,5 +53,14 @@ class Person:
                 self.first_name.lower() == other.first_name.lower() and \
                 self.family_relation[:5].lower() == other.family_relation[:5].lower()
 
+    def GetHubs (self):
+        return self.hubs
+
+    def AddHubID(self, hub_id):
+        self.hubs += "|" + hub_id
+
+    def DoesNotListEmailAddress(self):
+        return self.email == ""
+
     def Print(self):
         print "%s %s" % (self.first_name, self.last_name)
