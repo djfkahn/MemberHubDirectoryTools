@@ -9,8 +9,12 @@ def ConvertToHubIDList(hub_name_list):
     map_d       = ReadMap()
     
     for hub_name in hub_name_list:
-        if hub_name.split()[0] in map_d.keys():
-            hub_id_list.append(map_d[hub_name.split()[0]])
+        # strip off possible leading quote4
+        if hub_name[0] == '"':
+            hub_name = hub_name[1:]
+        # check if the hub name is among map keys
+        if hub_name.split(" ")[0] in map_d.keys():
+            hub_id_list.append(map_d[hub_name.split(" ")[0]])
         else:
             hub_id_list.append(hub_name)
     
