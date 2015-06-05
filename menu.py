@@ -25,7 +25,7 @@ def FindMissingEmail(directory):
         for adult in entry_family.GetAdults():
             adult_count += 1
             if adult.DoesNotListEmailAddress():
-                print "The entry for this person does not have an email address:"
+                print "The entry for this person does not have an email address:",
                 adult.Print()
                 no_email_count += 1
 
@@ -47,7 +47,7 @@ def FindOrphans(directory):
     for entry_family in directory:
         family_count += 1
         if entry_family.IsOrphan():
-            print "The entry for this family does not identify parents:" 
+            print "The entry for this family does not identify parents:",
             entry_family.Print()
             orphan_count += 1
             
@@ -69,7 +69,7 @@ def FindChildless(directory):
     for entry_family in directory:
         family_count += 1
         if entry_family.IsChildless():
-            print "The entry for this family does not identify children:" 
+            print "The entry for this family does not identify children:",
             entry_family.Print()
             childless_count += 1
             
@@ -147,7 +147,7 @@ def MakeImportForHubless(arg_list):
                 hubed_count += 1
                 break
         else:
-            print "Did not find match for this person in the roster:"
+            print "Did not find match for this person in the roster:",
             hubless_person.Print()
             hubless_count += 1
 
@@ -181,7 +181,7 @@ def FindEntriless(arg_list):
                 break
 
         else:
-            print "Did not find this family from the roster in the directory:"
+            print "Did not find this family from the roster in the directory:",
             roster_family.Print()
             entriless.append(roster_family)
 
