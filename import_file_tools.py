@@ -69,7 +69,7 @@ def WriteHublessPerson(open_file, new_person):
     person_id  = new_person.person_id
     WriteHublessLine(open_file, first_name, last_name, hubs, person_id)
     
-def CreateHublessImportFile(update_d):
+def CreateHublessImportFile(hubless):
     """CreateHublessImportFile
 Inputs : hubless - list of persons that need their hubs updated
 Outputs: Creates a file called 'hubless_import_<date tag>.csv' in the
