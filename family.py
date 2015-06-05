@@ -91,20 +91,18 @@ class Family:
         return num_found == len(self.adults)
 
     def CombineWith(self, other):
-        hubs_to_add = []
         for possible_child in other.children:
             for existing_child in self.children:
                 if existing_child.IsSame(possible_child):
                     break
             else:
-                hubs_to_add.append(possible_child.GetHubs())
                 self.children.append(possible_child)
+                # change the family relation for the new child
+                self.children[-1].family_relation = "Child%d" % (len(self.children))
+                # add hubs of the new child to the existing adult hubs.
+                for index in range(len(self.adults)):
+                    self.adults[index].hubs += possible_child.hubs
 
-        # add hubs of the children just added to the existing adult hubs.
-        for adult in self.adults:
-            for hub in hubs_to_add:
-                adult.AddHubID(hub)
-        
     def IsChildless(self):
         return len(self.children) == 0
     
