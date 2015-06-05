@@ -42,28 +42,18 @@ def ReadMap():
         
     return map_d
 
-def IsInClassroomHub(map_d, hub_text):
-    """hub_map_tools.IsInClassroomHub(map_d, hub_text)
+def IsInClassroomHub(map_d, hub_id):
+    """hub_map_tools.IsInClassroomHub(map_d, hub_id)
     INPUTS:
     - map_d    -- dictionary containing the map of teachers to HUB IDs
-    - hub_text -- text to check against classroom hubs
+    - hub_id   -- hub ID to check against classroom hubs
     OUTPUTS:
-    - True     -- if the hub_text matches any teacher name, SDC, or middle school grade
+    - True     -- if the hub_id matches any classroom hub ID in the hub map
     - False    -- otherwise
     ASSUMPTIONS:
     None
     """
-    # return True if hub text is one of the Middle School grade hubs
-    if hub_text in ('6th Grade', '7th Grade', '8th Grade', 'SDC'):
-        return True
-    
-    # return True if teacher's name starts the hub text
-    for teacher in map_d.keys():
-        if hub_text[:len(teacher)] == teacher:
-            return True
-    
-    # return False otherwise
-    return False
+    return hub_id in map_d.values()
     
 def IsAnyHubClassroomHub(map_d, hubs):
     """hub_map_tools.IsAnyHubClassroomHub(map_d, hub_field)
