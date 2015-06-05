@@ -36,9 +36,6 @@ class Person:
                 self.first_name.lower() == other.first_name.lower() and \
                 self.family_relation[:5].lower() == other.family_relation[:5].lower()
 
-    def GetHubs (self):
-        return self.hubs
-
     def SetHubs (self, hub_list):
         for hub_id in hub_list:
             self.AddHubID(hub_id)
