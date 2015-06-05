@@ -70,12 +70,12 @@ def ReadDirectory():
             lines_read += 1
             fields = line.split(',')
             if not len(fields) == 30:
-                print "Incorrect number of fields found on or near line %d.  Line will not be processed." % (count+1)
+                print "Incorrect number of fields found on or near line %d.  Line will not be processed." % (lines_read+1)
                 print "The following fields were read on this line:"
                 print fields
 
             elif fields[1] == "" or fields[2] == "":
-                print "Found a blank name on or near line %d.  Line will not be procssed." % (count+1)
+                print "Found a blank name on or near line %d.  Line will not be procssed." % (lines_read+1)
                 print "The following fields were read on this line:"
                 print fields
 
