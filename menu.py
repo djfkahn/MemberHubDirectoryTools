@@ -220,17 +220,20 @@ def MakePrompt(choices):
 def RunMenu(directory, roster, map_d):
     """Runs the user interface for dictionary manipulation."""
     # The choices dictionary has function names for values.
-    choices = {'1 - Find Missing Email':{'Function':FindMissingEmail,'Arg':directory},
-               '2 - Find Orphans':{'Function':FindOrphans,'Arg':directory},
-               '3 - Find Childless':{'Function':FindChildless,'Arg':directory},
-               '4 - Find Not In Hub':{'Function':PrintHubless,'Arg':[directory,map_d]},
-               '5 - Make Import File for Not In Hub':{'Function':MakeImportForHubless,
-                                                      'Arg':[directory,map_d,roster]},
-               '6 - Find Not in Directory':{'Function':PrintNotInDirectory,
-                                            'Arg':[directory,roster]},
+    choices = {'1 - Find Missing Email':
+                    {'Function':FindMissingEmail,'Arg':directory},
+               '2 - Find Orphans':
+                    {'Function':FindOrphans,'Arg':directory},
+               '3 - Find Childless':
+                    {'Function':FindChildless,'Arg':directory},
+               '4 - Find Not In Classroom Hub':
+                    {'Function':PrintHubless,'Arg':[directory,map_d]},
+               '5 - Make Import File for Not In Classroom Hub':
+                    {'Function':MakeImportForHubless,'Arg':[directory,map_d,roster]},
+               '6 - Find Not in Directory':
+                    {'Function':PrintNotInDirectory,'Arg':[directory,roster]},
                '7 - Make Import File for Not In Directory':
-                                           {'Function':MakeImportNotInDirectory,
-                                            'Arg':[directory,roster,map_d]}}
+                    {'Function':MakeImportNotInDirectory,'Arg':[directory,roster,map_d]}}
     
     prompt = MakePrompt(choices)
 
