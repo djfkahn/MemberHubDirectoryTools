@@ -176,7 +176,7 @@ def FindEntriless(arg_list):
 
     for roster_family in roster:
         
-        for directory_family in direct_d:
+        for directory_family in directory:
             if directory_family.IsSameFamily(roster_family):
                 break
 
