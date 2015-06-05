@@ -109,12 +109,6 @@ class Family:
     def IsOrphan(self):
         return len(self.adults) == 0
 
-    def GetAdults(self):
-        return self.adults
-
-    def GetChildren(self):
-        return self.children
-
     def FindPersonInFamily(self, to_find):
         for adult in self.adults:
             if to_find.IsSame(adult):
