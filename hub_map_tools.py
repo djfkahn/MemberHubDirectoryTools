@@ -65,18 +65,17 @@ def IsInClassroomHub(map_d, hub_text):
     # return False otherwise
     return False
     
-def IsAnyHubClassroomHub(map_d, hub_field):
+def IsAnyHubClassroomHub(map_d, hubs):
     """hub_map_tools.IsAnyHubClassroomHub(map_d, hub_field)
     INPUTS:
     - map_d     -- dictionary containing the map of teachers to HUB IDs
-    - hub_field -- string containing possible list of hubs to check against classroom hubs
+    - hub       -- list of hubs to check against classroom hubs
     OUTPUTS:
     - True      -- if any of the hubs in hub_field qualify as classroom hubs
     - False     -- otherwise
     ASSUMPTIONS:
     If hub_field is not empty, its hubs are separated by semi-colons (";").
     """
-    hubs = hub_field.split(';')
     for hub in hubs:
         if IsInClassroomHub(map_d, hub):
             return True
