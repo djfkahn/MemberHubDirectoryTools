@@ -4,6 +4,22 @@ It assumes the presence of a file called 'hub_map.csv' in the directory from
 which the program is executed.
 """
 
+def ConvertToHubIDList(hub_name_list):
+    hub_id_list = []
+    map_d       = ReadMap()
+    
+    for hub_name in hub_name_list:
+        # strip off possible leading quote4
+        if hub_name[0] == '"':
+            hub_name = hub_name[1:]
+        # check if the hub name is among map keys
+        if hub_name.split(" ")[0] in map_d.keys():
+            hub_id_list.append(map_d[hub_name.split(" ")[0]])
+        else:
+            hub_id_list.append(hub_name)
+    
+    return hub_id_list
+
 def ReadMap():
     """hub_map_tools.ReadMap() 
     INPUTS:  
@@ -15,7 +31,7 @@ def ReadMap():
     This function assumes the data file has two fields per line, separated by a "|",
     and that the last two characters of each line are carriage returns symbols.
     """
-    map_d = {}   # empty dictionary
+    map_d = {}
     count = 0
 
     try:
@@ -27,48 +43,35 @@ def ReadMap():
             map_d.update({fields[0]:fields[-1][:-2]})
             count += 1
 
-        print "%d hub IDs read and processed." % count
-
     finally:
         open_file.close()
         
     return map_d
 
-def IsInClassroomHub(map_d, hub_text):
-    """hub_map_tools.IsInClassroomHub(map_d, hub_text)
+def IsInClassroomHub(map_d, hub_id):
+    """hub_map_tools.IsInClassroomHub(map_d, hub_id)
     INPUTS:
     - map_d    -- dictionary containing the map of teachers to HUB IDs
-    - hub_text -- text to check against classroom hubs
+    - hub_id   -- hub ID to check against classroom hubs
     OUTPUTS:
-    - True     -- if the hub_text matches any teacher name, SDC, or middle school grade
+    - True     -- if the hub_id matches any classroom hub ID in the hub map
     - False    -- otherwise
     ASSUMPTIONS:
     None
     """
-    # return True if hub text is one of the Middle School grade hubs
-    if hub_text in ('6th Grade', '7th Grade', '8th Grade', 'SDC'):
-        return True
+    return hub_id in map_d.values()
     
-    # return True if teacher's name starts the hub text
-    for teacher in map_d.keys():
-        if hub_text[:len(teacher)] == teacher:
-            return True
-    
-    # return False otherwise
-    return False
-    
-def IsAnyHubClassroomHub(map_d, hub_field):
+def IsAnyHubClassroomHub(map_d, hubs):
     """hub_map_tools.IsAnyHubClassroomHub(map_d, hub_field)
     INPUTS:
     - map_d     -- dictionary containing the map of teachers to HUB IDs
-    - hub_field -- string containing possible list of hubs to check against classroom hubs
+    - hub       -- list of hubs to check against classroom hubs
     OUTPUTS:
     - True      -- if any of the hubs in hub_field qualify as classroom hubs
     - False     -- otherwise
     ASSUMPTIONS:
     If hub_field is not empty, its hubs are separated by semi-colons (";").
     """
-    hubs = hub_field.split(';')
     for hub in hubs:
         if IsInClassroomHub(map_d, hub):
             return True
