@@ -49,9 +49,9 @@ Summary: 1. asks user to name file to be written to.  this file will be
         WriteNewMemberLine(open_file,'family_relation', 'first_name', 'last_name', 'hubs','person_id')
 
         for new_family in entriless:
-            for new_adult in new_family.GetAdults():
+            for new_adult in new_family.adults:
                 WriteNewMemberPerson(open_file, new_adult)
-            for new_child in new_family.GetChildren():
+            for new_child in new_family.children:
                 WriteNewMemberPerson(open_file, new_child)
 
     finally:
