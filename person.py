@@ -39,6 +39,10 @@ class Person:
     def GetHubs (self):
         return self.hubs
 
+    def SetHubs (self, hub_list):
+        for hub_id in hub_list:
+            self.AddHubID(hub_id)
+
     def AddHubID(self, hub_id):
         self.hubs.append(hub_id)
 
