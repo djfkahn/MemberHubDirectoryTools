@@ -22,7 +22,7 @@ def FindMissingEmail(directory):
     """
     adult_count = no_email_count = 0
     for entry_family in directory:
-        for adult in entry_family.GetAdults():
+        for adult in entry_family.adults:
             adult_count += 1
             if adult.DoesNotListEmailAddress():
                 print "The entry for this person does not have an email address:",
@@ -94,16 +94,16 @@ def FindHubless(arg_list):
     child_count = adult_count = 0
 
     for directory_family in directory:
-        for adult in directory_family.GetAdults():
-            if not hub_map_tools.IsAnyHubClassroomHub(map_d, adult.GetHubs()):
-                print "Found adult not in a classroom hub.  Current hubs = (%s).  Name = " % adult.GetHubs(),
+        for adult in directory_family.adults:
+            if not hub_map_tools.IsAnyHubClassroomHub(map_d, adult.hubs):
+                print "Found adult not in a classroom hub.  Current hubs = (%s).  Name = " % adult.hubs,
                 adult.Print()
                 adult_count += 1
                 hubless.append(adult)
         
-        for child in directory_family.GetChildren():
-            if not hub_map_tools.IsAnyHubClassroomHub(map_d, child.GetHubs()):
-                print "Found child not in a classroom hub.  Current hubs =  (%s).  Name = " % child.GetHubs(),
+        for child in directory_family.children:
+            if not hub_map_tools.IsAnyHubClassroomHub(map_d, child.hubs):
+                print "Found child not in a classroom hub.  Current hubs =  (%s).  Name = " % child.hubs,
                 child.Print()
                 child_count += 1
                 hubless.append(child)
@@ -142,7 +142,7 @@ def MakeImportForHubless(arg_list):
         for roster_family in roster:
             found_person = roster_family.FindPersonInFamily(hubless_person)
             if not found_person == None:
-                hubless_person.SetHubs(found_person.GetHubs())
+                hubless_person.hubs = found_person.hubs
                 update_hubs.append(hubless_person)
                 hubed_count += 1
                 break
