@@ -96,14 +96,14 @@ def FindHubless(arg_list):
     for directory_family in directory:
         for adult in directory_family.GetAdults():
             if not hub_map_tools.IsAnyHubClassroomHub(map_d, adult.GetHubs()):
-                print "Found adult not in a classroom hub (%s)" % adult.GetHubs()
+                print "Found adult not in a classroom hub.  Current hubs = (%s).  Name = " % adult.GetHubs(),
                 adult.Print()
                 adult_count += 1
                 hubless.append(adult)
         
         for child in directory_family.GetChildren():
             if not hub_map_tools.IsAnyHubClassroomHub(map_d, child.GetHubs()):
-                print "Found child not in a classroom hub (%s)" % child.GetHubs()
+                print "Found child not in a classroom hub.  Current hubs =  (%s).  Name = " % child.GetHubs(),
                 child.Print()
                 child_count += 1
                 hubless.append(child)
