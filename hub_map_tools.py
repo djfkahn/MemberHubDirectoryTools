@@ -27,6 +27,7 @@ def ReadMap():
     This function assumes the data file has two fields per line, separated by a "|",
     and that the last two characters of each line are carriage returns symbols.
     """
+    map_d = {}
     count = 0
 
     try:
