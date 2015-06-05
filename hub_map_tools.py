@@ -4,12 +4,15 @@ It assumes the presence of a file called 'hub_map.csv' in the directory from
 which the program is executed.
 """
 
-map_d = {}   # empty dictionary
-
 def ConvertToHubIDList(hub_name_list):
     hub_id_list = []
+    map_d       = ReadMap()
+    
     for hub_name in hub_name_list:
-        hub_id_list.append(map_d[hub_name])
+        if hub_name.split()[0] in map_d.keys():
+            hub_id_list.append(map_d[hub_name.split()[0]])
+        else:
+            hub_id_list.append(hub_name)
     
     return hub_id_list
 
@@ -34,8 +37,6 @@ def ReadMap():
             ## be sure to strip the '\r\n' that Excel adds at the end of lines
             map_d.update({fields[0]:fields[-1][:-2]})
             count += 1
-
-        print "%d hub IDs read and processed." % count
 
     finally:
         open_file.close()
