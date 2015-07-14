@@ -6,7 +6,12 @@ import hub_map_tools
 
 class Person:
     """Class Person
-    TBD - document class
+    This class defines the characteristics that every Person in this project must possess.  
+    Several methods are defined for the parent class.
+    ATTRIBUTES:
+    last_name       - A string
+    first_name      - A string
+    family_relation - A string of the form "Adult#" or "Child#", where "#" is either blank or a number.
     """
 
     def Set(self, last_name, first_name, family_relation):
