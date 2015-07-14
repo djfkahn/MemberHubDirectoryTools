@@ -4,8 +4,11 @@
 import person
 
 class Family:
-    """Class Person
-    TBD - document class
+    """Class Family
+    This class defines family units that have a combination of Person objects
+    ATTRIBUTES
+    adults   - A list of Person objects representing the family's adults
+    children - A list of Person objects representing the family's children
     """
     
     def __init__(self):
