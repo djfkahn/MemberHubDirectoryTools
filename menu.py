@@ -178,6 +178,12 @@ def FindEntriless(arg_list):
         
         for directory_family in directory:
             if directory_family.IsSameFamily(roster_family):
+                if directory_family.HasNewChildren(roster_family):
+                    temp_family = family.Family()
+                    temp_family.FormFamilyWithNewChildren(directory_family,roster_family)
+                    print "Found family in directory with new child in roster:",
+                    temp_family.Print()
+                    entriless.append(temp_family)
                 break
 
         else:
