@@ -10,6 +10,9 @@ import import_file_tools
 import family
 import person
 
+### TBD - Need to confirm Student Indicator with Loren
+constant STUDENT_INDICATOR = "SA"
+
 def FindMissingEmail(directory):
     """menu.FindMissingEmail
     INPUTS:
@@ -217,6 +220,46 @@ def MakeImportNotInDirectory(arg_list):
 
     import_file_tools.CreateNewMemberImport(entriless)
 
+def MakeStudentImportFile(arg_list):
+    """menu.MakeStudentImportFile
+    INPUTS:
+    - directory -- dictionary containing the MemberHub directory
+    - roster    -- dictionary containing the school roster
+    OUTPUTS:
+    Creates a comma-separated text file that can be imported into MemberHub to create
+    directory entries for people who are in the roster, but not already in the directory.
+    Includes hub ID assignments for these people.
+    ASSUMPTIONS:
+    None.
+    """
+    directory = arg_list[0]
+    roster    = arg_list[1]
+    students  = []
+
+    for roster_family in roster:
+        for directory_family in directory:
+            if directory_family.IsSameFamily(roster_family):
+                for roster_child in roster_family.children:
+                    for directory_child in directory_family.children:
+                        if directory_child.IsSame(roster_child):
+                            temp_child = directory_child
+                            temp_child.hubs = []
+                            for hub in roster_child.hubs:
+                                student_hub = hub + STUDENT_INDICATOR
+                                temp_child.hubs.append(student_hub)
+                            students.append(temp_child)
+                    else:
+                        print "Did not find this child in the family:  ",
+                        roster_child.Print()
+                ## Found the roster family in the directory, so break out of the directory_family loop
+                break
+        else:
+            print "Did not find this family from the roster in the directory:",
+            roster_family.Print()
+
+    print "Found %d students on the roster who were in the directory" % len(students)
+
+    
 def MakePrompt(choices):
     choice_list = sorted(choices)
     guts = '\n'.join(['(%s)%s' % (choice[0], choice[1:])
@@ -239,7 +282,9 @@ def RunMenu(directory, roster, map_d):
                '6 - Find Not in Directory':
                     {'Function':PrintNotInDirectory,'Arg':[directory,roster]},
                '7 - Make Import File for Not In Directory':
-                    {'Function':MakeImportNotInDirectory,'Arg':[directory,roster,map_d]}}
+                    {'Function':MakeImportNotInDirectory,'Arg':[directory,roster,map_d]},
+               '8 - Make Student Hub Population Import File':
+                    {'Function':MakeStudentImportFile,'Arg':[directory,roster]}}
     
     prompt = MakePrompt(choices)
 
