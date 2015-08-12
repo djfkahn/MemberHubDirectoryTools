@@ -244,24 +244,27 @@ def MakeStudentImportFile(arg_list):
                 ## For each child in the roster family...
                 for roster_child in roster_family.children:
                     ## ...find the corresponding child in the directory family
-                    for directory_child in directory_family.children:
-                        if directory_child.IsSame(roster_child):
-                            ## instantiate a new Directory Person object, and copy the directory child into it
-                            temp_child = person.DirectoryPerson()
-                            temp_child = directory_child
-                            ## clear the temporary object's hubs
-                            temp_child.hubs = []
-                            ## populate the temporary object's hubs with the roster child's hubs
-                            ## modified with the student indicator appended
-                            for hub in roster_child.hubs:
-                                ## TBD - is student_hub a necessary step?
-                                student_hub = hub + STUDENT_INDICATOR
-                                temp_child.hubs.append(student_hub)
-                            ## add the temporary child object to the list of students
-                            students.append(temp_child)
+                    directory_child = directory_family.FindChildInFamily(roster_child)
+                    if directory_child != None:
+                        ## instantiate a new Directory Person object, and copy the directory child into it
+                        temp_child = person.DirectoryPerson()
+                        temp_child = directory_child
+                        ## clear the temporary object's hubs
+                        temp_child.hubs = []
+                        ## populate the temporary object's hubs with the roster child's hubs
+                        ## modified with the student indicator appended
+                        for hub in roster_child.hubs:
+                            ## TBD - is student_hub a necessary step?
+                            student_hub = hub + STUDENT_INDICATOR
+                            temp_child.hubs.append(student_hub)
+                        ## add the temporary child object to the list of students
+                        students.append(temp_child)
                     else:
-                        print "Did not find this child in the family:  ",
+                        print "##################"
+                        print "Did not find this child",
                         roster_child.Print()
+                        print " in the family: "
+                        directory_family.Print()
                 ## Found the roster family in the directory, so break out of the directory_family loop
                 break
         else:
