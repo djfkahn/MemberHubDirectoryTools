@@ -11,7 +11,7 @@ import family
 import person
 
 ### TBD - Need to confirm Student Indicator with Loren
-constant STUDENT_INDICATOR = "SA"
+STUDENT_INDICATOR = "SA"
 
 def FindMissingEmail(directory):
     """menu.FindMissingEmail
