@@ -80,30 +80,46 @@ class Family:
         self.children.append(new_child)
     
     def IsSameFamily(self, other):
-        if not len(self.adults) == len(other.adults):
-            return False
-        
-        num_found = 0
-        for adult in self.adults:
-            for other_adult in other.adults:
-                if adult.IsSame(other_adult):
-                    num_found += 1
-                    break
-        
-        return num_found == len(self.adults)
+        """Family.IsSameFamily
+        INPUTS:
+        - other -- the family object to compare to
+        OUTPUTS:
+        - returns True when the two objects contain all the same adults
+          or when the two objects share at least one adult and one child
+        - returns False otherwise
+        """
+        adults_found = 0
+        for other_adult in other.adults:
+            if self.FindAdultInFamily(other_adult) != None:
+                adults_found += 1
+
+        # if both families contain all the same adults
+        if adults_found == len(self.adults):
+            return True
+        # otherwise if the families share at least one adult and one child
+        elif adults_found > 0:
+            for other_child in other.children:
+                if self.FindChildInFamily(other_child) != None:
+                    return True
+
+        return False
 
     def HasNewChildren(self, other):
-        if not len(self.children) == len(other.children):
-            return False
-        
-        num_found = 0
+        """Family.HasNewChildren
+        INPUTS:
+        - other -- 
+        - other -- the family object to compare to
+        OUTPUTS:
+        - returns True if any child in the other family is not found in this family
+        - returns False otherwise
+        """
         for other_child in other.children:
-            for child in self.children:
-                if child.IsSame(other_child):
-                    num_found += 1
-                    break
-        
-        return num_found != len(self.children)
+            # if any child in the other family cannot be found in this family...
+            if self.FindChildInFamily(other_child) == None:
+                #... return True
+                return True
+
+        return False
 
     def FormFamilyWithNewChildren(self, directory_family, roster_family):
         # copy the adults from the directory, because they include the person_ids
@@ -111,18 +127,16 @@ class Family:
         
         # copy only the new children
         for roster_child in roster_family.children:
-            for directory_child in directory_family.children:
-                if roster_child.IsSame(directory_child):
-                    break
-            else:
+            # if the roster_child cannot be found in this family ...
+            if directory_family.FindChildInFamily(roster_child) == None:
+                # ...then append the roster_child to this family
                 self.children.append(roster_child)
 
     def CombineWith(self, other):
         for possible_child in other.children:
-            for existing_child in self.children:
-                if existing_child.IsSame(possible_child):
-                    break
-            else:
+            # if the possible_child cannot be found in this family...
+            if self.FindChildInFamily(possible_child) == None:
+                #...then append the possible_child to the family
                 self.children.append(possible_child)
                 # change the family relation for the new child
                 self.children[-1].family_relation = "Child%d" % (len(self.children))
@@ -136,15 +150,25 @@ class Family:
     def IsOrphan(self):
         return len(self.adults) == 0
 
-    def FindPersonInFamily(self, to_find):
+    def FindAdultInFamily(self, to_find):
         for adult in self.adults:
             if to_find.IsSame(adult):
                 return adult
+        return None
+
+    def FindChildInFamily(self, to_find):
         for child in self.children:
             if to_find.IsSame(child):
                 return child
         return None
-    
+        
+    def FindPersonInFamily(self, to_find):
+        try_person = self.FindAdultInFamily(to_find)
+        if try_person == None:
+            try_person = self.FindChildInFamily(to_find)
+
+        return try_person
+
     def Print(self):
         print "Adults:"
         for adult in self.adults:
