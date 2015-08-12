@@ -236,17 +236,28 @@ def MakeStudentImportFile(arg_list):
     roster    = arg_list[1]
     students  = []
 
+    ## For each family in the roster ...
     for roster_family in roster:
+        ## ...find the corresponding family in the directory
         for directory_family in directory:
             if directory_family.IsSameFamily(roster_family):
+                ## For each child in the roster family...
                 for roster_child in roster_family.children:
+                    ## ...find the corresponding child in the directory family
                     for directory_child in directory_family.children:
                         if directory_child.IsSame(roster_child):
+                            ## instantiate a new Directory Person object, and copy the directory child into it
+                            temp_child = person.DirectoryPerson()
                             temp_child = directory_child
+                            ## clear the temporary object's hubs
                             temp_child.hubs = []
+                            ## populate the temporary object's hubs with the roster child's hubs
+                            ## modified with the student indicator appended
                             for hub in roster_child.hubs:
+                                ## TBD - is student_hub a necessary step?
                                 student_hub = hub + STUDENT_INDICATOR
                                 temp_child.hubs.append(student_hub)
+                            ## add the temporary child object to the list of students
                             students.append(temp_child)
                     else:
                         print "Did not find this child in the family:  ",
@@ -258,6 +269,9 @@ def MakeStudentImportFile(arg_list):
             roster_family.Print()
 
     print "Found %d students on the roster who were in the directory" % len(students)
+
+    ## Create an import file with all the students
+    import_file_tools.CreateHublessImportFile(students)
 
     
 def MakePrompt(choices):
