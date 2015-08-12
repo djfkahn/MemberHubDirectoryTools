@@ -235,6 +235,7 @@ def MakeStudentImportFile(arg_list):
     directory = arg_list[0]
     roster    = arg_list[1]
     students  = []
+    not_found = []
 
     ## For each family in the roster ...
     for roster_family in roster:
@@ -265,13 +266,16 @@ def MakeStudentImportFile(arg_list):
                         roster_child.Print()
                         print " in the family: "
                         directory_family.Print()
+                        not_found.append(roster_child)
                 ## Found the roster family in the directory, so break out of the directory_family loop
                 break
         else:
             print "Did not find this family from the roster in the directory:",
             roster_family.Print()
+            not_found.append(roster_family.children)
 
     print "Found %d students on the roster who were in the directory" % len(students)
+    print "%d students on the roster could not be matched with the directory" % len(not_found)
 
     ## Create an import file with all the students
     import_file_tools.CreateHublessImportFile(students)
