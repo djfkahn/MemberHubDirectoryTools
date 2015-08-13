@@ -254,7 +254,7 @@ def MakeStudentImportFile(arg_list):
                         ## populate the temporary object's hubs with the roster child's hubs
                         ## modified with the student indicator appended
                         ## TBD - is student_hub a necessary step?
-                        student_hub = "/" + roster_child.hubs[0] + STUDENT_INDICATOR
+                        student_hub = roster_child.hubs[0] + STUDENT_INDICATOR
                         temp_child.hubs.append(student_hub)
                         ## add the temporary child object to the list of students
                         students.append(temp_child)
