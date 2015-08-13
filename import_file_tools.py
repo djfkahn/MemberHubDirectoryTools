@@ -13,10 +13,11 @@ def FormTimeTag():
     return tag
 
 def ConvertHubListToImportString(hub_list):
+    hub_str = "/"
     for hub in hub_list:
-        hub_str = str(hub) + ";"
+        hub_str += str(hub) + "/"
         
-    return hub_str[:-1]  # strip off the trailing ';'
+    return hub_str  # strip off the trailing ';'
     
 def WriteNewMemberLine(open_file, family_relation, first_name, last_name, hubs, person_id):
     line = "%s,%s,%s,%s,%s\n" % (family_relation, first_name, last_name, hubs, person_id)

@@ -10,6 +10,8 @@ import import_file_tools
 import family
 import person
 
+STUDENT_INDICATOR = "+SA"
+
 def FindMissingEmail(directory):
     """menu.FindMissingEmail
     INPUTS:
@@ -217,6 +219,62 @@ def MakeImportNotInDirectory(arg_list):
 
     import_file_tools.CreateNewMemberImport(entriless)
 
+def MakeStudentImportFile(arg_list):
+    """menu.MakeStudentImportFile
+    INPUTS:
+    - directory -- dictionary containing the MemberHub directory
+    - roster    -- dictionary containing the school roster
+    OUTPUTS:
+    Creates a comma-separated text file that can be imported into MemberHub to create
+    directory entries for people who are in the roster, but not already in the directory.
+    Includes hub ID assignments for these people.
+    ASSUMPTIONS:
+    Each person in the roster belongs to only one hub, and it is the classroom hub.
+    """
+    directory = arg_list[0]
+    roster    = arg_list[1]
+    students  = []
+    not_found = []
+
+    ## For each family in the roster ...
+    for roster_family in roster:
+        ## ...find the corresponding family in the directory
+        for directory_family in directory:
+            if directory_family.IsSameFamily(roster_family):
+                ## For each child in the roster family...
+                for roster_child in roster_family.children:
+                    ## ...find the corresponding child in the directory family
+                    directory_child = directory_family.FindChildInFamily(roster_child)
+                    if directory_child != None:
+                        ## instantiate a new Directory Person object, and copy the directory child into it
+                        temp_child = person.DirectoryPerson()
+                        temp_child = directory_child
+                        ## populate the temporary object's hub with the roster child's hub
+                        ## modified with the student indicator appended
+                        temp_child.hubs = [roster_child.hubs[0] + STUDENT_INDICATOR]
+                        ## add the temporary child object to the list of students
+                        students.append(temp_child)
+                    else:
+                        print "##################"
+                        print "Did not find this child",
+                        roster_child.Print()
+                        print " in the family: "
+                        directory_family.Print()
+                        not_found.append(roster_child)
+                ## Found the roster family in the directory, so break out of the directory_family loop
+                break
+        else:
+            print "Did not find this family from the roster in the directory:",
+            roster_family.Print()
+            not_found.append(roster_family.children)
+
+    print "Found %d students on the roster who were in the directory" % len(students)
+    print "%d students on the roster could not be matched with the directory" % len(not_found)
+
+    ## Create an import file with all the students
+    import_file_tools.CreateHublessImportFile(students)
+
+    
 def MakePrompt(choices):
     choice_list = sorted(choices)
     guts = '\n'.join(['(%s)%s' % (choice[0], choice[1:])
@@ -239,7 +297,9 @@ def RunMenu(directory, roster, map_d):
                '6 - Find Not in Directory':
                     {'Function':PrintNotInDirectory,'Arg':[directory,roster]},
                '7 - Make Import File for Not In Directory':
-                    {'Function':MakeImportNotInDirectory,'Arg':[directory,roster,map_d]}}
+                    {'Function':MakeImportNotInDirectory,'Arg':[directory,roster,map_d]},
+               '8 - Make Student Hub Population Import File':
+                    {'Function':MakeStudentImportFile,'Arg':[directory,roster]}}
     
     prompt = MakePrompt(choices)
 
