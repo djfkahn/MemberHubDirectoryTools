@@ -10,8 +10,7 @@ import import_file_tools
 import family
 import person
 
-### TBD - Need to confirm Student Indicator with Loren
-STUDENT_INDICATOR = "SA"
+STUDENT_INDICATOR = "+SA/"
 
 def FindMissingEmail(directory):
     """menu.FindMissingEmail
@@ -254,10 +253,9 @@ def MakeStudentImportFile(arg_list):
                         temp_child.hubs = []
                         ## populate the temporary object's hubs with the roster child's hubs
                         ## modified with the student indicator appended
-                        for hub in roster_child.hubs:
-                            ## TBD - is student_hub a necessary step?
-                            student_hub = hub + STUDENT_INDICATOR
-                            temp_child.hubs.append(student_hub)
+                        ## TBD - is student_hub a necessary step?
+                        student_hub = "/" + roster_child.hubs[0] + STUDENT_INDICATOR
+                        temp_child.hubs.append(student_hub)
                         ## add the temporary child object to the list of students
                         students.append(temp_child)
                     else:
