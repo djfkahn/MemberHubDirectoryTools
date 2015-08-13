@@ -13,8 +13,9 @@ def FormTimeTag():
     return tag
 
 def ConvertHubListToImportString(hub_list):
+    hub_str = "/"
     for hub in hub_list:
-        hub_str = str(hub) + ";"
+        hub_str += str(hub) + "/"
         
     return hub_str[:-1]  # strip off the trailing ';'
     
