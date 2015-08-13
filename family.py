@@ -18,7 +18,13 @@ class Family:
     def AddAdultsFromCombinedField(self, teacher, name_field):
         parent_count = 1
         parent_num = ""
-        parents = name_field.split(" and ")
+        if name_field.find(" And ") > 0:
+            parents = name_field.split(" And ")
+        elif name_field.find(" & ") > 0:
+            parents = name_field.split(" & ")
+        else:
+            parents = name_field.split(" and ")
+
         # if parents have same last name, then there is only one name
         # before the first "and"
         if len(parents[0].split(" ")) == 1:
