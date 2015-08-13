@@ -10,7 +10,7 @@ import import_file_tools
 import family
 import person
 
-STUDENT_INDICATOR = "+SA/"
+STUDENT_INDICATOR = "+SA"
 
 def FindMissingEmail(directory):
     """menu.FindMissingEmail
