@@ -229,7 +229,7 @@ def MakeStudentImportFile(arg_list):
     directory entries for people who are in the roster, but not already in the directory.
     Includes hub ID assignments for these people.
     ASSUMPTIONS:
-    None.
+    Each person in the roster belongs to only one hub, and it is the classroom hub.
     """
     directory = arg_list[0]
     roster    = arg_list[1]
@@ -249,13 +249,9 @@ def MakeStudentImportFile(arg_list):
                         ## instantiate a new Directory Person object, and copy the directory child into it
                         temp_child = person.DirectoryPerson()
                         temp_child = directory_child
-                        ## clear the temporary object's hubs
-                        temp_child.hubs = []
-                        ## populate the temporary object's hubs with the roster child's hubs
+                        ## populate the temporary object's hub with the roster child's hub
                         ## modified with the student indicator appended
-                        ## TBD - is student_hub a necessary step?
-                        student_hub = roster_child.hubs[0] + STUDENT_INDICATOR
-                        temp_child.hubs.append(student_hub)
+                        temp_child.hubs = [roster_child.hubs[0] + STUDENT_INDICATOR]
                         ## add the temporary child object to the list of students
                         students.append(temp_child)
                     else:
