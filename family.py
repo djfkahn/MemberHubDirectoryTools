@@ -2,6 +2,7 @@
 """This module defines the family class.
 """
 import person
+import name_parser
 
 class Family:
     """Class Family
@@ -18,42 +19,18 @@ class Family:
     def AddAdultsFromCombinedField(self, teacher, name_field):
         parent_count = 1
         parent_num = ""
-        if name_field.find(" And ") > 0:
-            parents = name_field.split(" And ")
-        elif name_field.find(" & ") > 0:
-            parents = name_field.split(" & ")
-        else:
-            parents = name_field.split(" and ")
 
-        # if parents have same last name, then there is only one name
-        # before the first "and"
-        if len(parents[0].split(" ")) == 1:
-            last_name = parents[-1].split(" ")[-1]            
-            for name in parents:
-                parent = name.split(' ')
-                new_adult = person.RosterPerson()
-                new_adult.SetFromRoster(last_name  = last_name,
-                                        first_name = parent[0],
-                                        teacher    = teacher,
-                                        family_relation = "Adult"+parent_num)
-                self.adults.append(new_adult)
-                # prepare the parent_tag for the next parent
-                parent_count += 1
-                parent_num = str(parent_count)
+        parent_names = name_parser.ParseFullName(name_field)
+        for parent in parent_names:
+            new_adult = person.RosterPerson()
+            new_adult.SetFromRoster(last_name  = parent['last'],
+                                    first_name = parent['first'],
+                                    teacher    = teacher,
+                                    family_relation = "Adult"+parent_num)
+            self.adults.append(new_adult)
+            parent_count += 1
+            parent_num = str(parent_count)
 
-        # each parent as a unique first and last name
-        else:
-            for name in parents:
-                parent = name.split(' ')
-                new_adult = person.RosterPerson()
-                new_adult.SetFromRoster(last_name  = parent[-1],
-                                        first_name = " ".join(parent[0:-1]),
-                                        teacher    = teacher,
-                                        family_relation = "Adult"+parent_num)
-                self.adults.append(new_adult)
-                # prepare the parent_tag for the next parent
-                parent_count += 1
-                parent_num = str(parent_count)
 
     def CreateFromRoster(self, fields):
         # for elementary school (< 6th grade) teacher name is retained
