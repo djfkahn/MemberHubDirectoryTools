@@ -64,5 +64,5 @@ class RosterPerson (Person):
         self.Set(last_name       = last_name, 
                  first_name      = first_name, 
                  family_relation = family_relation)
-        self.hubs = hub_map_tools.hub_map_tools.ConvertHubStringListToIDList \
+        self.hubs = hub_map_tools.ConvertHubStringListToIDList \
                         ([teacher], hub_map)
