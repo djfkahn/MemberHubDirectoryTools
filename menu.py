@@ -342,7 +342,7 @@ def RunMenu(directory, roster, map_d):
 
         
 def main():
-    map_d     = hub_map_tools.ReadMap()
+    map_d     = hub_map_tools.ReadHubMap()
     directory = directory_tools.ReadDirectory(map_d)
     roster    = roster_tools.ReadRoster(map_d)
     RunMenu(directory, roster, map_d)
