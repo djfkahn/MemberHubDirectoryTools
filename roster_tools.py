@@ -3,25 +3,44 @@
 """
 import family
 
-def ReadRoster():
-    roster        = []   # empty list
+def ReadRosterFromFile(file_name, hub_map):
+    """ roster_tools.ReadRosterFromFile
+    PURPOSE:
+    Reads a roster file with the following fields:
+    <**Last Name>,<**First Name>,<**Grade>,<**Parent/Guardian Name(s)>,<***Teacher Name>
+    **  - indicates always required field
+    *** - indicates field that is required when Grade field is < 6
+    INPUT:
+    - file_name -- name of the roster file
+    - hub_map   -- dictionary that maps hub names to hub IDs
+    OUTPUTS:
+    - roster    -- list of families extracted from the roster
+    ASSUMPTIONS:
+    1. First row of the file is the column headers...not a member of the roster.
+    """
+    roster        = []
     student_count = 0
 
-    file_name = raw_input('Enter name of roster comma-separated text file: ')
-    print file_name
     try:
         open_file = open(file_name)
         raw_line = open_file.readline()
+        if len(raw_line.split(',')) != 5:
+            raise RuntimeError, "This roster file only has %d fields, but 5 are expected." % len(raw_line.split(','))
 
         for line in open_file:
+            # process the line without the trailing '\r\n' that Excel adds
+            fields = line.strip('\n\r').split(',')
+            if fields[0] == "" or fields[1] == "" or fields[2] == "" or \
+               fields[3] == "" or (int(fields[2]) < 6 and fields[4] == ""):
+                print "Found line with missing required fields:",
+                print fields
+                continue
+
             # each line read represents one student
             student_count += 1
 
-            # process the line without the trailing '\r\n' that Excel adds
-            fields = line[:-2].split(',')
-            
             new_family = family.Family()
-            new_family.CreateFromRoster(fields)
+            new_family.CreateFromRoster(fields, hub_map)
 
             # if new_family is the same as a family already in the roster, then combine
             # families.  Otherwise, append new_family at the end of the roster.
@@ -39,14 +58,76 @@ def ReadRoster():
         
     return roster
 
+
+def ReadRoster(hub_map):
+    """ roster_tools.ReadRoster
+    PURPOSE:
+    Prompts the user for roster file name and proceeds to read the file.
+    INPUT:
+    - none
+    OUTPUTS:
+    - roster    -- list of families extracted from the roster
+    ASSUMPTIONS:
+    none
+    """
+    file_name = raw_input('Enter name of roster comma-separated text file (press <enter> to use "roster.csv"): ')
+    if not file_name:
+        file_name = "roster.csv"
+
+    return ReadRosterFromFile(file_name, hub_map)
+
+
 def PrintEntries(roster):
-    num_to_print = raw_input('Enter number of entries to print: ')
-    for x in roster[:int(num_to_print)]:
-        x.Print()
+    while True:
+        end_entry = int(raw_input('Enter entry at which to stop printing (enter 0 to stop): '))
+        if end_entry == 0:
+            break
+        elif end_entry > len(roster):
+            end_entry = len(roster)
+
+        start_entry = int(raw_input('Enter entry from which to start printing: '))
+        if start_entry < 0:
+            start_entry += end_entry
+            
+        for x in roster[start_entry:end_entry]:
+            x.Print()
+
 
 def main():
-    roster = ReadRoster()
-    PrintEntries(roster)
+    
+    test_roster_files = \
+        {"roster_tools_tests/test_roster_general.csv": \
+            {"error_expected":False,"number_read":2}, \
+         "roster_tools_tests/test_roster_no_parents.csv": \
+            {"error_expected":False,"number_read":0}, \
+         "roster_tools_tests/test_roster_no_teacher.csv": \
+            {"error_expected":False,"number_read":1},
+         "roster_tools_tests/test_roster_four_fields.csv": \
+            {"error_expected":True,"number_read":0}}
+
+    for roster_file in test_roster_files.keys():
+        try:
+            print "+++++++++++++++++++++++++++++++++++++++++++++++++++"
+            print "Testing roster file " + roster_file + "."
+            test_roster = ReadRosterFromFile(roster_file,{})
+            print "Processed roster file successfully",
+            if test_roster_files[roster_file]["error_expected"]:
+                print "which NOT EXPECTED."
+            else:
+                print "as expected."
+                if len(test_roster) == test_roster_files[roster_file]["number_read"]:
+                    print "The expected number of lines were processed."
+                else:
+                    print "UNEXPECTED number of lines processed."
+        except:
+            print "Error reading roster file " + roster_file,
+            if test_roster_files[roster_file]["error_expected"]:
+                print "as expected."
+            else:
+                print "where error was NOT EXPECTED."
+
+##    roster = ReadRoster()
+##    PrintEntries(roster)
 
 if __name__ == '__main__':
     main()
