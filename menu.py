@@ -84,6 +84,7 @@ def FindHubless(arg_list):
     - directory -- list containing the MemberHub directory families
     - map_d     -- dictionary mapping teacher names to hub IDs
     OUTPUTS:
+    - hubless   -- list of people who are not in any classroom hub
     Prints to standard output the names in the directory who are not members of
     at least one classroom hub.
     ASSUMPTIONS:
@@ -159,6 +160,7 @@ def MakeImportForHubless(arg_list):
 
     import_file_tools.CreateHublessImportFile(update_hubs)
 
+
 def FindEntriless(arg_list):
     """menu.FindEntriless
     INPUTS:
@@ -212,9 +214,6 @@ def MakeImportNotInDirectory(arg_list):
     ASSUMPTIONS:
     None.
     """
-    directory = arg_list[0]
-    roster    = arg_list[1]
-    map_d     = arg_list[2]
     entriless = FindEntriless(arg_list)
 
     import_file_tools.CreateNewMemberImport(entriless)
@@ -272,9 +271,30 @@ def MakeStudentImportFile(arg_list):
     print "%d students on the roster could not be matched with the directory" % len(not_found)
 
     ## Create an import file with all the students
-    import_file_tools.CreateHublessImportFile(students)
+    import_file_tools.CreateHubImportFile(students, "students2hubs")
 
-    
+
+def FindParentChildrenHubMismatches(directory):
+
+    for this_family in directory:
+        children_hubs = []
+        for this_child in this_family.children:
+            for this_hub in this_child.hubs:
+                children_hubs.append(this_hub)
+
+        for this_adult in this_family.adults:
+            for child_hub in children_hubs:
+                if child_hub not in this_adult.hubs:
+                    print "Found adult who is not a member of all family children's hubs:"
+                    print "Adult Name:    ",
+                    this_adult.Print()
+                    print "Adult Hubs:    ",
+                    print this_adult.hubs
+                    print "Children Hubs: ",
+                    print children_hubs
+                    break
+
+
 def MakePrompt(choices):
     choice_list = sorted(choices)
     guts = '\n'.join(['(%s)%s' % (choice[0], choice[1:])
@@ -284,22 +304,24 @@ def MakePrompt(choices):
 def RunMenu(directory, roster, map_d):
     """Runs the user interface for dictionary manipulation."""
     # The choices dictionary has function names for values.
-    choices = {'1 - Find Missing Email':
+    choices = {'a - Find Missing Email':
                     {'Function':FindMissingEmail,'Arg':directory},
-               '2 - Find Orphans':
+               'b - Find Orphans':
                     {'Function':FindOrphans,'Arg':directory},
-               '3 - Find Childless':
+               'c - Find Childless':
                     {'Function':FindChildless,'Arg':directory},
-               '4 - Find Not In Classroom Hub':
+               'd - Find Not In Classroom Hub':
                     {'Function':PrintHubless,'Arg':[directory,map_d]},
-               '5 - Make Import File for Not In Classroom Hub':
+               'e - Make Import File for Not In Classroom Hub':
                     {'Function':MakeImportForHubless,'Arg':[directory,map_d,roster]},
-               '6 - Find Not in Directory':
+               'f - Find Not in Directory':
                     {'Function':PrintNotInDirectory,'Arg':[directory,roster]},
-               '7 - Make Import File for Not In Directory':
+               'g - Make Import File for Not In Directory':
                     {'Function':MakeImportNotInDirectory,'Arg':[directory,roster,map_d]},
-               '8 - Make Student Hub Population Import File':
-                    {'Function':MakeStudentImportFile,'Arg':[directory,roster]}}
+               'h - Make Student Hub Population Import File':
+                    {'Function':MakeStudentImportFile,'Arg':[directory,roster]},
+               'i - Find Adults/Children Hub Mismatches':
+                    {'Function':FindParentChildrenHubMismatches,'Arg':directory}}
     
     prompt = MakePrompt(choices)
 
@@ -320,9 +342,9 @@ def RunMenu(directory, roster, map_d):
 
         
 def main():
-    directory = directory_tools.ReadDirectory()
-    roster    = roster_tools.ReadRoster()
-    map_d     = hub_map_tools.ReadMap()
+    map_d     = hub_map_tools.ReadHubMap()
+    directory = directory_tools.ReadDirectory(map_d)
+    roster    = roster_tools.ReadRoster(map_d)
     RunMenu(directory, roster, map_d)
 
 if __name__ == '__main__':
