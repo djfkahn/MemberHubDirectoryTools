@@ -40,24 +40,28 @@ class Person:
 class DirectoryPerson (Person):
     """This class extends the Person class with Directory-only fields."""
 
-    def SetFromDirectory (self, fields):
-        self.Set(last_name = fields[1], first_name = fields[2], family_relation = fields[7])
+    def SetFromDirectory (self, fields, hub_map):
+        self.Set(last_name       = fields[1].strip('"'), 
+                 first_name      = fields[2].strip('"'), 
+                 family_relation = fields[7].strip('"'))
 
-        self.person_id = fields[0][1:]
-        self.middle_name = fields[3]
-        self.suffix = fields[4]
-        self.email = fields[5]
-        self.family_id = fields[6]
-        self.parents = fields[11]
+        self.person_id = fields[0].strip('"')
+        self.middle_name = fields[3].strip('"')
+        self.suffix = fields[4].strip('"')
+        self.email = fields[5].strip('"')
+        self.family_id = fields[6].strip('"')
+        self.parents = fields[11].strip('"')
         hub_name_list = fields[23].split(';')
-        self.hubs = hub_map_tools.ConvertToHubIDList(hub_name_list)
-        self.account_created = fields[27]
-        self.account_updated = fields[28]
+        self.hubs = hub_map_tools.ConvertHubStringListToIDList \
+                        (hub_name_list, hub_map)
+        self.account_created = fields[27].strip('"')
+        self.account_updated = fields[28].strip('"')
 
 class RosterPerson (Person):
     """This class extends the Person class with Roster-only fields."""
 
-    def SetFromRoster(self, last_name, first_name, teacher, family_relation):
-        self.Set(last_name = last_name, first_name = first_name, family_relation = family_relation)
-        self.hubs = hub_map_tools.ConvertToHubIDList([teacher])
-
+    def SetFromRoster(self, last_name, first_name, teacher, family_relation, hub_map):
+        self.Set(last_name       = last_name, 
+                 first_name      = first_name, 
+                 family_relation = family_relation)
+        self.hubs = hub_map_tools.ConvertToHubIDList([teacher], hub_map)
