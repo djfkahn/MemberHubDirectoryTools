@@ -16,23 +16,24 @@ class Family:
         self.adults   = []
         self.children = []
     
-    def AddAdultsFromCombinedField(self, teacher, name_field):
+    def AddAdultsFromCombinedField(self, teacher, name_field, hub_map):
         parent_count = 1
         parent_num = ""
 
         parent_names = name_parser.ParseFullName(name_field)
         for parent in parent_names:
             new_adult = person.RosterPerson()
-            new_adult.SetFromRoster(last_name  = parent['last'],
-                                    first_name = parent['first'],
-                                    teacher    = teacher,
-                                    family_relation = "Adult"+parent_num)
+            new_adult.SetFromRoster(last_name       = parent['last'],
+                                    first_name      = parent['first'],
+                                    teacher         = teacher,
+                                    family_relation = "Adult"+parent_num,
+                                    hub_map         = hub_map)
             self.adults.append(new_adult)
             parent_count += 1
             parent_num = str(parent_count)
 
 
-    def CreateFromRoster(self, fields):
+    def CreateFromRoster(self, fields, hub_map):
         # for elementary school (< 6th grade) teacher name is retained
         # for middle school, teacher name is replaced with grade level
         if int(fields[2]) < 6:
@@ -42,24 +43,26 @@ class Family:
 
         # add adults to the family
         self.AddAdultsFromCombinedField(teacher    = teacher,
-                                        name_field = fields[3])
+                                        name_field = fields[3],
+                                        hub_map    = hub_map)
 
         # add the child to the family
         new_child = person.RosterPerson()
-        new_child.SetFromRoster(last_name  = fields[0],
-                                first_name = fields[1],
-                                teacher    = teacher,
-                                family_relation = "Child1")
+        new_child.SetFromRoster(last_name       = fields[0],
+                                first_name      = fields[1],
+                                teacher         = teacher,
+                                family_relation = "Child1",
+                                hub_map         = hub_map)
         self.children.append(new_child)
 
-    def AddAdultFromDirectory(self, fields):
+    def AddAdultFromDirectory(self, fields, hub_map):
         new_adult = person.DirectoryPerson()
-        new_adult.SetFromDirectory(fields)
+        new_adult.SetFromDirectory(fields, hub_map)
         self.adults.append(new_adult)
     
-    def AddChildFromDirectory(self, fields):
+    def AddChildFromDirectory(self, fields, hub_map):
         new_child = person.DirectoryPerson()
-        new_child.SetFromDirectory(fields)
+        new_child.SetFromDirectory(fields, hub_map)
         self.children.append(new_child)
     
     def IsSameFamily(self, other):
@@ -128,7 +131,19 @@ class Family:
                     self.adults[index].hubs += possible_child.hubs
 
     def IsChildless(self):
-        return len(self.children) == 0
+        ## not childless if more than zero persons in children attribute
+        if len(self.children) > 0:
+            return False
+
+        ## not considered childless if the first adult is a teacher or staff,
+        ## as indicated by membership in either the "Teachers" or "Staff" hubs
+        if "Teachers" in self.adults[0].hubs or \
+           "Staff" in self.adults[0].hubs:
+            return False
+
+        ## considered childless if none of the above conditions hold
+        return True
+
     
     def IsOrphan(self):
         return len(self.adults) == 0
