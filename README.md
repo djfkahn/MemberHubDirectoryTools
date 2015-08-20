@@ -10,17 +10,21 @@ Enter name of roster file: <roster file name>.csv
 #### students processed, with #### adults.
 #### hub IDs read and processed.
 Choose:
-(1) - Find Missing Email
-(2) - Find Orphans
-(3) - Find Childless
-(4) - Find Not In Hub
-(5) - Make Import File for Not In Hub
-(6) - Find Not in Directory
-(7) - Make Import File for Not In Directory
+(a) - Find Missing Email
+(b) - Find Orphans
+(c) - Find Childless
+(d) - Find Not In Classroom Hub
+(e) - Make Import File for Not In Classroom Hub
+(f) - Find Not in Directory
+(g) - Make Import File for Not In Directory
+(h) - Make Student Hub Population Import File
+(i) - Find Adults/Children Hub Mismatches
 Or press <enter> to quit:
 
 ASSUMPTIONS
 1.  Classroom Hub Definitions Map in file called "hub_map.csv"
-Each line in this file maps one teacher name to his/her Hub ID using the form:  "<teacher name>|<hub id>".
-
-2.  All input files are comma-separated text files, with one entry per line
+Each line in this file maps one teacher name or MemberHub hub name to his/her Hub ID using 
+the form:  "<teacher/hub name>|<hub id>".
+2.  Known roster errors are stored in file called "roster_errata.csv"
+Each line in this file maps one parents name field roster error to its corrected spelling.
+3.  All input files are comma-separated text files, with one entry per line
