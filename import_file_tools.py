@@ -91,3 +91,27 @@ Summary: 1. opens file for writing, and writes the column titles
 
     finally:
         open_file.close()
+
+
+def CreateHubImportFile(people,file_prefix):
+    """CreateStudentHubFile
+Inputs : people      - list of people whose need to be populated in hubs
+         file_prefix - string that starts the name of the import file
+Outputs: Creates a file called '<file_prefix>_<date tag>.csv' in the
+         run directory
+Summary: 1. opens file for writing, and writes the column titles
+         2. iterates over the inputs to write the data to the file
+         3. closes the file
+"""
+ 
+    file_name = file_prefix + "_" + FormTimeTag() + ".csv"
+    print "Writing to import file called %s." % file_name
+    try:
+        open_file = open(file_name,"w")
+        WriteHublessLine (open_file, "first_name", "last_name", "hubs", "person_id")
+
+        for this_person in people:
+            WriteHublessPerson(open_file, this_person)
+
+    finally:
+        open_file.close()
