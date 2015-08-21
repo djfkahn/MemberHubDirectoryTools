@@ -19,17 +19,20 @@ def ConvertHubListToImportString(hub_list):
         
     return hub_str  # strip off the trailing ';'
     
-def WriteNewMemberLine(open_file, family_relation, first_name, last_name, hubs, person_id):
-    line = "%s,%s,%s,%s,%s\n" % (family_relation, first_name, last_name, hubs, person_id)
+def WriteNewMemberLine(open_file, family_relation, first_name, last_name, person_id):
+    line = "%s,%s,%s,%s\n" % (family_relation, first_name, last_name, person_id)
     open_file.write(line)
 
 def WriteNewMemberPerson(open_file, new_person):
-    family_relation = new_person.family_relation
-    first_name = new_person.first_name
-    last_name  = new_person.last_name
-    hubs = ConvertHubListToImportString(new_person.hubs)
-    person_id  = ''
-    WriteNewMemberLine(open_file, family_relation, first_name, last_name, hubs, person_id)
+    if isinstance(new_person, person.RosterPerson):
+        person_id   = ''
+    else:
+        person_id   = new_person.person_id
+    WriteNewMemberLine(open_file       = open_file,
+                       family_relation = new_person.family_relation,
+                       first_name      = new_person.first_name,
+                       last_name       = new_person.last_name,
+                       person_id       = person_id)
     
 def CreateNewMemberImport(entriless):
     """CreateHubUpdateCSV
@@ -47,7 +50,7 @@ Summary: 1. asks user to name file to be written to.  this file will be
     print "Writing to import file called %s." % file_name
     try:
         open_file = open(file_name,"w")
-        WriteNewMemberLine(open_file,'family_relation', 'first_name', 'last_name', 'hubs','person_id')
+        WriteNewMemberLine(open_file,'family_relation', 'first_name', 'last_name', 'person_id')
 
         for new_family in entriless:
             for new_adult in new_family.adults:
