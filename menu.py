@@ -300,6 +300,8 @@ def RunMenu(directory, roster, map_d):
                     {'Function':FindChildless,'Arg':directory},
                'd - Find Not In Classroom Hub':
                     {'Function':FindHubless,'Arg':[directory,map_d]},
+               'e - Find Adults without Accounts':
+                    {'Function':FindAdultsWithoutAccounts,'Arg':directory},
                'f - Find Not in Directory':
                     {'Function':PrintNotInDirectory,'Arg':[directory,roster]},
                'g - Make Import File for Not In Directory':
