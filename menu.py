@@ -116,50 +116,6 @@ def FindHubless(arg_list):
     
     return hubless
 
-def PrintHubless(arg_list):
-    discard = FindHubless(arg_list)
-
-def MakeImportForHubless(arg_list):
-    """menu.MakeImportForHubless
-    INPUTS:
-    - directory -- dictionary containing the MemberHub directory
-    - roster    -- dictionary containing the school roster
-    - map_d     -- dictionary mapping teacher names to hub IDs
-    OUTPUTS:
-    Prints to standard output the names in the directory who are not members of
-    at least one classroom hub.
-    Creates a comma-separated text file that can be imported into MemberHub to assign
-    hub IDs to existing directory entries.
-    ASSUMPTIONS:
-    None.
-    """
-    directory   = arg_list[0]
-    map_d       = arg_list[1]
-    roster      = arg_list[2]
-    hubless     = FindHubless(arg_list)
-    update_hubs = []
-
-    hubed_count = hubless_count = 0
-
-    for hubless_person in hubless:
-        for roster_family in roster:
-            found_person = roster_family.FindPersonInFamily(hubless_person)
-            if not found_person == None:
-                hubless_person.hubs = found_person.hubs
-                update_hubs.append(hubless_person)
-                hubed_count += 1
-                break
-        else:
-            print "Did not find match for this person in the roster:",
-            hubless_person.Print()
-            hubless_count += 1
-
-    print "Processed %d entries that were not in any classroom hub." % len(hubless)
-    print "Was able to find classroom hubs for %d entries." % hubed_count
-    print "Was not able to find classroom hubs for %d entries." % hubless_count
-
-    import_file_tools.CreateHublessImportFile(update_hubs)
-
 
 def FindEntriless(arg_list):
     """menu.FindEntriless
@@ -311,9 +267,7 @@ def RunMenu(directory, roster, map_d):
                'c - Find Childless':
                     {'Function':FindChildless,'Arg':directory},
                'd - Find Not In Classroom Hub':
-                    {'Function':PrintHubless,'Arg':[directory,map_d]},
-               'e - Make Import File for Not In Classroom Hub':
-                    {'Function':MakeImportForHubless,'Arg':[directory,map_d,roster]},
+                    {'Function':FindHubless,'Arg':[directory,map_d]},
                'f - Find Not in Directory':
                     {'Function':PrintNotInDirectory,'Arg':[directory,roster]},
                'g - Make Import File for Not In Directory':
