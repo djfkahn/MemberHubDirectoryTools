@@ -66,35 +66,6 @@ def WriteHublessLine(open_file, first_name, last_name, hubs, person_id):
     line = "%s,%s,%s,%s\n" % (first_name, last_name, hubs, person_id)
     open_file.write(line)
 
-def WriteHublessPerson(open_file, new_person):
-    first_name = new_person.first_name
-    last_name  = new_person.last_name
-    hubs = ConvertHubListToImportString(new_person.hubs)
-    person_id  = new_person.person_id
-    WriteHublessLine(open_file, first_name, last_name, hubs, person_id)
-    
-def CreateHublessImportFile(hubless):
-    """CreateHublessImportFile
-Inputs : hubless - list of persons that need their hubs updated
-Outputs: Creates a file called 'hubless_import_<date tag>.csv' in the
-         run directory
-Summary: 1. opens file for writing, and writes the column titles
-         2. iterates over the inputs to write the data to the file
-         3. closes the file
-"""
- 
-    file_name = "hubless_import_" + FormTimeTag() + ".csv"
-    print "Writing to import file called %s." % file_name
-    try:
-        open_file = open(file_name,"w")
-        WriteHublessLine (open_file, "first_name", "last_name", "hubs", "person_id")
-
-        for update_person in hubless:
-            WriteHublessPerson(open_file, update_person)
-
-    finally:
-        open_file.close()
-
 
 def CreateHubImportFile(people,file_prefix):
     """CreateStudentHubFile
