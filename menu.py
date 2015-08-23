@@ -84,7 +84,6 @@ def FindHubless(arg_list):
     - directory -- list containing the MemberHub directory families
     - map_d     -- dictionary mapping teacher names to hub IDs
     OUTPUTS:
-    - hubless   -- list of people who are not in any classroom hub
     Prints to standard output the names in the directory who are not members of
     at least one classroom hub.
     ASSUMPTIONS:
@@ -113,8 +112,41 @@ def FindHubless(arg_list):
 
     print "Found %d children who are not in a classroom hub." % child_count
     print "Found %d adults who are not in at least one classroom hub." % adult_count
-    
-    return hubless
+
+
+
+def FindAdultsWithoutAccounts(directory):
+    """menu.FindAdultsWithoutAccounts
+    INPUTS:
+    - directory -- list of families from a MemberHub directory dump.
+    OUTPUTS:
+    Provides the option to write to standard output the list of adults who
+    do not have accounts, separated by whether their profile has an email 
+    address or not.
+    """
+    no_account_with_email    = []
+    no_account_without_email = []
+
+    for this_family in directory:
+        for this_adult in this_family.adults:
+            if this_adult.account_created == "":
+                if this_adult.email == "":
+                    no_account_without_email.append(this_adult)
+                else:
+                    no_account_with_email.append(this_adult)
+
+    print "Found %d adults without accounts or emails." % len(no_account_without_email)
+    answer = raw_input("Print list to screen? ('y' for yes) ")
+    if answer == "y":
+        for this_person in no_account_without_email:
+            this_person.Print()
+
+    print "Found %d adults without accounts, but with emails." % len(no_account_with_email)
+    answer = raw_input("Print list to screen? ('y' for yes) ")
+    if answer == "y":
+        for this_person in no_account_with_email:
+            print "%s %s <%s>" % (this_person.first_name, this_person.last_name, this_person.email)
+
 
 
 def FindEntriless(arg_list):
