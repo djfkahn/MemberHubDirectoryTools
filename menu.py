@@ -281,6 +281,8 @@ def FindParentChildrenHubMismatches(directory):
                     print "Children Hubs: ",
                     print children_hubs
                     break
+    else:
+        print "All adults are members of hubs to which all family children belong."
 
 
 def MakePrompt(choices):
