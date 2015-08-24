@@ -89,29 +89,31 @@ def FindHubless(arg_list):
     ASSUMPTIONS:
     None.
     """
-    directory = arg_list[0]
-    map_d     = arg_list[1]
-    hubless   = []
-
-    child_count = adult_count = 0
+    directory        = arg_list[0]
+    map_d            = arg_list[1]
+    hubless_adults   = []
+    hubless_children = []
 
     for directory_family in directory:
         for adult in directory_family.adults:
             if not hub_map_tools.IsAnyHubClassroomHub(map_d, adult.hubs):
-                print "Found adult not in a classroom hub.  Current hubs = (%s).  Name = " % adult.hubs,
-                adult.Print()
-                adult_count += 1
-                hubless.append(adult)
+                hubless_adults.append(adult)
         
         for child in directory_family.children:
             if not hub_map_tools.IsAnyHubClassroomHub(map_d, child.hubs):
-                print "Found child not in a classroom hub.  Current hubs =  (%s).  Name = " % child.hubs,
-                child.Print()
-                child_count += 1
-                hubless.append(child)
+                hubless_children.append(child)
 
-    print "Found %d children who are not in a classroom hub." % child_count
-    print "Found %d adults who are not in at least one classroom hub." % adult_count
+    print "Found %d adults who are not in at least one classroom hub." % len(hubless_adults)
+    answer = raw_input("Print list to screen? ('y' for yes) ")
+    if answer == "y":
+        for this_person in hubless_adults:
+            print "%s %s <%s>" % (this_person.first_name, this_person.last_name, this_person.hubs)
+
+    print "Found %d children who are not in a classroom hub." % len(hubless_children)
+    answer = raw_input("Print list to screen? ('y' for yes) ")
+    if answer == "y":
+        for this_person in hubless_children:
+            print "%s %s <%s>" % (this_person.first_name, this_person.last_name, this_person.hubs)
 
 
 
@@ -281,6 +283,8 @@ def FindParentChildrenHubMismatches(directory):
                     print "Children Hubs: ",
                     print children_hubs
                     break
+    else:
+        print "All adults are members of hubs to which all family children belong."
 
 
 def MakePrompt(choices):
