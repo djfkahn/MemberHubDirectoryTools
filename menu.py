@@ -17,22 +17,57 @@ def FindMissingEmail(directory):
     INPUTS:
     - directory -- list containing the MemberHub directory families
     OUTPUTS:
-    Prints to standard output the adults in the directory who do not have an
-    email address associated with their entry.
+    Prints to standard output statistics about families with and without
+    email addresses, and give the option to display the lists.
     ASSUMPTIONS:
     None.
     """
-    adult_count = no_email_count = 0
+    adult_count = no_email_adult = 0
+    no_email_family = []
+    partial_family = []
+    
     for entry_family in directory:
+        no_email_count = 0
         for adult in entry_family.adults:
             adult_count += 1
             if adult.DoesNotListEmailAddress():
-                print "The entry for this person does not have an email address:",
-                adult.Print()
+                no_email_adult += 1
                 no_email_count += 1
 
-    print "Found %d out of %d adults with missing email addresses" % \
-          (no_email_count, adult_count)
+        if no_email_count == len(entry_family.adults):
+            no_email_family.append(entry_family)
+        elif no_email_count > 0:
+            partial_family.append(entry_family)
+
+    print "The directory has %d families and %d adults." % \
+          (len(directory), adult_count)
+    print "Of the %d adults, %d have no email address." % \
+          (adult_count, no_email_adult)
+    print "%d out of %d families have no adult with an email address." % \
+          (len(no_email_family), len(directory))
+    print "%d out of %d families have some adults without and some with email addresses." % \
+          (len(partial_family), len(directory))
+    print "%d out of %d families have all adults with email addresses." % \
+          ((len(directory)-len(no_email_family)-len(partial_family)), len(directory))
+    print "%d out of %d families have at least one adult with an email address." % \
+          ((len(directory)-len(no_email_family)), len(directory))
+
+    print ""
+    answer = raw_input("Print list of families with no email to screen? ('y' for yes) ")
+    if answer == "y":
+        for this_family in no_email_family:
+            for this_person in this_family.adults:
+                print "%s %s [%s]" % (this_person.first_name, this_person.last_name, this_person.hubs)
+            print "---------------"
+
+    print ""
+    answer = raw_input("Print list of families with some email to screen? ('y' for yes) ")
+    if answer == "y":
+        for this_family in partial_family:
+            for this_person in this_family.adults:
+                print "%s %s <%s>," % (this_person.first_name, this_person.last_name, this_person.email)
+            print "---------------"
+
 
 def FindOrphans(directory):
     """menu.FindOrphans
