@@ -85,7 +85,12 @@ Summary: 1. opens file for writing, and writes the column titles
         WriteHublessLine (open_file, "first_name", "last_name", "hubs", "person_id")
 
         for this_person in people:
-            WriteHublessPerson(open_file, this_person)
+            WriteHublessLine(open_file  = open_file, 
+                             first_name = this_person.first_name, 
+                             last_name  = this_person.last_name, 
+                             hubs       = this_person.hubs, 
+                             person_id  = this_person.person_id)
+
 
     finally:
         open_file.close()
