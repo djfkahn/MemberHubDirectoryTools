@@ -22,7 +22,7 @@ def ReadDirectoryFromFile(file_name, hub_map):
     - directory -- list of families read from the MemberHub directory dump
     ASSUMPTIONS:
     1. The MemberHub directory dump file is a comman separated text file comprised
-       of exactly 30 fields in the following order:
+       of exactly 31 fields in the following order:
         1.  <person_id> **
         2.  <last_name> **
         3.  <first_name> **
@@ -46,13 +46,14 @@ def ReadDirectoryFromFile(file_name, hub_map):
         21. <mobile_number>:
         22. <mobile_provider>
         23. <allow_sms>
-        24. <hubs>
-        25. <hubs_administered>
-        26. <person_created>
-        27. <person_updated>
-        28. <account_created>
-        29. <account_updated>
-        30. <last_login>
+        24. <pta_member>
+        25. <hubs>
+        26. <hubs_administered>
+        27. <person_created>
+        28. <person_updated>
+        29. <account_created>
+        30. <account_updated>
+        31. <last_login>
         ** - indicates required field
     2. None of the fields contain commas.
     3. Lines that contain blank required fields will be flagged, but not added to the 
@@ -62,20 +63,21 @@ def ReadDirectoryFromFile(file_name, hub_map):
     directory  = []
     lines_read = lines_processed = families_created = 0
     new_family = False
+    family_id  = 0
 
     try:
         open_file = open(file_name)
         title_line = open_file.readline()
         fields = title_line.split(',')
-        if not len(fields) == 30:
+        if not len(fields) == 31:
             PrintErrorMessage \
-                (fields, "The file %s does not contain 30 fields, and cannot be parsed." % file_name)
-            raise RuntimeError, "This directory file has %d fields, but 30 are expected." % len(fields)
+                (fields, "The file %s does not contain 31 fields, and cannot be parsed." % file_name)
+            raise RuntimeError, "This directory file has %d fields, but 31 are expected." % len(fields)
 
         for line in open_file:
             lines_read += 1
             fields = line.split(',')
-            if not len(fields) == 30:
+            if not len(fields) == 31:
                 PrintErrorMessage \
                     (fields, "Found line with incorrect number of fields.")
                 continue
@@ -87,16 +89,18 @@ def ReadDirectoryFromFile(file_name, hub_map):
                 continue
 
             lines_processed += 1
-            # according to MemberHub.com, a new family begins each time the family_relation (field 7)
-            # is not numbered (i.e. just "Adult" or just "Child"), so start a new family when that
-            # condition is detected
-            if fields[7].lower() in ("adult", "child"):
-                # to start processing a new family, append the family previously worked on (if
-                # it exists), then instantiate a new Family class
+            # create a new family every time a new family ID is found
+            if fields[6] != family_id:
+                # to start processing a new family, append the family previously worked on 
+                # (if it exists)
                 if new_family:
                     directory.append(new_family)
+                # instantiate new family object
                 new_family = family.Family()
+                # increment number of families created
                 families_created += 1
+                # store the family ID currently working on
+                family_id = fields[6]
                 
             if fields[7][:5].lower() == "adult":
                 new_family.AddAdultFromDirectory(fields, hub_map)

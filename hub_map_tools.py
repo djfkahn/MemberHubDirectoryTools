@@ -27,12 +27,53 @@ def ConvertHubStringListToIDList(hub_name_list, map_d):
             hub_id_list.append(map_d[hub_name])
         else:
             hub_id_list.append(hub_name)
-    
+
     return hub_id_list
 
 def ConvertToHubIDList(hub_name_list):
     return ConvertHubStringListToIDList(hub_name_list, ReadHubMap())
 
+
+def ConvertHubIDListToStringList(hub_id_list, map_d):
+    """hub_map_tools.ConvertHubIDListToStringList
+    INPUTS:
+    - hub_id_list   -- list of hub IDs
+    - map_d         -- dictionary that maps hub/teacher names to hub IDs
+    OUTPUTS:
+    - hub_name_list -- list of hub names corresponding to the hub_name_list.
+                       if a corrsponding ID is not in the map, the original
+                       hub name is returned in that position.
+    """
+"""
+    hub_name_list = []
+    
+    if IsAnyHubClassroomHub(map_d, hub_id_list):
+	    for hub_id in hub_id_list:
+    	    # check if the hub name is among map keys
+        	if IsInClassroomHub(map_d, hub_id):
+        		temp_list = map_d.values().find(hub_id)
+        		hub_name_list.append(temp_list.min())
+
+    return hub_name_list
+"""
+
+"""
+def ConvertToHubStringList(hub_name_list):
+    return ConvertHubIDListToStringList(hub_name_list, ReadHubMap())
+"""
+
+def CreateEmptyHubDictionary(raw_map):
+	raw_values = raw_map.values()
+	raw_values.sort()
+	temp = ['0']
+	for val in raw_values:
+		if temp[-1] != val:
+			temp.append(val)
+	reduced_values = temp[1:]
+	new_map = {}
+	for val in reduced_values:
+		new_map[val] = []
+	return new_map
 
 def PrintReadErrorMessage(line, message):
     print message, "Skipping this line."
@@ -98,9 +139,12 @@ def IsInClassroomHub(map_d, hub_id):
     ASSUMPTIONS:
     None
     """
+    ## MODIFIED CODE BEGIN - 2017-09-06
     return hub_id in map_d.values() or \
            hub_id == "Teachers" or \
-           hub_id == "Staff"
+           hub_id == "Staff" or \
+           hub_id == "Volunteers"
+    ## MODIFIED CODE END
     
 def IsAnyHubClassroomHub(map_d, hubs):
     """hub_map_tools.IsAnyHubClassroomHub(map_d, hub_field)
@@ -163,8 +207,7 @@ def main():
          3: {"hub_names":['Smyth']        ,"hub_ids":['Smyth']},
          4: {"hub_names":['Smith','8th']  ,"hub_ids":['9001','9002']},
          5: {"hub_names":['Smith','Smyth'],"hub_ids":['9001','Smyth']}}
-    test_hub_map = ReadHubMapFromFile \
-                       ("hub_map_tools_tests/test_hub_map_general.csv")
+    test_hub_map = ReadHubMapFromFile ("hub_map_tools_tests/test_hub_map_general.csv")
 
     for test_case in test_list.keys():
         result = ConvertHubStringListToIDList \

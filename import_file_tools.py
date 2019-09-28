@@ -85,12 +85,38 @@ Summary: 1. opens file for writing, and writes the column titles
         WriteHublessLine (open_file, "first_name", "last_name", "hubs", "person_id")
 
         for this_person in people:
-            WriteHublessLine(open_file  = open_file, 
-                             first_name = this_person.first_name, 
-                             last_name  = this_person.last_name, 
-                             hubs       = this_person.hubs, 
-                             person_id  = this_person.person_id)
-
+        	WriteHublessLine(open_file  = open_file, 
+        					 first_name = this_person.first_name, 
+        					 last_name  = this_person.last_name, 
+        					 hubs       = this_person.hubs, 
+        					 person_id  = this_person.person_id)
 
     finally:
         open_file.close()
+
+
+
+def CreateEmaillessFile(people, hubs, file_prefix):
+
+	file_name = file_prefix + "_" + FormTimeTag() + ".txt"
+	print "Writing to file called %s." % file_name
+	try:
+		open_file = open(file_name,"w")
+		for hub in people:
+			possible_teachers = ""
+			for key in hubs.keys():
+				if hubs[key] == hub:
+					possible_teachers += key + " | "
+			line = "Teacher(s): %s\n" % possible_teachers
+			open_file.write(line)
+			for person in people[hub]:
+				line = "%s %s\n" % (person.first_name, person.last_name)
+				open_file.write(line)
+			line = "Number: %d\n\n##########################################\n" % len(people[hub])
+			open_file.write(line)
+		
+		
+	finally:
+		open_file.close()
+		
+		

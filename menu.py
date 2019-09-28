@@ -12,17 +12,22 @@ import person
 
 STUDENT_INDICATOR = "+SA"
 
-def FindMissingEmail(directory):
+def FindMissingEmail(arg_list):
     """menu.FindMissingEmail
     INPUTS:
     - directory -- list containing the MemberHub directory families
+    - map_d     -- dictionary mapping teacher names to hub IDs
     OUTPUTS:
     Prints to standard output statistics about families with and without
     email addresses, and give the option to display the lists.
     ASSUMPTIONS:
     None.
     """
+    directory   = arg_list[0]
+    hub_map_d   = arg_list[1]
+    map_d       = hub_map_tools.CreateEmptyHubDictionary(hub_map_d)
     adult_count = no_email_adult = 0
+    no_email_person = []
     no_email_family = []
     partial_family = []
     
@@ -31,8 +36,12 @@ def FindMissingEmail(directory):
         for adult in entry_family.adults:
             adult_count += 1
             if adult.DoesNotListEmailAddress():
+            	no_email_person.append(adult)            		
                 no_email_adult += 1
                 no_email_count += 1
+                for hub in adult.hubs:
+                	if hub in map_d.keys():
+	                	map_d[hub].append(adult)
 
         if no_email_count == len(entry_family.adults):
             no_email_family.append(entry_family)
@@ -53,6 +62,9 @@ def FindMissingEmail(directory):
           ((len(directory)-len(no_email_family)), len(directory))
 
     print ""
+
+    import_file_tools.CreateEmaillessFile(map_d, hub_map_d, "emailless")
+    """
     answer = raw_input("Print list of families with no email to screen? ('y' for yes) ")
     if answer == "y":
         for this_family in no_email_family:
@@ -67,6 +79,8 @@ def FindMissingEmail(directory):
             for this_person in this_family.adults:
                 print "%s %s <%s>," % (this_person.first_name, this_person.last_name, this_person.email)
             print "---------------"
+    """
+    
 
 
 def FindOrphans(directory):
@@ -275,7 +289,11 @@ def MakeStudentImportFile(arg_list):
                         temp_child = directory_child
                         ## populate the temporary object's hub with the roster child's hub
                         ## modified with the student indicator appended
-                        temp_child.hubs = [roster_child.hubs[0] + STUDENT_INDICATOR]
+                        ## MODIFIED CODE START - 2017-09-02
+                        ##temp_child.hubs = [roster_child.hubs[0] + STUDENT_INDICATOR]
+                        temp_child.hubs = "/"+roster_child.hubs[0] + STUDENT_INDICATOR+"/"
+                        ## MODIFIED CODE END
+                        
                         ## add the temporary child object to the list of students
                         students.append(temp_child)
                     else:
@@ -315,8 +333,11 @@ def FindParentChildrenHubMismatches(directory):
                     this_adult.Print()
                     print "Adult Hubs:    ",
                     print this_adult.hubs
-                    print "Children Hubs: ",
-                    print children_hubs
+                    for this_child in this_family.children:
+                    	print "Child Name -- ",
+                    	this_child.Print()
+                    	print " -- "
+                    	print this_child.hubs
                     break
     else:
         print "All adults are members of hubs to which all family children belong."
@@ -332,7 +353,7 @@ def RunMenu(directory, roster, map_d):
     """Runs the user interface for dictionary manipulation."""
     # The choices dictionary has function names for values.
     choices = {'a - Find Missing Email':
-                    {'Function':FindMissingEmail,'Arg':directory},
+                    {'Function':FindMissingEmail,'Arg':[directory,map_d]},
                'b - Find Orphans':
                     {'Function':FindOrphans,'Arg':directory},
                'c - Find Childless':

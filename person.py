@@ -51,11 +51,11 @@ class DirectoryPerson (Person):
         self.email = fields[5].strip('"')
         self.family_id = fields[6].strip('"')
         self.parents = fields[11].strip('"')
-        hub_name_list = fields[23].split(';')
+        hub_name_list = fields[24].split(';')
         self.hubs = hub_map_tools.ConvertHubStringListToIDList \
                         (hub_name_list, hub_map)
-        self.account_created = fields[27].strip('"')
-        self.account_updated = fields[28].strip('"')
+        self.account_created = fields[28].strip('"')
+        self.account_updated = fields[29].strip('"')
 
 class RosterPerson (Person):
     """This class extends the Person class with Roster-only fields."""
