@@ -3,6 +3,8 @@
 """
 import family
 
+NUM_ROSTER_FIELDS = 5
+
 def ReadRosterFromFile(file_name, hub_map):
     """ roster_tools.ReadRosterFromFile
     PURPOSE:
@@ -25,11 +27,20 @@ def ReadRosterFromFile(file_name, hub_map):
         open_file = open(file_name)
         raw_line = open_file.readline()
         if len(raw_line.split(',')) != 5:
-            raise RuntimeError, "This roster file only has %d fields, but 5 are expected." % len(raw_line.split(','))
+            raise RuntimeError, "This roster file has %d fields, but 5 are expected." % len(raw_line.split(','))
 
         for line in open_file:
             # process the line without the trailing '\r\n' that Excel adds
-            fields = line.strip('\n\r').split(',')
+            fields = line.strip('\n\r').strip('"').split(',')
+            
+            # MODIFY CODE START - 2017-09-02
+            if len(fields) > NUM_ROSTER_FIELDS:
+            	temp_field = fields[4].strip('"')+","+fields[5]
+            	if len(fields) > NUM_ROSTER_FIELDS+1:
+            		temp_field += ","+fields[6].strip('"')
+            	fields[4]=temp_field
+            # MODIFY CODE END
+
             if fields[0] == "" or fields[1] == "" or fields[2] == "" or \
                fields[3] == "" or (int(fields[2]) < 6 and fields[4] == ""):
                 print "Found line with missing required fields:",

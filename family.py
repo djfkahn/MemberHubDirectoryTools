@@ -74,6 +74,10 @@ class Family:
           or when the two objects share at least one adult and one child
         - returns False otherwise
         """
+        # Families cannot be the same, if either one of them contain orphans
+        if self.IsOrphan() or other.IsOrphan():
+        	return False
+        	
         adults_found = 0
         for other_adult in other.adults:
             if self.FindAdultInFamily(other_adult) != None:
@@ -138,7 +142,8 @@ class Family:
         ## not considered childless if the first adult is a teacher or staff,
         ## as indicated by membership in either the "Teachers" or "Staff" hubs
         if "Teachers" in self.adults[0].hubs or \
-           "Staff" in self.adults[0].hubs:
+           "Staff" in self.adults[0].hubs or \
+           "Volunteers" in self.adults[0].hubs:
             return False
 
         ## considered childless if none of the above conditions hold
@@ -149,6 +154,10 @@ class Family:
         return len(self.adults) == 0
 
     def FindAdultInFamily(self, to_find):
+        # Cannot find adult in a family if family is orphan
+        if self.IsOrphan():
+        	return None
+        	
         for adult in self.adults:
             if to_find.IsSame(adult):
                 return adult
