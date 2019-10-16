@@ -1,3 +1,11 @@
+# Omit the data files
+*.csv
+*.xlsx
+*.zip
+*.txt
+*.docx
+*.pdf
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
