@@ -21,7 +21,7 @@ def ParseFullName(full_name):
       1. <first1> <conjunction> <first2> <last>
       2. <first1> <last 1> <conjunction> <first 2> <last2>
       3. <first> <last>
-      where <first#> and <last#> may be multi-word names 
+      where <first#> and <last#> may be multi-word names
     """
 
     ## correct for known errors before proceeding
@@ -61,8 +61,8 @@ def ApplyErrata(full_name):
     - otherwise, the unmodified input full_name
     ASSUMPTIONS:
     - The run directory contains a file called 'roster_errata.csv' that contains
-      two columns of data:  left is the erroneous name field as it appears in the 
-      roster, and right is the corrected name field to match the directory.  The 
+      two columns of data:  left is the erroneous name field as it appears in the
+      roster, and right is the corrected name field to match the directory.  The
       columns are spearated by a pipe, "|".
     """
     errata_d = {}
@@ -76,6 +76,7 @@ def ApplyErrata(full_name):
         open_file.close()
 
     if full_name in errata_d.keys():
+        print "----------------------------------------------------------"
         print "Found Errata for: " + full_name
         print "Will use " + errata_d[full_name] + " instead."
         return errata_d[full_name]
@@ -87,7 +88,7 @@ def ParseType1Name(name_list):
     """name_parser.ParseType1Name
     Puprpose:  Parses a name field with the format <first1> <conjunction> <first2> <last>
     INPUTS:
-    name_list -- A list of names in format ['<first1>','<first2> <last>'] 
+    name_list -- A list of names in format ['<first1>','<first2> <last>']
     OUTPUTS:
     names     -- A list of name dictionaries.  Each name dictionary contains
                  a single person's first and last names.
@@ -102,7 +103,7 @@ def ParseType2Name(name_list):
     """name_parser.ParseType2Name
     Puprpose:  Parses a name field with the format <first1> <last1> <conjunction> <first2> <last2>
     INPUTS:
-    name_list -- A list of names in format ['<first1> <last1>','<first2> <last2>'] 
+    name_list -- A list of names in format ['<first1> <last1>','<first2> <last2>']
     OUTPUTS:
     names     -- A list of name dictionaries.  Each name dictionary contains
                  a single person's first and last names.
@@ -115,7 +116,7 @@ def ParseType3Name(full_name):
     """name_parser.ParseType3Name
     Puprpose:  Parses a name field with the format <first> <last>
     INPUTS:
-    name_list -- A list of names in format ['<first> <last>'] 
+    name_list -- A list of names in format ['<first> <last>']
     OUTPUTS:
     name      -- A list of a name dictionary containing the person's first and last names.
     """
@@ -140,7 +141,7 @@ def ParseType3Name(full_name):
         fname += " " + word.title()
 
     ## check that we have more than 1 word in our string
-    if len(name_parts) > 1: 
+    if len(name_parts) > 1:
         ## concat the last name
         lname = ""
         for i in range(last_processed+1,len(name_parts)):

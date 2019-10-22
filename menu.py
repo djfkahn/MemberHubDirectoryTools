@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Defines the main menu module for a program that inputs a MemberHub directory dump, 
+"""Defines the main menu module for a program that inputs a MemberHub directory dump,
 a school roster, and a hub map to perform analyses on the MemberHub directory.
 """
 
@@ -30,13 +30,13 @@ def FindMissingEmail(arg_list):
     no_email_person = []
     no_email_family = []
     partial_family = []
-    
+
     for entry_family in directory:
         no_email_count = 0
         for adult in entry_family.adults:
             adult_count += 1
             if adult.DoesNotListEmailAddress():
-            	no_email_person.append(adult)            		
+            	no_email_person.append(adult)
                 no_email_adult += 1
                 no_email_count += 1
                 for hub in adult.hubs:
@@ -80,7 +80,7 @@ def FindMissingEmail(arg_list):
                 print "%s %s <%s>," % (this_person.first_name, this_person.last_name, this_person.email)
             print "---------------"
     """
-    
+
 
 
 def FindOrphans(directory):
@@ -101,7 +101,7 @@ def FindOrphans(directory):
             print "The entry for this family does not identify parents:",
             entry_family.Print()
             orphan_count += 1
-            
+
     print "Found %d families without adults out of %d families" % \
           (orphan_count, family_count)
 
@@ -123,7 +123,7 @@ def FindChildless(directory):
             print "The entry for this family does not identify children:",
             entry_family.Print()
             childless_count += 1
-            
+
     print "Found %d families without children out of %d families" % \
           (childless_count, family_count)
 
@@ -147,7 +147,7 @@ def FindHubless(arg_list):
         for adult in directory_family.adults:
             if not hub_map_tools.IsAnyHubClassroomHub(map_d, adult.hubs):
                 hubless_adults.append(adult)
-        
+
         for child in directory_family.children:
             if not hub_map_tools.IsAnyHubClassroomHub(map_d, child.hubs):
                 hubless_children.append(child)
@@ -172,7 +172,7 @@ def FindAdultsWithoutAccounts(directory):
     - directory -- list of families from a MemberHub directory dump.
     OUTPUTS:
     Provides the option to write to standard output the list of adults who
-    do not have accounts, separated by whether their profile has an email 
+    do not have accounts, separated by whether their profile has an email
     address or not.
     """
     no_account_with_email    = []
@@ -218,7 +218,7 @@ def FindEntriless(arg_list):
     entriless = []
 
     for roster_family in roster:
-        
+
         for directory_family in directory:
             if directory_family.IsSameFamily(roster_family):
                 if directory_family.HasNewChildren(roster_family):
@@ -293,7 +293,7 @@ def MakeStudentImportFile(arg_list):
                         ##temp_child.hubs = [roster_child.hubs[0] + STUDENT_INDICATOR]
                         temp_child.hubs = "/"+roster_child.hubs[0] + STUDENT_INDICATOR+"/"
                         ## MODIFIED CODE END
-                        
+
                         ## add the temporary child object to the list of students
                         students.append(temp_child)
                     else:
@@ -343,6 +343,58 @@ def FindParentChildrenHubMismatches(directory):
         print "All adults are members of hubs to which all family children belong."
 
 
+def FindUnsedErrata(roster):
+    """menu.FindUnsedErrata
+    INPUTS:
+    - roster    -- passing roster, because something needs to be passed (not actually used)
+    OUTPUTS:
+    Prints the roster errata entries that are no longer found in the roster, and can be
+    removed.
+    ASSUMPTIONS:
+    None.
+    """
+    roster_name = raw_input('Enter name of roster comma-separated text file (press <enter> to use "roster.csv"): ')
+    if not roster_name:
+        roster_name = "roster.csv"
+
+    # First, read the roster file once to generate a list of adult names
+    try:
+        roster_file = open(roster_name)
+        raw_line = roster_file.readline()
+        if len(raw_line.split(',')) != 5:
+            raise RuntimeError, "This roster file has %d fields, but 5 are expected." % len(raw_line.split(','))
+
+        roster_names = []
+        for line in roster_file:
+            # process the line without the trailing '\r\n' that Excel adds
+            fields = line.strip('\n\r').strip('"').split(',')
+            roster_names.append([fields[3]])
+    finally:
+        roster_file.close()
+
+    # Next, read the roster errata file, and check each line that has not been commented out
+    try:
+        errata_file = open('roster_errata.csv')
+        line_number = 0
+        for line in errata_file:
+            line_number += 1
+            if line[0] != "#":
+                fields = line.split('|')
+                found  = False
+                for entry in roster_names:
+                    if fields[0] == entry[0]:
+                        found = True
+                        break
+
+                if not found:
+                    print "Did not find usage of the entry on line %d" % line_number
+                    print line
+                    print "--------------------------------------"
+    finally:
+        errata_file.close()
+
+
+
 def MakePrompt(choices):
     choice_list = sorted(choices)
     guts = '\n'.join(['(%s)%s' % (choice[0], choice[1:])
@@ -369,8 +421,10 @@ def RunMenu(directory, roster, map_d):
                'h - Make Student Hub Population Import File':
                     {'Function':MakeStudentImportFile,'Arg':[directory,roster]},
                'i - Find Adults/Children Hub Mismatches':
-                    {'Function':FindParentChildrenHubMismatches,'Arg':directory}}
-    
+                    {'Function':FindParentChildrenHubMismatches,'Arg':directory},
+               'j - Find Unused Errata':
+                    {'Function':FindUnsedErrata,'Arg':roster}}
+
     prompt = MakePrompt(choices)
 
     while True:
@@ -378,17 +432,17 @@ def RunMenu(directory, roster, map_d):
         if not raw_choice:
             break
         given_choice = raw_choice[0].lower()
-        for maybe_choice in choices: 
+        for maybe_choice in choices:
             if maybe_choice[0] == given_choice:
                 # The appropriate function is called
                 # using the dictionary value for the name
-                # of the function.    
+                # of the function.
                 choices[maybe_choice]['Function'](choices[maybe_choice]['Arg'])
                 break
         else:
             print '%s is not an acceptible choice.' % raw_choice
 
-        
+
 def main():
     map_d     = hub_map_tools.ReadHubMap()
     directory = directory_tools.ReadDirectory(map_d)
