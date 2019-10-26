@@ -15,7 +15,7 @@ class Roster:
         # Initialize the roster table to an empty set
         self.table            = []
         # Ask whether to show errors, and then hide the errata output as the opposite of that answer
-        show_errors           = raw_input('Print corrected roster errors to the screen? (press <enter> for "no", press "y" for "yes"): ')
+        show_errors           = input("Print corrected roster errors to the screen? (press <enter> for \"no\", press \"y\" for \"yes\"): ")
         self.hideErrataOutput = not show_errors
         # Initialize the errata dictionary to the contents of 'roster_errata.csv'
         self.errata           = {}
@@ -57,9 +57,9 @@ class Roster:
         """
         if full_name in self.errata.keys():
             if not self.hideErrataOutput:
-                print "-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
-                print "Found Errata for: " + full_name
-                print "Will use " + self.errata[full_name] + " instead."
+                print("-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-")
+                print("Found Errata for: " + full_name)
+                print("Will use " + self.errata[full_name] + " instead.")
             return self.errata[full_name]
 
         return full_name
