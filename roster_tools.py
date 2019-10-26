@@ -2,6 +2,7 @@
 """This program inputs a MemberHub directory dump, and analyzes it.
 """
 import family
+import roster
 
 NUM_ROSTER_FIELDS = 5
 
@@ -20,26 +21,24 @@ def ReadRosterFromFile(file_name, hub_map):
     ASSUMPTIONS:
     1. First row of the file is the column headers...not a member of the roster.
     """
-    roster        = []
-    student_count = 0
-
     try:
         open_file = open(file_name)
         raw_line = open_file.readline()
         if len(raw_line.split(',')) != 5:
             raise RuntimeError, "This roster file has %d fields, but 5 are expected." % len(raw_line.split(','))
 
+        rosterC       = roster.Roster()
+        student_count = 0
+
         for line in open_file:
             # process the line without the trailing '\r\n' that Excel adds
             fields = line.strip('\n\r').strip('"').split(',')
-            
-            # MODIFY CODE START - 2017-09-02
+
             if len(fields) > NUM_ROSTER_FIELDS:
             	temp_field = fields[4].strip('"')+","+fields[5]
             	if len(fields) > NUM_ROSTER_FIELDS+1:
             		temp_field += ","+fields[6].strip('"')
             	fields[4]=temp_field
-            # MODIFY CODE END
 
             if fields[0] == "" or fields[1] == "" or fields[2] == "" or \
                fields[3] == "" or (int(fields[2]) < 6 and fields[4] == ""):
@@ -51,23 +50,25 @@ def ReadRosterFromFile(file_name, hub_map):
             student_count += 1
 
             new_family = family.Family()
-            new_family.CreateFromRoster(fields, hub_map)
+            new_family.CreateFromRoster(fields  = fields,
+                                        hub_map = hub_map,
+                                        rosterC = rosterC)
 
             # if new_family is the same as a family already in the roster, then combine
             # families.  Otherwise, append new_family at the end of the roster.
-            for roster_entry in roster:
+            for roster_entry in rosterC.GetRoster():
                 if roster_entry.IsSameFamily(new_family):
                     roster_entry.CombineWith(new_family)
                     break
             else:
-                roster.append(new_family)
+                rosterC.append(new_family)
 
-        print "%d students processed %d families." % (student_count, len(roster))
+        print "%d students processed %d families." % (student_count, len(rosterC))
 
     finally:
         open_file.close()
-        
-    return roster
+
+    return rosterC.GetRoster()
 
 
 def ReadRoster(hub_map):
@@ -88,24 +89,24 @@ def ReadRoster(hub_map):
     return ReadRosterFromFile(file_name, hub_map)
 
 
-def PrintEntries(roster):
+def PrintEntries(testRoster):
     while True:
         end_entry = int(raw_input('Enter entry at which to stop printing (enter 0 to stop): '))
         if end_entry == 0:
             break
-        elif end_entry > len(roster):
-            end_entry = len(roster)
+        elif end_entry > len(testRoster):
+            end_entry = len(testRoster)
 
         start_entry = int(raw_input('Enter entry from which to start printing: '))
         if start_entry < 0:
             start_entry += end_entry
-            
-        for x in roster[start_entry:end_entry]:
+
+        for x in testRoster[start_entry:end_entry]:
             x.Print()
 
 
 def main():
-    
+
     test_roster_files = \
         {"roster_tools_tests/test_roster_general.csv": \
             {"error_expected":False,"number_read":2}, \
@@ -137,8 +138,6 @@ def main():
             else:
                 print "where error was NOT EXPECTED."
 
-##    roster = ReadRoster()
-##    PrintEntries(roster)
 
 if __name__ == '__main__':
     main()

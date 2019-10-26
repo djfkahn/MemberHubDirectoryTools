@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
+import roster
 
-def ParseFullName(full_name):
+def ParseFullName(full_name, rosterC):
     """name_parser.ParseFullName
     Purpose:  Advanced name field Parseting that recognizes most multi-word last
               names.
@@ -25,7 +26,7 @@ def ParseFullName(full_name):
     """
 
     ## correct for known errors before proceeding
-    full_name = ApplyErrata(full_name)
+    full_name = rosterC.ApplyErrata(full_name)
 
     ## separate the name field based on the conjunction
     conjunction = None
@@ -51,37 +52,38 @@ def ParseFullName(full_name):
 
     return answer
 
-def ApplyErrata(full_name):
-    """name_parser.ApplyErrata
-    Purpose:  Replaces roster name fields with known errors with the correct name fields.
-    INPUTS:
-    - full_name -- The raw parent name field from the roster.
-    OUTPUTS:
-    - corrected full_name if this fields is known to be in error
-    - otherwise, the unmodified input full_name
-    ASSUMPTIONS:
-    - The run directory contains a file called 'roster_errata.csv' that contains
-      two columns of data:  left is the erroneous name field as it appears in the
-      roster, and right is the corrected name field to match the directory.  The
-      columns are spearated by a pipe, "|".
-    """
-    errata_d = {}
-    try:
-        open_file = open('roster_errata.csv')
-        for line in open_file:
-            if line[0] != "#":
-                fields = line.split('|')
-                errata_d.update({fields[0]:fields[-1].strip("\r\n")})
-    finally:
-        open_file.close()
-
-    if full_name in errata_d.keys():
-        print "----------------------------------------------------------"
-        print "Found Errata for: " + full_name
-        print "Will use " + errata_d[full_name] + " instead."
-        return errata_d[full_name]
-
-    return full_name
+# def ApplyErrata(full_name, hideErrataOutput):
+#     """name_parser.ApplyErrata
+#     Purpose:  Replaces roster name fields with known errors with the correct name fields.
+#     INPUTS:
+#     - full_name -- The raw parent name field from the roster.
+#     OUTPUTS:
+#     - corrected full_name if this fields is known to be in error
+#     - otherwise, the unmodified input full_name
+#     ASSUMPTIONS:
+#     - The run directory contains a file called 'roster_errata.csv' that contains
+#       two columns of data:  left is the erroneous name field as it appears in the
+#       roster, and right is the corrected name field to match the directory.  The
+#       columns are spearated by a pipe, "|".
+#     """
+#     errata_d = {}
+#     try:
+#         open_file = open('roster_errata.csv')
+#         for line in open_file:
+#             if line[0] != "#":
+#                 fields = line.split('|')
+#                 errata_d.update({fields[0]:fields[-1].strip("\r\n")})
+#     finally:
+#         open_file.close()
+#
+#     if full_name in errata_d.keys():
+#         if not hideErrataOutput:
+#             print "----------------------------------------------------------"
+#             print "Found Errata for: " + full_name
+#             print "Will use " + errata_d[full_name] + " instead."
+#         return errata_d[full_name]
+#
+#     return full_name
 
 
 def ParseType1Name(name_list):
@@ -177,8 +179,10 @@ def main():
                   "Joe Schmoe and Betty Davis",
                   "Joan and Marc Edward Vlasic",
                   "Marc Edward and Joan Vlasic") ## TBD - expect this one will not parse correctly
+
+    testRosterC = roster.Roster()
     for name in test_names:
-        answer = ParseFullName(name)
+        answer = ParseFullName(name, testRosterC)
         print answer
 
 if __name__ == '__main__':

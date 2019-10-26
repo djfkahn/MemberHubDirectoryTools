@@ -11,16 +11,16 @@ class Family:
     adults   - A list of Person objects representing the family's adults
     children - A list of Person objects representing the family's children
     """
-    
+
     def __init__(self):
         self.adults   = []
         self.children = []
-    
-    def AddAdultsFromCombinedField(self, teacher, name_field, hub_map):
+
+    def AddAdultsFromCombinedField(self, teacher, name_field, hub_map, rosterC):
         parent_count = 1
         parent_num = ""
 
-        parent_names = name_parser.ParseFullName(name_field)
+        parent_names = name_parser.ParseFullName(name_field, rosterC)
         for parent in parent_names:
             new_adult = person.RosterPerson()
             new_adult.SetFromRoster(last_name       = parent['last'],
@@ -33,7 +33,7 @@ class Family:
             parent_num = str(parent_count)
 
 
-    def CreateFromRoster(self, fields, hub_map):
+    def CreateFromRoster(self, fields, hub_map, rosterC):
         # for elementary school (< 6th grade) teacher name is retained
         # for middle school, teacher name is replaced with grade level
         if int(fields[2]) < 6:
@@ -44,7 +44,8 @@ class Family:
         # add adults to the family
         self.AddAdultsFromCombinedField(teacher    = teacher,
                                         name_field = fields[3],
-                                        hub_map    = hub_map)
+                                        hub_map    = hub_map,
+                                        rosterC    = rosterC)
 
         # add the child to the family
         new_child = person.RosterPerson()
@@ -59,12 +60,12 @@ class Family:
         new_adult = person.DirectoryPerson()
         new_adult.SetFromDirectory(fields, hub_map)
         self.adults.append(new_adult)
-    
+
     def AddChildFromDirectory(self, fields, hub_map):
         new_child = person.DirectoryPerson()
         new_child.SetFromDirectory(fields, hub_map)
         self.children.append(new_child)
-    
+
     def IsSameFamily(self, other):
         """Family.IsSameFamily
         INPUTS:
@@ -77,7 +78,7 @@ class Family:
         # Families cannot be the same, if either one of them contain orphans
         if self.IsOrphan() or other.IsOrphan():
         	return False
-        	
+
         adults_found = 0
         for other_adult in other.adults:
             if self.FindAdultInFamily(other_adult) != None:
@@ -97,7 +98,7 @@ class Family:
     def HasNewChildren(self, other):
         """Family.HasNewChildren
         INPUTS:
-        - other -- 
+        - other --
         - other -- the family object to compare to
         OUTPUTS:
         - returns True if any child in the other family is not found in this family
@@ -114,7 +115,7 @@ class Family:
     def FormFamilyWithNewChildren(self, directory_family, roster_family):
         # copy the adults from the directory, because they include the person_ids
         self.adults = directory_family.adults
-        
+
         # copy only the new children
         for roster_child in roster_family.children:
             # if the roster_child cannot be found in this family ...
@@ -149,7 +150,7 @@ class Family:
         ## considered childless if none of the above conditions hold
         return True
 
-    
+
     def IsOrphan(self):
         return len(self.adults) == 0
 
@@ -157,7 +158,7 @@ class Family:
         # Cannot find adult in a family if family is orphan
         if self.IsOrphan():
         	return None
-        	
+
         for adult in self.adults:
             if to_find.IsSame(adult):
                 return adult
@@ -168,7 +169,7 @@ class Family:
             if to_find.IsSame(child):
                 return child
         return None
-        
+
     def FindPersonInFamily(self, to_find):
         try_person = self.FindAdultInFamily(to_find)
         if try_person == None:
