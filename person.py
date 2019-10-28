@@ -6,7 +6,7 @@ import hub_map_tools
 
 class Person:
     """Class Person
-    This class defines the characteristics that every Person in this project must possess.  
+    This class defines the characteristics that every Person in this project must possess.
     Several methods are defined for the parent class.
     ATTRIBUTES:
     last_name       - A string
@@ -35,14 +35,14 @@ class Person:
         return self.email == ""
 
     def Print(self):
-        print "%s %s" % (self.first_name, self.last_name)
+        print("%s %s" % (self.first_name, self.last_name))
 
 class DirectoryPerson (Person):
     """This class extends the Person class with Directory-only fields."""
 
     def SetFromDirectory (self, fields, hub_map):
-        self.Set(last_name       = fields[1].strip('"'), 
-                 first_name      = fields[2].strip('"'), 
+        self.Set(last_name       = fields[1].strip('"'),
+                 first_name      = fields[2].strip('"'),
                  family_relation = fields[7].strip('"'))
 
         self.person_id = fields[0].strip('"')
@@ -61,8 +61,8 @@ class RosterPerson (Person):
     """This class extends the Person class with Roster-only fields."""
 
     def SetFromRoster(self, last_name, first_name, teacher, family_relation, hub_map):
-        self.Set(last_name       = last_name, 
-                 first_name      = first_name, 
+        self.Set(last_name       = last_name,
+                 first_name      = first_name,
                  family_relation = family_relation)
         self.hubs = hub_map_tools.ConvertHubStringListToIDList \
                         ([teacher], hub_map)

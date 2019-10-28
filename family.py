@@ -178,9 +178,9 @@ class Family:
         return try_person
 
     def Print(self):
-        print "Adults:"
+        print("Adults:")
         for adult in self.adults:
             adult.Print()
-        print "Children:"
+        print("Children:")
         for child in self.children:
             child.Print()

@@ -25,7 +25,7 @@ def ReadRosterFromFile(file_name, hub_map):
         open_file = open(file_name)
         raw_line = open_file.readline()
         if len(raw_line.split(',')) != 5:
-            raise RuntimeError, "This roster file has %d fields, but 5 are expected." % len(raw_line.split(','))
+            raise RuntimeError("This roster file has %d fields, but 5 are expected." % len(raw_line.split(',')))
 
         rosterC       = roster.Roster()
         student_count = 0
@@ -42,8 +42,7 @@ def ReadRosterFromFile(file_name, hub_map):
 
             if fields[0] == "" or fields[1] == "" or fields[2] == "" or \
                fields[3] == "" or (int(fields[2]) < 6 and fields[4] == ""):
-                print "Found line with missing required fields:",
-                print fields
+                print("Found line with missing required fields:", fields)
                 continue
 
             # each line read represents one student
@@ -63,7 +62,7 @@ def ReadRosterFromFile(file_name, hub_map):
             else:
                 rosterC.append(new_family)
 
-        print "%d students processed %d families." % (student_count, len(rosterC))
+        print("%d students processed %d families." % (student_count, len(rosterC)))
 
     finally:
         open_file.close()
@@ -82,7 +81,7 @@ def ReadRoster(hub_map):
     ASSUMPTIONS:
     none
     """
-    file_name = raw_input('Enter name of roster comma-separated text file (press <enter> to use "roster.csv"): ')
+    file_name = input("Enter name of roster comma-separated text file (press <enter> to use \"roster.csv\"): ")
     if not file_name:
         file_name = "roster.csv"
 
@@ -91,13 +90,13 @@ def ReadRoster(hub_map):
 
 def PrintEntries(testRoster):
     while True:
-        end_entry = int(raw_input('Enter entry at which to stop printing (enter 0 to stop): '))
+        end_entry = int(input("Enter entry at which to stop printing (enter 0 to stop): "))
         if end_entry == 0:
             break
         elif end_entry > len(testRoster):
             end_entry = len(testRoster)
 
-        start_entry = int(raw_input('Enter entry from which to start printing: '))
+        start_entry = int(input("Enter entry from which to start printing: "))
         if start_entry < 0:
             start_entry += end_entry
 
@@ -119,24 +118,24 @@ def main():
 
     for roster_file in test_roster_files.keys():
         try:
-            print "+++++++++++++++++++++++++++++++++++++++++++++++++++"
-            print "Testing roster file " + roster_file + "."
+            print("+++++++++++++++++++++++++++++++++++++++++++++++++++")
+            print("Testing roster file " + roster_file + ".")
             test_roster = ReadRosterFromFile(roster_file,{})
-            print "Processed roster file successfully",
+            print("Processed roster file successfully",)
             if test_roster_files[roster_file]["error_expected"]:
-                print "which NOT EXPECTED."
+                print("which NOT EXPECTED.")
             else:
-                print "as expected."
+                print("as expected.")
                 if len(test_roster) == test_roster_files[roster_file]["number_read"]:
-                    print "The expected number of lines were processed."
+                    print("The expected number of lines were processed.")
                 else:
-                    print "UNEXPECTED number of lines processed."
+                    print("UNEXPECTED number of lines processed.")
         except:
-            print "Error reading roster file " + roster_file,
+            print("Error reading roster file " + roster_file,)
             if test_roster_files[roster_file]["error_expected"]:
-                print "as expected."
+                print("as expected.")
             else:
-                print "where error was NOT EXPECTED."
+                print("where error was NOT EXPECTED.")
 
 
 if __name__ == '__main__':
