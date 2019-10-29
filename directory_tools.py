@@ -2,12 +2,13 @@
 """This module contains the tools to injest a MemberHub directory dump into
 a dictionary, and display portions of the dictionary for analysis.
 """
-
+import csv
+import os
 import family
 
 def PrintErrorMessage(fields, error_text):
     print(error_text, "Line will not be processed.")
-    print("The following fields were read on this line:", fields)
+    print("The following fields were read on this row:", fields)
 
 
 def ReadDirectoryFromFile(file_name, hub_map):
@@ -60,34 +61,32 @@ def ReadDirectoryFromFile(file_name, hub_map):
     """
 
     directory  = []
-    lines_read = lines_processed = families_created = 0
+    rows_read = rows_processed = families_created = 0
     new_family = False
     family_id  = 0
 
-    try:
-        open_file = open(file_name)
-        title_line = open_file.readline()
-        fields = title_line.split(',')
-        if not len(fields) == 31:
-            PrintErrorMessage \
-                (fields, "The file %s does not contain 31 fields, and cannot be parsed." % file_name)
-            raise RuntimeError("This directory file has %d fields, but 31 are expected." % len(fields))
+    with open(file_name) as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
 
-        for line in open_file:
-            lines_read += 1
-            fields = line.split(',')
+        for fields in csv_reader:
+            # Skip the first row
+            if rows_read == 0:
+                rows_read += 1
+                continue
+
+            rows_read += 1
             if not len(fields) == 31:
                 PrintErrorMessage \
-                    (fields, "Found line with incorrect number of fields.")
+                    (fields, "Found row with incorrect number of fields.")
                 continue
 
             if fields[1] == "" or fields[2] == "" or \
                fields[0] == "" or fields[7] == "":
                 PrintErrorMessage \
-                    (fields, "Found a line with missing required fields.")
+                    (fields, "Found a row with missing required fields.")
                 continue
 
-            lines_processed += 1
+            rows_processed += 1
             # create a new family every time a new family ID is found
             if fields[6] != family_id:
                 # to start processing a new family, append the family previously worked on
@@ -110,24 +109,38 @@ def ReadDirectoryFromFile(file_name, hub_map):
                     (fields, "Found entry in directory that is neither an adult nor a child.")
 
         else:
-            # once the last line is read, append the last family processed to the
+            # once the last row is read, append the last family processed to the
             # directory list
             if new_family:
                 directory.append(new_family)
+            # remove one from the rows read to take away the header row
+            rows_read -= 1
 
-        print("Read %d lines, processed %d lines, and created %d families from directory file" % \
-            (lines_read, lines_processed, families_created))
 
-    finally:
-        open_file.close()
+        print("Read %d rows, processed %d rows, and created %d families from directory file" % \
+            (rows_read, rows_processed, families_created))
 
     return directory
 
 
 def ReadDirectory(hub_map):
-    file_name = input("Enter name of directory dump file (press <enter> to use \"dump.csv\"): ")
-    if not file_name:
-        file_name = "dump.csv"
+    print ("These are the potential directory files:")
+    files = [file for file in os.listdir(".") \
+                if (file.lower().startswith('memberhub_download_') and
+                    file.lower().endswith('.csv'))]
+    files.sort(key=os.path.getmtime)
+    files = sorted(files,key=os.path.getmtime, reverse=True)
+
+    index = 1
+    for file in sorted(files,key=os.path.getmtime, reverse=True):
+        print("%d) %s" % (index, file))
+        index += 1
+
+    file_number = input("Enter list number of file or press <enter> to use '" + files[0] + "':")
+    if not file_number:
+        file_name = files[0]
+    else:
+        file_name = files[file_number-1]
 
     return ReadDirectoryFromFile(file_name, hub_map)
 
@@ -173,9 +186,9 @@ def main():
             else:
                 print("as expected.")
                 if len(test_directory) == test_directory_files[directory_file]["number_read"]:
-                    print("The expected number of lines were processed.")
+                    print("The expected number of rows were processed.")
                 else:
-                    print("UNEXPECTED number of lines processed.")
+                    print("UNEXPECTED number of rows processed.")
         except:
             print("Error reading directory file " + directory_file,)
             if test_directory_files[directory_file]["error_expected"]:
