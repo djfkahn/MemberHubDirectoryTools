@@ -3,6 +3,8 @@
 """
 import family
 import roster
+import os
+from openpyxl import load_workbook
 
 NUM_ROSTER_FIELDS = 5
 
@@ -21,51 +23,42 @@ def ReadRosterFromFile(file_name, hub_map):
     ASSUMPTIONS:
     1. First row of the file is the column headers...not a member of the roster.
     """
-    try:
-        open_file = open(file_name)
-        raw_line = open_file.readline()
-        if len(raw_line.split(',')) != 5:
-            raise RuntimeError("This roster file has %d fields, but 5 are expected." % len(raw_line.split(',')))
+    wb = load_workbook(file_name)
+    ws = wb.active
 
-        rosterC       = roster.Roster()
-        student_count = 0
+    rosterC       = roster.Roster()
+    student_count = 0
 
-        for line in open_file:
-            # process the line without the trailing '\r\n' that Excel adds
-            fields = line.strip('\n\r').strip('"').split(',')
+    for fields in ws.values:
 
-            if len(fields) > NUM_ROSTER_FIELDS:
-            	temp_field = fields[4].strip('"')+","+fields[5]
-            	if len(fields) > NUM_ROSTER_FIELDS+1:
-            		temp_field += ","+fields[6].strip('"')
-            	fields[4]=temp_field
-
-            if fields[0] == "" or fields[1] == "" or fields[2] == "" or \
-               fields[3] == "" or (int(fields[2]) < 6 and fields[4] == ""):
-                print("Found line with missing required fields:", fields)
-                continue
-
-            # each line read represents one student
+        # Skip the first row
+        if student_count == 0:
             student_count += 1
+            continue
 
-            new_family = family.Family()
-            new_family.CreateFromRoster(fields  = fields,
-                                        hub_map = hub_map,
-                                        rosterC = rosterC)
+        if fields[0] == "" or fields[1] == "" or fields[2] == "" or \
+           fields[3] == "" or (int(fields[2]) < 6 and fields[4] == ""):
+            print("Found row with missing required fields:", fields)
+            continue
 
-            # if new_family is the same as a family already in the roster, then combine
-            # families.  Otherwise, append new_family at the end of the roster.
-            for roster_entry in rosterC.GetRoster():
-                if roster_entry.IsSameFamily(new_family):
-                    roster_entry.CombineWith(new_family)
-                    break
-            else:
-                rosterC.append(new_family)
+        # each row represents one student
+        student_count += 1
 
-        print("%d students processed %d families." % (student_count, len(rosterC)))
+        new_family = family.Family()
+        new_family.CreateFromRoster(fields  = fields,
+                                    hub_map = hub_map,
+                                    rosterC = rosterC)
 
-    finally:
-        open_file.close()
+        # if new_family is the same as a family already in the roster, then combine
+        # families.  Otherwise, append new_family at the end of the roster.
+        for roster_entry in rosterC.GetRoster():
+            if roster_entry.IsSameFamily(new_family):
+                roster_entry.CombineWith(new_family)
+                break
+        else:
+            rosterC.append(new_family)
+
+    print("%d students processed %d families." % (student_count, len(rosterC)))
 
     return rosterC.GetRoster()
 
@@ -81,9 +74,22 @@ def ReadRoster(hub_map):
     ASSUMPTIONS:
     none
     """
-    file_name = input("Enter name of roster comma-separated text file (press <enter> to use \"roster.csv\"): ")
-    if not file_name:
-        file_name = "roster.csv"
+
+    print ("These are the potential roster files:")
+    files = [file for file in os.listdir(".") if (file.lower().endswith('.xlsx'))]
+    files.sort(key=os.path.getmtime)
+    files = sorted(files,key=os.path.getmtime, reverse=True)
+
+    index = 1
+    for file in sorted(files,key=os.path.getmtime, reverse=True):
+        print("%d) %s" % (index, file))
+        index += 1
+
+    file_number = input("Enter list number of file or press <enter> to use '" + files[0] + "':")
+    if not file_number:
+        file_name = files[0]
+    else:
+        file_name = files[file_number-1]
 
     return ReadRosterFromFile(file_name, hub_map)
 

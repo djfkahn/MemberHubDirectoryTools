@@ -18,9 +18,10 @@ def ConvertHubStringListToIDList(hub_name_list, map_d):
 
     for hub_name in hub_name_list:
         # strip off quotes
-        hub_name = hub_name.strip('"')
-        if len(hub_name) == 0:
-            continue
+        if isinstance(hub_name, str):
+            hub_name = hub_name.strip('"')
+            if len(hub_name) == 0:
+                continue
 
         # check if the hub name is among map keys
         if hub_name in map_d.keys():
