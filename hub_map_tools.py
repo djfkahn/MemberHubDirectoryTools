@@ -3,6 +3,8 @@
 It assumes the presence of a file called 'hub_map.csv' in the directory from
 which the program is executed.
 """
+import csv
+import os
 
 def ConvertHubStringListToIDList(hub_name_list, map_d):
     """hub_map_tools.ConvertHubStringListToIDList
@@ -93,14 +95,14 @@ def ReadHubMapFromFile(file_name):
     """
     map_d = {}
 
-    try:
-        open_file = open(file_name)
+    with open(file_name) as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter='|')
 
-        for line in open_file:
-            if line[0] == "#":
+        for fields in csv_reader:
+            ## skip line if the first character is a comment
+            if fields[0][0] == "#":
                 continue
-            ## be sure to strip the '\r\n' that Excel adds at the end of lines
-            fields = line.strip('\r\n').split('|')
+            ## skip lines that do not have the right number of fields
             if len(fields) < 2:
                 PrintReadErrorMessage \
                     (line, "Not enough fields found on this line.")
@@ -113,15 +115,26 @@ def ReadHubMapFromFile(file_name):
 
             map_d.update({fields[0]:fields[1]})
 
-    finally:
-        open_file.close()
-
     return map_d
 
 def ReadHubMap():
-    file_name = input("Enter name of hub map file (press <enter> to use \"hub_map.csv\"): ")
-    if not file_name:
-        file_name = "hub_map.csv"
+    print ("These are the potential hub map files:")
+    files = [file for file in os.listdir(".") \
+                if (file.lower().startswith('hub') and
+                    file.lower().endswith('.csv'))]
+    files.sort(key=os.path.getmtime)
+    files = sorted(files,key=os.path.getmtime, reverse=True)
+
+    index = 1
+    for file in sorted(files,key=os.path.getmtime, reverse=True):
+        print("%d) %s" % (index, file))
+        index += 1
+
+    file_number = input("Enter list number of file or press <enter> to use '" + files[0] + "':")
+    if not file_number:
+        file_name = files[0]
+    else:
+        file_name = files[file_number-1]
 
     return ReadHubMapFromFile(file_name)
 
