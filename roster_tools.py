@@ -68,30 +68,35 @@ def ReadRoster(hub_map):
     PURPOSE:
     Prompts the user for roster file name and proceeds to read the file.
     INPUT:
-    - none
+    - hub_map   -- mapping of teacher names to hub numbers
     OUTPUTS:
     - roster    -- list of families extracted from the roster
     ASSUMPTIONS:
-    none
+    - All the candidate rosters reside in a folder called "Roster" under the
+      run directory.
+    - All candidate rosters are Microsoft Excel files.
     """
-
     print ("These are the potential roster files:")
-    files = [file for file in os.listdir(".") if (file.lower().endswith('.xlsx'))]
-    files.sort(key=os.path.getmtime)
-    files = sorted(files,key=os.path.getmtime, reverse=True)
+    file_path = os.path.abspath("./Roster/")
+    with os.scandir(file_path) as raw_files:
+        files = [file for file in raw_files \
+                    if not(file.name.startswith('~')) and (file.name.endswith('.xlsx'))]
+        files.sort(key=lambda x: os.stat(x).st_mtime, reverse=True)
 
-    index = 1
-    for file in sorted(files,key=os.path.getmtime, reverse=True):
-        print("%d) %s" % (index, file))
-        index += 1
+        index = 0
+        for file in files:
+            index += 1
+            print("%d) %s" % (index, file.name))
 
-    file_number = input("Enter list number of file or press <enter> to use '" + files[0] + "':")
-    if not file_number:
-        file_name = files[0]
-    else:
-        file_name = files[file_number-1]
+        file_number = input("Enter list number of file or press <enter> to use '" + files[0].name + "':")
+        if not file_number:
+            return ReadRosterFromFile(file_path + "/" +files[0].name, hub_map)
+        elif 0 < int(file_number) and int(file_number) <= index:
+            return ReadRosterFromFile(file_path + "/" + files[int(file_number)-1].name, hub_map)
+        else:
+            print("The selection made is out of range.  Please try again.")
+            ReadRoster(hub_map)
 
-    return ReadRosterFromFile(file_name, hub_map)
 
 
 def PrintEntries(testRoster):
