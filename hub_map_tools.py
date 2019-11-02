@@ -33,37 +33,12 @@ def ConvertHubStringListToIDList(hub_name_list, map_d):
 
     return hub_id_list
 
+
+
 def ConvertToHubIDList(hub_name_list):
     return ConvertHubStringListToIDList(hub_name_list, ReadHubMap())
 
 
-def ConvertHubIDListToStringList(hub_id_list, map_d):
-    """hub_map_tools.ConvertHubIDListToStringList
-    INPUTS:
-    - hub_id_list   -- list of hub IDs
-    - map_d         -- dictionary that maps hub/teacher names to hub IDs
-    OUTPUTS:
-    - hub_name_list -- list of hub names corresponding to the hub_name_list.
-                       if a corrsponding ID is not in the map, the original
-                       hub name is returned in that position.
-    """
-"""
-    hub_name_list = []
-
-    if IsAnyHubClassroomHub(map_d, hub_id_list):
-	    for hub_id in hub_id_list:
-    	    # check if the hub name is among map keys
-        	if IsInClassroomHub(map_d, hub_id):
-        		temp_list = map_d.values().find(hub_id)
-        		hub_name_list.append(temp_list.min())
-
-    return hub_name_list
-"""
-
-"""
-def ConvertToHubStringList(hub_name_list):
-    return ConvertHubIDListToStringList(hub_name_list, ReadHubMap())
-"""
 
 def CreateEmptyHubDictionary(raw_map):
 	raw_values = raw_map.values()
@@ -141,12 +116,11 @@ def IsInClassroomHub(map_d, hub_id):
     ASSUMPTIONS:
     None
     """
-    ## MODIFIED CODE BEGIN - 2017-09-06
     return hub_id in map_d.values() or \
            hub_id == "Teachers" or \
            hub_id == "Staff" or \
            hub_id == "Volunteers"
-    ## MODIFIED CODE END
+
 
 def IsAnyHubClassroomHub(map_d, hubs):
     """hub_map_tools.IsAnyHubClassroomHub(map_d, hub_field)
@@ -164,6 +138,26 @@ def IsAnyHubClassroomHub(map_d, hubs):
             return True
 
     return False
+
+
+def IsInMultipleClassroomHubs(map_d, hubs):
+    """hub_map_tools.IsInMultipleClassroomHubs
+    INPUTS:
+    - map_d     -- dictionary containing the map of teachers to HUB IDs
+    - hubs      -- list of hubs to check against classroom hubs
+    OUTPUTS:
+    - True      -- if more than one hub in the hubs list qualify as classroom hub
+    - False     -- otherwise
+    ASSUMPTIONS:
+    If hub_field is not empty, its hubs are separated by semi-colons (";").
+    """
+    count = 0
+    for hub in hubs:
+        if IsInClassroomHub(map_d, hub):
+            count += 1
+
+    return count > 1
+
 
 def PrintMap(map_d):
     print(map_d)
