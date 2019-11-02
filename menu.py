@@ -9,6 +9,8 @@ import hub_map_tools
 import import_file_tools
 import family
 import person
+from openpyxl import load_workbook
+import csv
 
 STUDENT_INDICATOR = "+SA"
 
@@ -337,47 +339,34 @@ def FindUnsedErrata(roster):
     Prints the roster errata entries that are no longer found in the roster, and can be
     removed.
     ASSUMPTIONS:
-    None.
+    - Assumes the roster errata is stored in a file called 'roster_errata.csv'.
     """
-    roster_name = input("Enter name of roster comma-separated text file (press <enter> to use \"roster.csv\"): ")
-    if not roster_name:
-        roster_name = "roster.csv"
-
     # First, read the roster file once to generate a list of adult names
-    try:
-        roster_file = open(roster_name)
-        raw_line = roster_file.readline()
-        if len(raw_line.split(',')) != 5:
-            raise RuntimeError("This roster file has %d fields, but 5 are expected." % len(raw_line.split(',')))
-
-        roster_names = []
-        for line in roster_file:
-            # process the line without the trailing '\r\n' that Excel adds
-            fields = line.strip('\n\r').strip('"').split(',')
-            roster_names.append([fields[3]])
-    finally:
-        roster_file.close()
+    roster_adults = []
+    roster_name   = roster_tools.GetRosterFileName()
+    wb            = load_workbook(roster_name)
+    ws            = wb.active
+    for fields in ws.values:
+        roster_adults.append([fields[3]])
 
     # Next, read the roster errata file, and check each line that has not been commented out
-    try:
-        errata_file = open('roster_errata.csv')
-        line_number = 0
-        for line in errata_file:
+    line_number = 0
+    num_unused  = 0
+    with open('roster_errata.csv') as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter='|')
+        for fields in csv_reader:
             line_number += 1
-            if line[0] != "#":
-                fields = line.split('|')
-                found  = False
-                for entry in roster_names:
-                    if fields[0] == entry[0]:
-                        found = True
-                        break
+            ## skip line if the first character is a comment
+            if fields[0][0] == "#":
+                continue
+            if not([fields[0]] in roster_adults):
+                print("Did not find usage of the entry on line %d" % line_number)
+                print(fields)
+                print("--------------------------------------")
+                num_unused += 1
 
-                if not found:
-                    print("Did not find usage of the entry on line %d" % line_number)
-                    print(line)
-                    print("--------------------------------------")
-    finally:
-        errata_file.close()
+    if num_unused == 0:
+        print("No unused errata found.")
 
 
 
