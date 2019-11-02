@@ -63,35 +63,54 @@ def ReadRosterFromFile(file_name, hub_map):
     return rosterC.GetRoster()
 
 
+def GetRosterFileName():
+    """ roster_tools.GetRosterFileName
+    PURPOSE:
+    Gives the user a list of possible roster files, and processes their selection.
+    INPUTS:
+    None
+    OUTPUTS:
+    - file_name - the selected roster file name
+    ASSUMPTIONS:
+    - Assumes the candidate roster files are stored in a subfolder called 'Roster'
+    """
+    print ("These are the potential roster files:")
+    file_path = os.path.abspath("./Roster/")
+    with os.scandir(file_path) as raw_files:
+        files = [file for file in raw_files \
+                    if not(file.name.startswith('~')) and (file.name.endswith('.xlsx'))]
+        files.sort(key=lambda x: os.stat(x).st_mtime, reverse=True)
+
+        max_index = 0
+        file_number = 1
+        while int(file_number) >= max_index:
+            for file in files:
+                max_index += 1
+                print("%d) %s" % (max_index, file.name))
+
+            file_number = input("Enter list number of file or press <enter> to use '" + files[0].name + "':")
+            if not file_number:
+                return file_path + "/" +files[0].name
+            elif 0 < int(file_number) and int(file_number) <= max_index:
+                return file_path + "/" + files[int(file_number)-1].name
+            else:
+                max_index = 0
+                print("The selection made is out of range.  Please try again.")
+
 def ReadRoster(hub_map):
     """ roster_tools.ReadRoster
     PURPOSE:
     Prompts the user for roster file name and proceeds to read the file.
     INPUT:
-    - none
+    - hub_map   -- mapping of teacher names to hub numbers
     OUTPUTS:
     - roster    -- list of families extracted from the roster
     ASSUMPTIONS:
-    none
+    - All the candidate rosters reside in a folder called "Roster" under the
+      run directory.
+    - All candidate rosters are Microsoft Excel files.
     """
-
-    print ("These are the potential roster files:")
-    files = [file for file in os.listdir(".") if (file.lower().endswith('.xlsx'))]
-    files.sort(key=os.path.getmtime)
-    files = sorted(files,key=os.path.getmtime, reverse=True)
-
-    index = 1
-    for file in sorted(files,key=os.path.getmtime, reverse=True):
-        print("%d) %s" % (index, file))
-        index += 1
-
-    file_number = input("Enter list number of file or press <enter> to use '" + files[0] + "':")
-    if not file_number:
-        file_name = files[0]
-    else:
-        file_name = files[file_number-1]
-
-    return ReadRosterFromFile(file_name, hub_map)
+    return ReadRosterFromFile(GetRosterFileName(), hub_map)
 
 
 def PrintEntries(testRoster):

@@ -124,25 +124,38 @@ def ReadDirectoryFromFile(file_name, hub_map):
 
 
 def ReadDirectory(hub_map):
+    """ roster_tools.ReadDirectory
+    PURPOSE:
+    Prompts the user for directory file name and proceeds to read the file.
+    INPUT:
+    - hub_map   -- mapping of teacher names to hub numbers
+    OUTPUTS:
+    - directory -- list of families extracted from the directory file
+    ASSUMPTIONS:
+    - All the candidate directories reside in a folder called "Directory" under the
+      run directory.
+    - All candidate directories are text CSV files.
+    """
     print ("These are the potential directory files:")
-    files = [file for file in os.listdir(".") \
-                if (file.lower().startswith('memberhub_download_') and
-                    file.lower().endswith('.csv'))]
-    files.sort(key=os.path.getmtime)
-    files = sorted(files,key=os.path.getmtime, reverse=True)
+    file_path = os.path.abspath("./Directory/")
+    with os.scandir(file_path) as raw_files:
+        files = [file for file in raw_files if (file.name.endswith('.csv'))]
+        files.sort(key=lambda x: os.stat(x).st_mtime, reverse=True)
 
-    index = 1
-    for file in sorted(files,key=os.path.getmtime, reverse=True):
-        print("%d) %s" % (index, file))
-        index += 1
+        index = 0
+        for file in files:
+            index += 1
+            print("%d) %s" % (index, file.name))
 
-    file_number = input("Enter list number of file or press <enter> to use '" + files[0] + "':")
-    if not file_number:
-        file_name = files[0]
-    else:
-        file_name = files[file_number-1]
+        file_number = input("Enter list number of file or press <enter> to use '" + files[0].name + "':")
+        if not file_number:
+            return ReadDirectoryFromFile(file_path + "/" +files[0].name, hub_map)
+        elif 0 < int(file_number) and int(file_number) <= index:
+            return ReadDirectoryFromFile(file_path + "/" + files[int(file_number)-1].name, hub_map)
+        else:
+            print("The selection made is out of range.  Please try again.")
+            ReadDirectory(hub_map)
 
-    return ReadDirectoryFromFile(file_name, hub_map)
 
 
 def Print(directory):

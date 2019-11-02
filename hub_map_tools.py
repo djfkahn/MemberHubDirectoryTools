@@ -118,25 +118,15 @@ def ReadHubMapFromFile(file_name):
     return map_d
 
 def ReadHubMap():
-    print ("These are the potential hub map files:")
-    files = [file for file in os.listdir(".") \
-                if (file.lower().startswith('hub') and
-                    file.lower().endswith('.csv'))]
-    files.sort(key=os.path.getmtime)
-    files = sorted(files,key=os.path.getmtime, reverse=True)
-
-    index = 1
-    for file in sorted(files,key=os.path.getmtime, reverse=True):
-        print("%d) %s" % (index, file))
-        index += 1
-
-    file_number = input("Enter list number of file or press <enter> to use '" + files[0] + "':")
-    if not file_number:
-        file_name = files[0]
-    else:
-        file_name = files[file_number-1]
-
-    return ReadHubMapFromFile(file_name)
+    """hub_map_tools.IsInClassroomHub(map_d, hub_id)
+    INPUTS:
+    - none
+    OUTPUTS:
+    - a dictionary that maps the teacher names to their hub numbers
+    ASSUMPTIONS:
+    - the hub map is documented in a CSV file called 'hub_map.csv'
+    """
+    return ReadHubMapFromFile('hub_map.csv')
 
 
 def IsInClassroomHub(map_d, hub_id):
