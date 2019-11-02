@@ -137,16 +137,18 @@ def FindHubless(arg_list):
                 hubless_children.append(child)
 
     print("Found %d adults who are not in at least one classroom hub." % len(hubless_adults))
-    answer = input("Print list to screen? ('y' for yes) ")
-    if answer == "y":
-        for this_person in hubless_adults:
-            print("%s %s <%s>" % (this_person.first_name, this_person.last_name, this_person.hubs))
+    if len(hubless_adults) > 0:
+        answer = input("Print list to screen? (<enter> for 'no' and 'y' for yes) ")
+        if answer == "y":
+            for this_person in hubless_adults:
+                print("%s %s <%s>" % (this_person.first_name, this_person.last_name, this_person.hubs))
 
     print("Found %d children who are not in a classroom hub." % len(hubless_children))
-    answer = input("Print list to screen? ('y' for yes) ")
-    if answer == "y":
-        for this_person in hubless_children:
-            print("%s %s <%s>" % (this_person.first_name, this_person.last_name, this_person.hubs))
+    if len(hubless_children) > 0:
+        answer = input("Print list to screen? (<enter> for 'no' and 'y' for yes) ")
+        if answer == "y":
+            for this_person in hubless_children:
+                print("%s %s <%s>" % (this_person.first_name, this_person.last_name, this_person.hubs))
 
 
 
@@ -383,7 +385,7 @@ def MakePrompt(choices):
     choice_list = sorted(choices)
     guts = '\n'.join(['(%s)%s' % (choice[0], choice[1:])
                       for choice in choice_list])
-    return 'Choose:\n' + guts + '\nOr press <enter> to quit '
+    return '\n===============\nChoose:\n' + guts + '\nOr press <enter> to quit '
 
 def RunMenu(directory, roster, map_d):
     """Runs the user interface for dictionary manipulation."""
