@@ -6,13 +6,17 @@ Tools for checking certain qualities of MemberHub directory dumps, and for creat
 ---
 ## HOW TO USE
 `% python3 menu.py` <br>
-`Enter name of hub map file (press <enter> to use "hub_map.csv"): ` <br>
-`Enter name of directory dump file (press <enter> to use "dump.csv"): ` <br>
+`These are the potential directory files: ` <br>
+`1) ... <list of directory files available>` <br>
+`Enter list number of file or press <enter> to use '<newest directory file>':` <BR>
 `Read #### lines, processed #### lines, and created ### families from directory file` <br>
-`Enter name of roster comma-separated text file (press <enter> to use "roster.csv"): ` <br>
+`These are the potential roster files: ` <br>
+`1) ... <list of roster files available>` <br>
+`Enter list number of file or press <enter> to use '<newest roster file>':` <BR>
 `Print corrected roster errors to the screen? (press <enter> for "no", press "y" for "yes"): ` <br>
 `### students processed ### families.` <br>
 `Choose:` <br>
+`===============` <br>
 `(a) - Find Missing Email` <br>
 `(b) - Find Orphans` <br>
 `(c) - Find Childless` <br>
@@ -23,6 +27,7 @@ Tools for checking certain qualities of MemberHub directory dumps, and for creat
 `(h) - Make Student Hub Population Import File` <br>
 `(i) - Find Adults/Children Hub Mismatches` <br>
 `(j) - Find Unused Errata` <br>
+`(k) - Find students who are in multipe classroom hubs` <br>
 `Or press <enter> to quit:` <br>
 
 ---
