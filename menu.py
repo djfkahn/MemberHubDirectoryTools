@@ -232,6 +232,9 @@ def FindEntriless(arg_list):
     roster    = arg_list[1]
     entriless = []
 
+    print_to_screen = input("If anyone from the roster not found in the directory, print list to screen? " + \
+                            "(<return> for 'no' and 'y' for 'yes') ")
+
     for roster_family in roster:
 
         for directory_family in directory:
@@ -239,20 +242,32 @@ def FindEntriless(arg_list):
                 if directory_family.HasNewChildren(roster_family):
                     temp_family = family.Family()
                     temp_family.FormFamilyWithNewChildren(directory_family,roster_family)
-                    print("Found family in directory with new child in roster:",)
-                    temp_family.Print()
                     entriless.append(temp_family)
+                    if print_to_screen == 'y':
+                        print("Found family in directory with new child in roster:",)
+                        temp_family.Print()
                 break
 
         else:
-            print("Did not find this family from the roster in the directory:",)
-            roster_family.Print()
             entriless.append(roster_family)
+            if print_to_screen == 'y':
+                print("Did not find this family from the roster in the directory:",)
+                roster_family.Print()
 
     print("Found %d people on the roster who were not in the directory" % len(entriless))
     return entriless
 
 def PrintNotInDirectory(arg_list):
+    """menu.PrintNotInDirectory
+    INPUTS:
+    - directory -- dictionary containing the MemberHub directory
+    - roster    -- dictionary containing the school roster
+    - map_d     -- dictionary mapping teacher names to hub IDs
+    OUTPUTS:
+    None.
+    ASSUMPTIONS:
+    None.
+    """
     discard = FindEntriless(arg_list)
 
 def MakeImportNotInDirectory(arg_list):
