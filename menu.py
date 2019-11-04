@@ -186,9 +186,8 @@ def FindAdultsWithoutAccounts(directory):
     INPUTS:
     - directory -- list of families from a MemberHub directory dump.
     OUTPUTS:
-    Provides the option to write to standard output the list of adults who
-    do not have accounts, separated by whether their profile has an email
-    address or not.
+    Provides the option to write to standard output or to a file the list of adults who
+    do not have accounts, separated by whether their profile has an email address or not.
     """
     no_account_with_email    = []
     no_account_without_email = []
@@ -202,16 +201,20 @@ def FindAdultsWithoutAccounts(directory):
                     no_account_with_email.append(this_adult)
 
     print("Found %d adults without accounts or emails." % len(no_account_without_email))
-    answer = input("Print list to screen? ('y' for yes) ")
+    answer = input("Print list to screen or file? ('y' for 'screen', 'f' for file, <return> for neither) ")
     if answer == "y":
         for this_person in no_account_without_email:
             this_person.Print()
+    elif answer == "f":
+        import_file_tools.CreateEmaillessFile(no_account_without_email, "no_account_without_email")
 
     print("Found %d adults without accounts, but with emails." % len(no_account_with_email))
-    answer = input("Print list to screen? ('y' for yes) ")
+    answer = input("Print list to screen or file? ('y' for 'screen', 'f' for file, <return> for neither) ")
     if answer == "y":
         for this_person in no_account_with_email:
             print("%s %s <%s>" % (this_person.first_name, this_person.last_name, this_person.email))
+    elif answer == "f":
+        import_file_tools.CreateEmaillessFile(no_account_with_email, "no_account_with_email")
 
 
 

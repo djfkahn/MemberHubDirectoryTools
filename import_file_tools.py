@@ -96,23 +96,14 @@ Summary: 1. opens file for writing, and writes the column titles
 
 
 
-def CreateEmaillessFile(people, hubs, file_prefix):
+def CreateEmaillessFile(people, file_prefix):
 
 	file_name = file_prefix + "_" + FormTimeTag() + ".txt"
 	print("Writing to file called %s." % file_name)
 	try:
 		open_file = open(file_name,"w")
-		for hub in people:
-			possible_teachers = ""
-			for key in hubs.keys():
-				if hubs[key] == hub:
-					possible_teachers += key + " | "
-			line = "Teacher(s): %s\n" % possible_teachers
-			open_file.write(line)
-			for person in people[hub]:
-				line = "%s %s\n" % (person.first_name, person.last_name)
-				open_file.write(line)
-			line = "Number: %d\n\n##########################################\n" % len(people[hub])
+		for person in people:
+			line = "%s|%s|%s|%s\n" % (person.first_name, person.last_name, person.family_relation, person.hubs)
 			open_file.write(line)
 
 
