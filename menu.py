@@ -153,6 +153,33 @@ def FindHubless(arg_list):
                 print("%s %s <%s>" % (this_person.first_name, this_person.last_name, this_person.hubs))
 
 
+def FindChildrenInMultipleClassroom(arg_list):
+    """menu.FindChildrenInMultipleClassroom
+    INPUTS:
+    - directory -- list containing the MemberHub directory families
+    - map_d     -- dictionary mapping teacher names to hub IDs
+    OUTPUTS:
+    Prints to standard output the students in the directory who are members of
+    more than one classroom hub.
+    ASSUMPTIONS:
+    None.
+    """
+    directory       = arg_list[0]
+    map_d           = arg_list[1]
+    hubful_children = []
+
+    for directory_family in directory:
+        for child in directory_family.children:
+            if hub_map_tools.IsInMultipleClassroomHubs(map_d, child.hubs):
+                hubful_children.append(child)
+
+    print("Found %d students who are not in more than one classroom hub." % len(hubful_children))
+    if len(hubful_children) > 0:
+        answer = input("Print list to screen? (<enter> for 'no' and 'y' for yes) ")
+        if answer == "y":
+            for this_person in hubful_children:
+                print("%s %s <%s>" % (this_person.first_name, this_person.last_name, this_person.hubs))
+
 
 def FindAdultsWithoutAccounts(directory):
     """menu.FindAdultsWithoutAccounts
@@ -398,7 +425,9 @@ def RunMenu(directory, roster, map_d):
                'i - Find Adults/Children Hub Mismatches':
                     {'Function':FindParentChildrenHubMismatches,'Arg':directory},
                'j - Find Unused Errata':
-                    {'Function':FindUnsedErrata,'Arg':roster}}
+                    {'Function':FindUnsedErrata,'Arg':roster},
+               'k - Find students who are in multipe classroom hubs':
+                    {'Function':FindChildrenInMultipleClassroom,'Arg':[directory,map_d]}}
 
     prompt = MakePrompt(choices)
 
