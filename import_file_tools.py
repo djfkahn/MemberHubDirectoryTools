@@ -16,9 +16,9 @@ def ConvertHubListToImportString(hub_list):
     hub_str = "/"
     for hub in hub_list:
         hub_str += str(hub) + "/"
-        
+
     return hub_str  # strip off the trailing ';'
-    
+
 def WriteNewMemberLine(open_file, family_relation, first_name, last_name, person_id):
     line = "%s,%s,%s,%s\n" % (family_relation, first_name, last_name, person_id)
     open_file.write(line)
@@ -33,7 +33,7 @@ def WriteNewMemberPerson(open_file, new_person):
                        first_name      = new_person.first_name,
                        last_name       = new_person.last_name,
                        person_id       = person_id)
-    
+
 def CreateNewMemberImport(entriless):
     """CreateHubUpdateCSV
 Inputs : entriless - list of families that need to be added to the directory
@@ -45,9 +45,9 @@ Summary: 1. asks user to name file to be written to.  this file will be
          3. iterates over the inputs to write the data to the file
          4. closes the file
 """
- 
+
     file_name = "new_member_import_" + FormTimeTag() + ".csv"
-    print "Writing to import file called %s." % file_name
+    print("Writing to import file called %s." % file_name)
     try:
         open_file = open(file_name,"w")
         WriteNewMemberLine(open_file,'family_relation', 'first_name', 'last_name', 'person_id')
@@ -77,18 +77,18 @@ Summary: 1. opens file for writing, and writes the column titles
          2. iterates over the inputs to write the data to the file
          3. closes the file
 """
- 
+
     file_name = file_prefix + "_" + FormTimeTag() + ".csv"
-    print "Writing to import file called %s." % file_name
+    print("Writing to import file called %s." % file_name)
     try:
         open_file = open(file_name,"w")
         WriteHublessLine (open_file, "first_name", "last_name", "hubs", "person_id")
 
         for this_person in people:
-        	WriteHublessLine(open_file  = open_file, 
-        					 first_name = this_person.first_name, 
-        					 last_name  = this_person.last_name, 
-        					 hubs       = this_person.hubs, 
+        	WriteHublessLine(open_file  = open_file,
+        					 first_name = this_person.first_name,
+        					 last_name  = this_person.last_name,
+        					 hubs       = this_person.hubs,
         					 person_id  = this_person.person_id)
 
     finally:
@@ -96,27 +96,16 @@ Summary: 1. opens file for writing, and writes the column titles
 
 
 
-def CreateEmaillessFile(people, hubs, file_prefix):
+def CreateEmaillessFile(people, file_prefix):
 
 	file_name = file_prefix + "_" + FormTimeTag() + ".txt"
-	print "Writing to file called %s." % file_name
+	print("Writing to file called %s." % file_name)
 	try:
 		open_file = open(file_name,"w")
-		for hub in people:
-			possible_teachers = ""
-			for key in hubs.keys():
-				if hubs[key] == hub:
-					possible_teachers += key + " | "
-			line = "Teacher(s): %s\n" % possible_teachers
+		for person in people:
+			line = "%s|%s|%s|%s\n" % (person.first_name, person.last_name, person.family_relation, person.hubs)
 			open_file.write(line)
-			for person in people[hub]:
-				line = "%s %s\n" % (person.first_name, person.last_name)
-				open_file.write(line)
-			line = "Number: %d\n\n##########################################\n" % len(people[hub])
-			open_file.write(line)
-		
-		
+
+
 	finally:
 		open_file.close()
-		
-		

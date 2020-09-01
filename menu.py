@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Defines the main menu module for a program that inputs a MemberHub directory dump, 
+"""Defines the main menu module for a program that inputs a MemberHub directory dump,
 a school roster, and a hub map to perform analyses on the MemberHub directory.
 """
 
@@ -9,6 +9,8 @@ import hub_map_tools
 import import_file_tools
 import family
 import person
+from openpyxl import load_workbook
+import csv
 
 STUDENT_INDICATOR = "+SA"
 
@@ -30,13 +32,13 @@ def FindMissingEmail(arg_list):
     no_email_person = []
     no_email_family = []
     partial_family = []
-    
+
     for entry_family in directory:
         no_email_count = 0
         for adult in entry_family.adults:
             adult_count += 1
             if adult.DoesNotListEmailAddress():
-            	no_email_person.append(adult)            		
+                no_email_person.append(adult)
                 no_email_adult += 1
                 no_email_count += 1
                 for hub in adult.hubs:
@@ -48,39 +50,23 @@ def FindMissingEmail(arg_list):
         elif no_email_count > 0:
             partial_family.append(entry_family)
 
-    print "The directory has %d families and %d adults." % \
-          (len(directory), adult_count)
-    print "Of the %d adults, %d have no email address." % \
-          (adult_count, no_email_adult)
-    print "%d out of %d families have no adult with an email address." % \
-          (len(no_email_family), len(directory))
-    print "%d out of %d families have some adults without and some with email addresses." % \
-          (len(partial_family), len(directory))
-    print "%d out of %d families have all adults with email addresses." % \
-          ((len(directory)-len(no_email_family)-len(partial_family)), len(directory))
-    print "%d out of %d families have at least one adult with an email address." % \
-          ((len(directory)-len(no_email_family)), len(directory))
+    print("The directory has %d families and %d adults." % \
+          (len(directory), adult_count))
+    print("Of the %d adults, %d have no email address." % \
+          (adult_count, no_email_adult))
+    print("%d out of %d families have no adult with an email address." % \
+          (len(no_email_family), len(directory)))
+    print("%d out of %d families have some adults without and some with email addresses." % \
+          (len(partial_family), len(directory)))
+    print("%d out of %d families have all adults with email addresses." % \
+          ((len(directory)-len(no_email_family)-len(partial_family)), len(directory)))
+    print("%d out of %d families have at least one adult with an email address." % \
+          ((len(directory)-len(no_email_family)), len(directory)))
 
-    print ""
+    print("")
 
     import_file_tools.CreateEmaillessFile(map_d, hub_map_d, "emailless")
-    """
-    answer = raw_input("Print list of families with no email to screen? ('y' for yes) ")
-    if answer == "y":
-        for this_family in no_email_family:
-            for this_person in this_family.adults:
-                print "%s %s [%s]" % (this_person.first_name, this_person.last_name, this_person.hubs)
-            print "---------------"
 
-    print ""
-    answer = raw_input("Print list of families with some email to screen? ('y' for yes) ")
-    if answer == "y":
-        for this_family in partial_family:
-            for this_person in this_family.adults:
-                print "%s %s <%s>," % (this_person.first_name, this_person.last_name, this_person.email)
-            print "---------------"
-    """
-    
 
 
 def FindOrphans(directory):
@@ -98,12 +84,12 @@ def FindOrphans(directory):
     for entry_family in directory:
         family_count += 1
         if entry_family.IsOrphan():
-            print "The entry for this family does not identify parents:",
+            print("The entry for this family does not identify parents:",)
             entry_family.Print()
             orphan_count += 1
-            
-    print "Found %d families without adults out of %d families" % \
-          (orphan_count, family_count)
+
+    print("Found %d families without adults out of %d families" % \
+          (orphan_count, family_count))
 
 def FindChildless(directory):
     """menu.FindChildless
@@ -120,12 +106,12 @@ def FindChildless(directory):
     for entry_family in directory:
         family_count += 1
         if entry_family.IsChildless():
-            print "The entry for this family does not identify children:",
+            print("The entry for this family does not identify children:",)
             entry_family.Print()
             childless_count += 1
-            
-    print "Found %d families without children out of %d families" % \
-          (childless_count, family_count)
+
+    print("Found %d families without children out of %d families" % \
+          (childless_count, family_count))
 
 def FindHubless(arg_list):
     """menu.FindHubless
@@ -147,23 +133,52 @@ def FindHubless(arg_list):
         for adult in directory_family.adults:
             if not hub_map_tools.IsAnyHubClassroomHub(map_d, adult.hubs):
                 hubless_adults.append(adult)
-        
+
         for child in directory_family.children:
             if not hub_map_tools.IsAnyHubClassroomHub(map_d, child.hubs):
                 hubless_children.append(child)
 
-    print "Found %d adults who are not in at least one classroom hub." % len(hubless_adults)
-    answer = raw_input("Print list to screen? ('y' for yes) ")
-    if answer == "y":
-        for this_person in hubless_adults:
-            print "%s %s <%s>" % (this_person.first_name, this_person.last_name, this_person.hubs)
+    print("Found %d adults who are not in at least one classroom hub." % len(hubless_adults))
+    if len(hubless_adults) > 0:
+        answer = input("Print list to screen? (<enter> for 'no' and 'y' for yes) ")
+        if answer == "y":
+            for this_person in hubless_adults:
+                print("%s %s <%s>" % (this_person.first_name, this_person.last_name, this_person.hubs))
 
-    print "Found %d children who are not in a classroom hub." % len(hubless_children)
-    answer = raw_input("Print list to screen? ('y' for yes) ")
-    if answer == "y":
-        for this_person in hubless_children:
-            print "%s %s <%s>" % (this_person.first_name, this_person.last_name, this_person.hubs)
+    print("Found %d children who are not in a classroom hub." % len(hubless_children))
+    if len(hubless_children) > 0:
+        answer = input("Print list to screen? (<enter> for 'no' and 'y' for yes) ")
+        if answer == "y":
+            for this_person in hubless_children:
+                print("%s %s <%s>" % (this_person.first_name, this_person.last_name, this_person.hubs))
 
+
+def FindChildrenInMultipleClassroom(arg_list):
+    """menu.FindChildrenInMultipleClassroom
+    INPUTS:
+    - directory -- list containing the MemberHub directory families
+    - map_d     -- dictionary mapping teacher names to hub IDs
+    OUTPUTS:
+    Prints to standard output the students in the directory who are members of
+    more than one classroom hub.
+    ASSUMPTIONS:
+    None.
+    """
+    directory       = arg_list[0]
+    map_d           = arg_list[1]
+    hubful_children = []
+
+    for directory_family in directory:
+        for child in directory_family.children:
+            if hub_map_tools.IsInMultipleClassroomHubs(map_d, child.hubs):
+                hubful_children.append(child)
+
+    print("Found %d students who are not in more than one classroom hub." % len(hubful_children))
+    if len(hubful_children) > 0:
+        answer = input("Print list to screen? (<enter> for 'no' and 'y' for yes) ")
+        if answer == "y":
+            for this_person in hubful_children:
+                print("%s %s <%s>" % (this_person.first_name, this_person.last_name, this_person.hubs))
 
 
 def FindAdultsWithoutAccounts(directory):
@@ -171,9 +186,8 @@ def FindAdultsWithoutAccounts(directory):
     INPUTS:
     - directory -- list of families from a MemberHub directory dump.
     OUTPUTS:
-    Provides the option to write to standard output the list of adults who
-    do not have accounts, separated by whether their profile has an email 
-    address or not.
+    Provides the option to write to standard output or to a file the list of adults who
+    do not have accounts, separated by whether their profile has an email address or not.
     """
     no_account_with_email    = []
     no_account_without_email = []
@@ -186,17 +200,21 @@ def FindAdultsWithoutAccounts(directory):
                 else:
                     no_account_with_email.append(this_adult)
 
-    print "Found %d adults without accounts or emails." % len(no_account_without_email)
-    answer = raw_input("Print list to screen? ('y' for yes) ")
+    print("Found %d adults without accounts or emails." % len(no_account_without_email))
+    answer = input("Print list to screen or file? ('y' for 'screen', 'f' for file, <return> for neither) ")
     if answer == "y":
         for this_person in no_account_without_email:
             this_person.Print()
+    elif answer == "f":
+        import_file_tools.CreateEmaillessFile(no_account_without_email, "no_account_without_email")
 
-    print "Found %d adults without accounts, but with emails." % len(no_account_with_email)
-    answer = raw_input("Print list to screen? ('y' for yes) ")
+    print("Found %d adults without accounts, but with emails." % len(no_account_with_email))
+    answer = input("Print list to screen or file? ('y' for 'screen', 'f' for file, <return> for neither) ")
     if answer == "y":
         for this_person in no_account_with_email:
-            print "%s %s <%s>" % (this_person.first_name, this_person.last_name, this_person.email)
+            print("%s %s <%s>" % (this_person.first_name, this_person.last_name, this_person.email))
+    elif answer == "f":
+        import_file_tools.CreateEmaillessFile(no_account_with_email, "no_account_with_email")
 
 
 
@@ -217,27 +235,42 @@ def FindEntriless(arg_list):
     roster    = arg_list[1]
     entriless = []
 
+    print_to_screen = input("If anyone from the roster not found in the directory, print list to screen? " + \
+                            "(<return> for 'no' and 'y' for 'yes') ")
+
     for roster_family in roster:
-        
+
         for directory_family in directory:
             if directory_family.IsSameFamily(roster_family):
                 if directory_family.HasNewChildren(roster_family):
                     temp_family = family.Family()
                     temp_family.FormFamilyWithNewChildren(directory_family,roster_family)
-                    print "Found family in directory with new child in roster:",
-                    temp_family.Print()
                     entriless.append(temp_family)
+                    if print_to_screen == 'y':
+                        print("Found family in directory with new child in roster:",)
+                        temp_family.Print()
                 break
 
         else:
-            print "Did not find this family from the roster in the directory:",
-            roster_family.Print()
             entriless.append(roster_family)
+            if print_to_screen == 'y':
+                print("Did not find this family from the roster in the directory:",)
+                roster_family.Print()
 
-    print "Found %d people on the roster who were not in the directory" % len(entriless)
+    print("Found %d people on the roster who were not in the directory" % len(entriless))
     return entriless
 
 def PrintNotInDirectory(arg_list):
+    """menu.PrintNotInDirectory
+    INPUTS:
+    - directory -- dictionary containing the MemberHub directory
+    - roster    -- dictionary containing the school roster
+    - map_d     -- dictionary mapping teacher names to hub IDs
+    OUTPUTS:
+    None.
+    ASSUMPTIONS:
+    None.
+    """
     discard = FindEntriless(arg_list)
 
 def MakeImportNotInDirectory(arg_list):
@@ -293,25 +326,25 @@ def MakeStudentImportFile(arg_list):
                         ##temp_child.hubs = [roster_child.hubs[0] + STUDENT_INDICATOR]
                         temp_child.hubs = "/"+roster_child.hubs[0] + STUDENT_INDICATOR+"/"
                         ## MODIFIED CODE END
-                        
+
                         ## add the temporary child object to the list of students
                         students.append(temp_child)
                     else:
-                        print "##################"
-                        print "Did not find this child",
+                        print("##################")
+                        print("Did not find this child",)
                         roster_child.Print()
-                        print " in the family: "
+                        print(" in the family: ")
                         directory_family.Print()
                         not_found.append(roster_child)
                 ## Found the roster family in the directory, so break out of the directory_family loop
                 break
         else:
-            print "Did not find this family from the roster in the directory:",
+            print("Did not find this family from the roster in the directory:",)
             roster_family.Print()
             not_found.append(roster_family.children)
 
-    print "Found %d students on the roster who were in the directory" % len(students)
-    print "%d students on the roster could not be matched with the directory" % len(not_found)
+    print("Found %d students on the roster who were in the directory" % len(students))
+    print("%d students on the roster could not be matched with the directory" % len(not_found))
 
     ## Create an import file with all the students
     import_file_tools.CreateHubImportFile(students, "students2hubs")
@@ -328,26 +361,65 @@ def FindParentChildrenHubMismatches(directory):
         for this_adult in this_family.adults:
             for child_hub in children_hubs:
                 if child_hub not in this_adult.hubs:
-                    print "Found adult who is not a member of all family children's hubs:"
-                    print "Adult Name:    ",
+                    print("Found adult who is not a member of all family children's hubs:")
+                    print("Adult Name:    ",)
                     this_adult.Print()
-                    print "Adult Hubs:    ",
-                    print this_adult.hubs
+                    print("Adult Hubs:    ",)
+                    print(this_adult.hubs)
                     for this_child in this_family.children:
-                    	print "Child Name -- ",
+                    	print("Child Name -- ",)
                     	this_child.Print()
-                    	print " -- "
-                    	print this_child.hubs
+                    	print(" -- ")
+                    	print(this_child.hubs)
                     break
     else:
-        print "All adults are members of hubs to which all family children belong."
+        print("All adults are members of hubs to which all family children belong.")
+
+
+def FindUnsedErrata(roster):
+    """menu.FindUnsedErrata
+    INPUTS:
+    - roster    -- passing roster, because something needs to be passed (not actually used)
+    OUTPUTS:
+    Prints the roster errata entries that are no longer found in the roster, and can be
+    removed.
+    ASSUMPTIONS:
+    - Assumes the roster errata is stored in a file called 'roster_errata.csv'.
+    """
+    # First, read the roster file once to generate a list of adult names
+    roster_adults = []
+    roster_name   = roster_tools.GetRosterFileName()
+    wb            = load_workbook(roster_name)
+    ws            = wb.active
+    for fields in ws.values:
+        roster_adults.append([fields[3]])
+
+    # Next, read the roster errata file, and check each line that has not been commented out
+    line_number = 0
+    num_unused  = 0
+    with open('roster_errata.csv') as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter='|')
+        for fields in csv_reader:
+            line_number += 1
+            ## skip line if the first character is a comment
+            if fields[0][0] == "#":
+                continue
+            if not([fields[0]] in roster_adults):
+                print("Did not find usage of the entry on line %d" % line_number)
+                print(fields)
+                print("--------------------------------------")
+                num_unused += 1
+
+    if num_unused == 0:
+        print("No unused errata found.")
+
 
 
 def MakePrompt(choices):
     choice_list = sorted(choices)
     guts = '\n'.join(['(%s)%s' % (choice[0], choice[1:])
                       for choice in choice_list])
-    return 'Choose:\n' + guts + '\nOr press <enter> to quit '
+    return '\n===============\nChoose:\n' + guts + '\nOr press <enter> to quit '
 
 def RunMenu(directory, roster, map_d):
     """Runs the user interface for dictionary manipulation."""
@@ -369,26 +441,30 @@ def RunMenu(directory, roster, map_d):
                'h - Make Student Hub Population Import File':
                     {'Function':MakeStudentImportFile,'Arg':[directory,roster]},
                'i - Find Adults/Children Hub Mismatches':
-                    {'Function':FindParentChildrenHubMismatches,'Arg':directory}}
-    
+                    {'Function':FindParentChildrenHubMismatches,'Arg':directory},
+               'j - Find Unused Errata':
+                    {'Function':FindUnsedErrata,'Arg':roster},
+               'k - Find students who are in multipe classroom hubs':
+                    {'Function':FindChildrenInMultipleClassroom,'Arg':[directory,map_d]}}
+
     prompt = MakePrompt(choices)
 
     while True:
-        raw_choice = raw_input(prompt)
+        raw_choice = input(prompt)
         if not raw_choice:
             break
         given_choice = raw_choice[0].lower()
-        for maybe_choice in choices: 
+        for maybe_choice in choices:
             if maybe_choice[0] == given_choice:
                 # The appropriate function is called
                 # using the dictionary value for the name
-                # of the function.    
+                # of the function.
                 choices[maybe_choice]['Function'](choices[maybe_choice]['Arg'])
                 break
         else:
-            print '%s is not an acceptible choice.' % raw_choice
+            print("%s is not an acceptible choice." % raw_choice)
 
-        
+
 def main():
     map_d     = hub_map_tools.ReadHubMap()
     directory = directory_tools.ReadDirectory(map_d)
