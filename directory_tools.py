@@ -2,14 +2,14 @@
 """This module contains the tools to injest a MemberHub directory dump into
 a dictionary, and display portions of the dictionary for analysis.
 """
-
+import csv
+import os
 import family
 
 def PrintErrorMessage(fields, error_text):
-    print error_text, "Line will not be processed."
-    print "The following fields were read on this line:",
-    print fields
-    
+    print(error_text, "Line will not be processed.")
+    print("The following fields were read on this row:", fields)
+
 
 def ReadDirectoryFromFile(file_name, hub_map):
     """directory_tools.ReadDirectory
@@ -56,42 +56,40 @@ def ReadDirectoryFromFile(file_name, hub_map):
         31. <last_login>
         ** - indicates required field
     2. None of the fields contain commas.
-    3. Lines that contain blank required fields will be flagged, but not added to the 
+    3. Lines that contain blank required fields will be flagged, but not added to the
     output dictionary.
     """
 
     directory  = []
-    lines_read = lines_processed = families_created = 0
+    rows_read = rows_processed = families_created = 0
     new_family = False
     family_id  = 0
 
-    try:
-        open_file = open(file_name)
-        title_line = open_file.readline()
-        fields = title_line.split(',')
-        if not len(fields) == 31:
-            PrintErrorMessage \
-                (fields, "The file %s does not contain 31 fields, and cannot be parsed." % file_name)
-            raise RuntimeError, "This directory file has %d fields, but 31 are expected." % len(fields)
+    with open(file_name) as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
 
-        for line in open_file:
-            lines_read += 1
-            fields = line.split(',')
+        for fields in csv_reader:
+            # Skip the first row
+            if rows_read == 0:
+                rows_read += 1
+                continue
+
+            rows_read += 1
             if not len(fields) == 31:
                 PrintErrorMessage \
-                    (fields, "Found line with incorrect number of fields.")
+                    (fields, "Found row with incorrect number of fields.")
                 continue
 
             if fields[1] == "" or fields[2] == "" or \
                fields[0] == "" or fields[7] == "":
                 PrintErrorMessage \
-                    (fields, "Found a line with missing required fields.")
+                    (fields, "Found a row with missing required fields.")
                 continue
 
-            lines_processed += 1
+            rows_processed += 1
             # create a new family every time a new family ID is found
             if fields[6] != family_id:
-                # to start processing a new family, append the family previously worked on 
+                # to start processing a new family, append the family previously worked on
                 # (if it exists)
                 if new_family:
                     directory.append(new_family)
@@ -101,7 +99,7 @@ def ReadDirectoryFromFile(file_name, hub_map):
                 families_created += 1
                 # store the family ID currently working on
                 family_id = fields[6]
-                
+
             if fields[7][:5].lower() == "adult":
                 new_family.AddAdultFromDirectory(fields, hub_map)
             elif fields[7][:5].lower() == "child":
@@ -111,40 +109,67 @@ def ReadDirectoryFromFile(file_name, hub_map):
                     (fields, "Found entry in directory that is neither an adult nor a child.")
 
         else:
-            # once the last line is read, append the last family processed to the
+            # once the last row is read, append the last family processed to the
             # directory list
             if new_family:
                 directory.append(new_family)
+            # remove one from the rows read to take away the header row
+            rows_read -= 1
 
-        print "Read %d lines, processed %d lines, and created %d families from directory file" % \
-            (lines_read, lines_processed, families_created)
 
-    finally:
-        open_file.close()
-        
+        print("Read %d rows, processed %d rows, and created %d families from directory file" % \
+            (rows_read, rows_processed, families_created))
+
     return directory
 
 
 def ReadDirectory(hub_map):
-    file_name = raw_input('Enter name of directory dump file (press <enter> to use "dump.csv"): ')
-    if not file_name:
-        file_name = "dump.csv"
+    """ roster_tools.ReadDirectory
+    PURPOSE:
+    Prompts the user for directory file name and proceeds to read the file.
+    INPUT:
+    - hub_map   -- mapping of teacher names to hub numbers
+    OUTPUTS:
+    - directory -- list of families extracted from the directory file
+    ASSUMPTIONS:
+    - All the candidate directories reside in a folder called "Directory" under the
+      run directory.
+    - All candidate directories are text CSV files.
+    """
+    print ("These are the potential directory files:")
+    file_path = os.path.abspath("./Directory/")
+    with os.scandir(file_path) as raw_files:
+        files = [file for file in raw_files if (file.name.endswith('.csv'))]
+        files.sort(key=lambda x: os.stat(x).st_mtime, reverse=True)
 
-    return ReadDirectoryFromFile(file_name, hub_map)
+        index = 0
+        for file in files:
+            index += 1
+            print("%d) %s" % (index, file.name))
+
+        file_number = input("Enter list number of file or press <enter> to use '" + files[0].name + "':")
+        if not file_number:
+            return ReadDirectoryFromFile(file_path + "/" +files[0].name, hub_map)
+        elif 0 < int(file_number) and int(file_number) <= index:
+            return ReadDirectoryFromFile(file_path + "/" + files[int(file_number)-1].name, hub_map)
+        else:
+            print("The selection made is out of range.  Please try again.")
+            ReadDirectory(hub_map)
+
 
 
 def Print(directory):
     while True:
-        end_entry = int(raw_input('Enter entry at which to stop printing (enter 0 to stop): '))
+        end_entry = int(input("Enter entry at which to stop printing (enter 0 to stop): "))
         if end_entry == 0:
             break
         elif end_entry > len(directory):
             end_entry = len(directory)
 
-        start_entry = int(raw_input('Enter entry from which to start printing: '))
+        start_entry = int(input("Enter entry from which to start printing: "))
         if start_entry < 0:
             start_entry += end_entry
-            
+
         for x in directory[start_entry:end_entry]:
             x.Print()
 
@@ -165,24 +190,24 @@ def main():
 
     for directory_file in test_directory_files.keys():
         try:
-            print "+++++++++++++++++++++++++++++++++++++++++++++++++++"
-            print "Testing directory file " + directory_file + "."
+            print("+++++++++++++++++++++++++++++++++++++++++++++++++++")
+            print("Testing directory file " + directory_file + ".")
             test_directory = ReadDirectoryFromFile(directory_file,{})
-            print "Processed directory file successfully",
+            print("Processed directory file successfully",)
             if test_directory_files[directory_file]["error_expected"]:
-                print "which NOT EXPECTED."
+                print("which NOT EXPECTED.")
             else:
-                print "as expected."
+                print("as expected.")
                 if len(test_directory) == test_directory_files[directory_file]["number_read"]:
-                    print "The expected number of lines were processed."
+                    print("The expected number of rows were processed.")
                 else:
-                    print "UNEXPECTED number of lines processed."
+                    print("UNEXPECTED number of rows processed.")
         except:
-            print "Error reading directory file " + directory_file,
+            print("Error reading directory file " + directory_file,)
             if test_directory_files[directory_file]["error_expected"]:
-                print "as expected."
+                print("as expected.")
             else:
-                print "where error was NOT EXPECTED."
+                print("where error was NOT EXPECTED.")
 
 ##    directory = ReadDirectory()
 ##    Print(directory)

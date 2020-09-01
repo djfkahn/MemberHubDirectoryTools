@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
+import roster
 
-def ParseFullName(full_name):
+def ParseFullName(full_name, rosterC):
     """name_parser.ParseFullName
     Purpose:  Advanced name field Parseting that recognizes most multi-word last
               names.
@@ -21,11 +22,11 @@ def ParseFullName(full_name):
       1. <first1> <conjunction> <first2> <last>
       2. <first1> <last 1> <conjunction> <first 2> <last2>
       3. <first> <last>
-      where <first#> and <last#> may be multi-word names 
+      where <first#> and <last#> may be multi-word names
     """
 
     ## correct for known errors before proceeding
-    full_name = ApplyErrata(full_name)
+    full_name = rosterC.ApplyErrata(full_name)
 
     ## separate the name field based on the conjunction
     conjunction = None
@@ -51,43 +52,12 @@ def ParseFullName(full_name):
 
     return answer
 
-def ApplyErrata(full_name):
-    """name_parser.ApplyErrata
-    Purpose:  Replaces roster name fields with known errors with the correct name fields.
-    INPUTS:
-    - full_name -- The raw parent name field from the roster.
-    OUTPUTS:
-    - corrected full_name if this fields is known to be in error
-    - otherwise, the unmodified input full_name
-    ASSUMPTIONS:
-    - The run directory contains a file called 'roster_errata.csv' that contains
-      two columns of data:  left is the erroneous name field as it appears in the 
-      roster, and right is the corrected name field to match the directory.  The 
-      columns are spearated by a pipe, "|".
-    """
-    errata_d = {}
-    try:
-        open_file = open('roster_errata.csv')
-        for line in open_file:
-            if line[0] != "#":
-                fields = line.split('|')
-                errata_d.update({fields[0]:fields[-1].strip("\r\n")})
-    finally:
-        open_file.close()
-
-    if full_name in errata_d.keys():
-        print "Found Errata for: " + full_name
-        print "Will use " + errata_d[full_name] + " instead."
-        return errata_d[full_name]
-
-    return full_name
-
 
 def ParseType1Name(name_list):
     """name_parser.ParseType1Name
     Puprpose:  Parses a name field with the format <first1> <conjunction> <first2> <last>
     INPUTS:
-    name_list -- A list of names in format ['<first1>','<first2> <last>'] 
+    name_list -- A list of names in format ['<first1>','<first2> <last>']
     OUTPUTS:
     names     -- A list of name dictionaries.  Each name dictionary contains
                  a single person's first and last names.
@@ -102,7 +72,7 @@ def ParseType2Name(name_list):
     """name_parser.ParseType2Name
     Puprpose:  Parses a name field with the format <first1> <last1> <conjunction> <first2> <last2>
     INPUTS:
-    name_list -- A list of names in format ['<first1> <last1>','<first2> <last2>'] 
+    name_list -- A list of names in format ['<first1> <last1>','<first2> <last2>']
     OUTPUTS:
     names     -- A list of name dictionaries.  Each name dictionary contains
                  a single person's first and last names.
@@ -115,7 +85,7 @@ def ParseType3Name(full_name):
     """name_parser.ParseType3Name
     Puprpose:  Parses a name field with the format <first> <last>
     INPUTS:
-    name_list -- A list of names in format ['<first> <last>'] 
+    name_list -- A list of names in format ['<first> <last>']
     OUTPUTS:
     name      -- A list of a name dictionary containing the person's first and last names.
     """
@@ -140,7 +110,7 @@ def ParseType3Name(full_name):
         fname += " " + word.title()
 
     ## check that we have more than 1 word in our string
-    if len(name_parts) > 1: 
+    if len(name_parts) > 1:
         ## concat the last name
         lname = ""
         for i in range(last_processed+1,len(name_parts)):
@@ -176,9 +146,11 @@ def main():
                   "Joe Schmoe and Betty Davis",
                   "Joan and Marc Edward Vlasic",
                   "Marc Edward and Joan Vlasic") ## TBD - expect this one will not parse correctly
+
+    testRosterC = roster.Roster()
     for name in test_names:
-        answer = ParseFullName(name)
-        print answer
+        answer = ParseFullName(name, testRosterC)
+        print(answer)
 
 if __name__ == '__main__':
     main()

@@ -3,6 +3,8 @@
 It assumes the presence of a file called 'hub_map.csv' in the directory from
 which the program is executed.
 """
+import csv
+import os
 
 def ConvertHubStringListToIDList(hub_name_list, map_d):
     """hub_map_tools.ConvertHubStringListToIDList
@@ -15,13 +17,14 @@ def ConvertHubStringListToIDList(hub_name_list, map_d):
                        hub name is returned in that position.
     """
     hub_id_list = []
-    
+
     for hub_name in hub_name_list:
         # strip off quotes
-        hub_name = hub_name.strip('"')
-        if len(hub_name) == 0:
-            continue
-        
+        if isinstance(hub_name, str):
+            hub_name = hub_name.strip('"')
+            if len(hub_name) == 0:
+                continue
+
         # check if the hub name is among map keys
         if hub_name in map_d.keys():
             hub_id_list.append(map_d[hub_name])
@@ -30,43 +33,17 @@ def ConvertHubStringListToIDList(hub_name_list, map_d):
 
     return hub_id_list
 
+
+
 def ConvertToHubIDList(hub_name_list):
     return ConvertHubStringListToIDList(hub_name_list, ReadHubMap())
 
 
-def ConvertHubIDListToStringList(hub_id_list, map_d):
-    """hub_map_tools.ConvertHubIDListToStringList
-    INPUTS:
-    - hub_id_list   -- list of hub IDs
-    - map_d         -- dictionary that maps hub/teacher names to hub IDs
-    OUTPUTS:
-    - hub_name_list -- list of hub names corresponding to the hub_name_list.
-                       if a corrsponding ID is not in the map, the original
-                       hub name is returned in that position.
-    """
-"""
-    hub_name_list = []
-    
-    if IsAnyHubClassroomHub(map_d, hub_id_list):
-	    for hub_id in hub_id_list:
-    	    # check if the hub name is among map keys
-        	if IsInClassroomHub(map_d, hub_id):
-        		temp_list = map_d.values().find(hub_id)
-        		hub_name_list.append(temp_list.min())
-
-    return hub_name_list
-"""
-
-"""
-def ConvertToHubStringList(hub_name_list):
-    return ConvertHubIDListToStringList(hub_name_list, ReadHubMap())
-"""
 
 def CreateEmptyHubDictionary(raw_map):
 	raw_values = raw_map.values()
-	raw_values.sort()
 	temp = ['0']
-	for val in raw_values:
+	for val in sorted(raw_values):
 		if temp[-1] != val:
 			temp.append(val)
 	reduced_values = temp[1:]
@@ -76,12 +53,11 @@ def CreateEmptyHubDictionary(raw_map):
 	return new_map
 
 def PrintReadErrorMessage(line, message):
-    print message, "Skipping this line."
-    print "Line read:",
-    print line
+    print(message, "Skipping this line.")
+    print("Line read:", line)
 
 def ReadHubMapFromFile(file_name):
-    """hub_map_tools.ReadHubMapFromFile() 
+    """hub_map_tools.ReadHubMapFromFile()
     INPUTS:
     - file_name -- name of the file containing the hub map.
     OUTPUTS:
@@ -94,14 +70,14 @@ def ReadHubMapFromFile(file_name):
     """
     map_d = {}
 
-    try:
-        open_file = open(file_name)
+    with open(file_name) as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter='|')
 
-        for line in open_file:
-            if line[0] == "#":
+        for fields in csv_reader:
+            ## skip line if the first character is a comment
+            if fields[0][0] == "#":
                 continue
-            ## be sure to strip the '\r\n' that Excel adds at the end of lines
-            fields = line.strip('\r\n').split('|')
+            ## skip lines that do not have the right number of fields
             if len(fields) < 2:
                 PrintReadErrorMessage \
                     (line, "Not enough fields found on this line.")
@@ -111,20 +87,21 @@ def ReadHubMapFromFile(file_name):
                 PrintReadErrorMessage \
                     (line, "Duplicate teacher found on this line.")
                 continue
-            
+
             map_d.update({fields[0]:fields[1]})
 
-    finally:
-        open_file.close()
-        
     return map_d
 
 def ReadHubMap():
-    file_name = raw_input('Enter name of hub map file (press <enter> to use "hub_map.csv"): ')
-    if not file_name:
-        file_name = "hub_map.csv"
-
-    return ReadHubMapFromFile(file_name)
+    """hub_map_tools.IsInClassroomHub(map_d, hub_id)
+    INPUTS:
+    - none
+    OUTPUTS:
+    - a dictionary that maps the teacher names to their hub numbers
+    ASSUMPTIONS:
+    - the hub map is documented in a CSV file called 'hub_map.csv'
+    """
+    return ReadHubMapFromFile('hub_map.csv')
 
 
 def IsInClassroomHub(map_d, hub_id):
@@ -139,13 +116,12 @@ def IsInClassroomHub(map_d, hub_id):
     ASSUMPTIONS:
     None
     """
-    ## MODIFIED CODE BEGIN - 2017-09-06
     return hub_id in map_d.values() or \
            hub_id == "Teachers" or \
            hub_id == "Staff" or \
            hub_id == "Volunteers"
-    ## MODIFIED CODE END
-    
+
+
 def IsAnyHubClassroomHub(map_d, hubs):
     """hub_map_tools.IsAnyHubClassroomHub(map_d, hub_field)
     INPUTS:
@@ -160,15 +136,35 @@ def IsAnyHubClassroomHub(map_d, hubs):
     for hub in hubs:
         if IsInClassroomHub(map_d, hub):
             return True
-    
+
     return False
-    
+
+
+def IsInMultipleClassroomHubs(map_d, hubs):
+    """hub_map_tools.IsInMultipleClassroomHubs
+    INPUTS:
+    - map_d     -- dictionary containing the map of teachers to HUB IDs
+    - hubs      -- list of hubs to check against classroom hubs
+    OUTPUTS:
+    - True      -- if more than one hub in the hubs list qualify as classroom hub
+    - False     -- otherwise
+    ASSUMPTIONS:
+    If hub_field is not empty, its hubs are separated by semi-colons (";").
+    """
+    count = 0
+    for hub in hubs:
+        if IsInClassroomHub(map_d, hub):
+            count += 1
+
+    return count > 1
+
+
 def PrintMap(map_d):
-    print map_d
+    print(map_d)
 
 def main():
-    print "===================================="
-    print "Unit Under Test:  ReadHubMapFromFile"
+    print("====================================")
+    print("Unit Under Test:  ReadHubMapFromFile")
     test_files = \
         {"hub_map_tools_tests/test_hub_map_general.csv": \
             {"error_expected":False,"number_read":3}, \
@@ -179,28 +175,28 @@ def main():
 
     for hub_map_file in test_files.keys():
         try:
-            print "+++++++++++++++++++++++++++++++++++++++++++++++++++"
-            print "Testing hub map file " + hub_map_file + "."
+            print("+++++++++++++++++++++++++++++++++++++++++++++++++++")
+            print("Testing hub map file " + hub_map_file + ".")
             test_hub_map = ReadHubMapFromFile(hub_map_file)
-            print "Processed hub map file successfully",
+            print("Processed hub map file successfully",)
             if test_files[hub_map_file]["error_expected"]:
-                print "which NOT EXPECTED."
+                print("which NOT EXPECTED.")
             else:
-                print "as expected."
+                print("as expected.")
                 if len(test_hub_map) == test_files[hub_map_file]["number_read"]:
-                    print "The expected number of lines were processed."
+                    print("The expected number of lines were processed.")
                 else:
-                    print "UNEXPECTED number of lines processed."
-                    print test_hub_map
+                    print("UNEXPECTED number of lines processed.")
+                    print(test_hub_map)
         except:
-            print "Error reading hub_map file " + hub_map_file,
+            print("Error reading hub_map file " + hub_map_file,)
             if test_files[hub_map_file]["error_expected"]:
-                print "as expected."
+                print("as expected.")
             else:
-                print "where error was NOT EXPECTED."
+                print("where error was NOT EXPECTED.")
 
-    print "=============================================="
-    print "Unit Under Test:  ConvertHubStringListToIDList"
+    print("==============================================")
+    print("Unit Under Test:  ConvertHubStringListToIDList")
     test_list = \
         {1: {"hub_names":['Smith']        ,"hub_ids":['9001']}, \
          2: {"hub_names":['Smits']        ,"hub_ids":['9001']}, \
@@ -213,13 +209,13 @@ def main():
         result = ConvertHubStringListToIDList \
                     (test_list[test_case]["hub_names"], test_hub_map)
         if result == test_list[test_case]["hub_ids"]:
-            print "Test case %d successful." % test_case
+            print("Test case %d successful." % test_case)
         else:
-            print "Test case %d FAILED." % test_case
-            print "Actual Results:  ",
-            print result
-            print "Expected Results:",
-            print test_list[test_case]["hub_ids"]
+            print("Test case %d FAILED." % test_case)
+            print("Actual Results:  ",)
+            print(result)
+            print("Expected Results:",)
+            print(test_list[test_case]["hub_ids"])
 
 if __name__ == '__main__':
     main()
