@@ -1,6 +1,4 @@
 # Omit the data files
-*.csv
-*.xlsx
 *.zip
 *.txt
 *.docx
