@@ -27,23 +27,29 @@ def ReadRosterFromFile(file_name, hub_map):
     ws = wb.active
 
     rosterC       = roster.Roster()
-    student_count = 0
+    student_count = -1
 
     for fields in ws.values:
 
-        # Skip the first row
-        if student_count == 0:
-            student_count += 1
+        ## Skip the first row
+        if student_count < 0:
+            student_count = 0
             continue
 
-        if fields[0] == "" or fields[1] == "" or fields[2] == "" or \
-           fields[3] == "" or (int(fields[2]) < 6 and fields[4] == ""):
-            print("Found row with missing required fields:", fields)
+        ## Skip any row for which all fields are not populated
+        empty_field_found = False
+        for field in fields:
+            if field == None or field == "":
+                empty_field_found = True
+                print("Found row with missing required fields:", fields)
+                continue
+        if empty_field_found:
             continue
 
-        # each row represents one student
+        ## each row represents one student
         student_count += 1
 
+        ## treat the student as a member of a new family...for now
         new_family = family.Family()
         new_family.CreateFromRoster(fields  = fields,
                                     hub_map = hub_map,
