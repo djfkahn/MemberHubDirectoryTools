@@ -41,16 +41,16 @@ def ConvertToHubIDList(hub_name_list):
 
 
 def CreateEmptyHubDictionary(raw_map):
-	raw_values = raw_map.values()
-	temp = ['0']
-	for val in sorted(raw_values):
-		if temp[-1] != val:
-			temp.append(val)
-	reduced_values = temp[1:]
-	new_map = {}
-	for val in reduced_values:
-		new_map[val] = []
-	return new_map
+    raw_values = raw_map.values()
+    temp = ['0']
+    for val in sorted(raw_values):
+        if temp[-1] != val:
+            temp.append(val)
+    reduced_values = temp[1:]
+    new_map = {}
+    for val in reduced_values:
+        new_map[val] = []
+    return new_map
 
 def PrintReadErrorMessage(line, message):
     print(message, "Skipping this line.")
@@ -157,65 +157,3 @@ def IsInMultipleClassroomHubs(map_d, hubs):
             count += 1
 
     return count > 1
-
-
-def PrintMap(map_d):
-    print(map_d)
-
-def main():
-    print("====================================")
-    print("Unit Under Test:  ReadHubMapFromFile")
-    test_files = \
-        {"hub_map_tools_tests/test_hub_map_general.csv": \
-            {"error_expected":False,"number_read":3}, \
-         "hub_map_tools_tests/test_hub_map_duplicate.csv": \
-            {"error_expected":False,"number_read":2}, \
-         "hub_map_tools_tests/test_hub_map_1_field.csv": \
-            {"error_expected":False,"number_read":2}}
-
-    for hub_map_file in test_files.keys():
-        try:
-            print("+++++++++++++++++++++++++++++++++++++++++++++++++++")
-            print("Testing hub map file " + hub_map_file + ".")
-            test_hub_map = ReadHubMapFromFile(hub_map_file)
-            print("Processed hub map file successfully",)
-            if test_files[hub_map_file]["error_expected"]:
-                print("which NOT EXPECTED.")
-            else:
-                print("as expected.")
-                if len(test_hub_map) == test_files[hub_map_file]["number_read"]:
-                    print("The expected number of lines were processed.")
-                else:
-                    print("UNEXPECTED number of lines processed.")
-                    print(test_hub_map)
-        except:
-            print("Error reading hub_map file " + hub_map_file,)
-            if test_files[hub_map_file]["error_expected"]:
-                print("as expected.")
-            else:
-                print("where error was NOT EXPECTED.")
-
-    print("==============================================")
-    print("Unit Under Test:  ConvertHubStringListToIDList")
-    test_list = \
-        {1: {"hub_names":['Smith']        ,"hub_ids":['9001']}, \
-         2: {"hub_names":['Smits']        ,"hub_ids":['9001']}, \
-         3: {"hub_names":['Smyth']        ,"hub_ids":['Smyth']},
-         4: {"hub_names":['Smith','8th']  ,"hub_ids":['9001','9002']},
-         5: {"hub_names":['Smith','Smyth'],"hub_ids":['9001','Smyth']}}
-    test_hub_map = ReadHubMapFromFile ("hub_map_tools_tests/test_hub_map_general.csv")
-
-    for test_case in test_list.keys():
-        result = ConvertHubStringListToIDList \
-                    (test_list[test_case]["hub_names"], test_hub_map)
-        if result == test_list[test_case]["hub_ids"]:
-            print("Test case %d successful." % test_case)
-        else:
-            print("Test case %d FAILED." % test_case)
-            print("Actual Results:  ",)
-            print(result)
-            print("Expected Results:",)
-            print(test_list[test_case]["hub_ids"])
-
-if __name__ == '__main__':
-    main()
