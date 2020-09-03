@@ -1,10 +1,9 @@
 id,last_name,first_name,middle_name,suffix,email,family_id,family_relation,maiden_name,born_on,gender,parents,street,city,state,zip,home_number,work_number,work_number_ext,fax_number,mobile_number,mobile_provider,allow_sms,hub_membership,hubs_administered,person_created,person_updated,account_created,account_updated,last_login
-79678,Webmaster,EDS PTO,,,edsptowebmaster@gmail.com,71693,Adult,,"","","","",,"",,,,,,,"",0,"",Implementation;Volunteers,all,2014-12-17,2017-08-31,2014-12-17,2020-08-31,2020-08-28 17:18
-79678,Webmaster,EDS PTO,,,edsptowebmaster@gmail.com,71693,Adult,,"","","","",,"",,,,,,,"",0,"",Implementation;Volunteers,all,2014-12-17,2015-01-13,2014-12-17,2015-08-11,2015-08-11 19:34
+79678,Webmaster,EDS PTO,,,edsptowebmaster@gmail.com,71693,Adult,,"","","","",,"",,,,,,,"",0,"",Trayer (Room 19),all,2014-12-17,2015-01-13,2014-12-17,2015-08-11,2015-08-11 19:34
 79680,Smith,Nancy,,,,71695,Adult,,"",,"",,,,,,,,,,"",0,"",Implementation,all,2014-12-17,2015-05-08,2015-03-28,2015-06-15,2015-06-15 19:29
-81723,Smith,Gerhard,,,,71695,Adult2,,"","","","",,"",,,,,,,"",0,"","","",2015-02-02,2015-05-27,2015-05-08,2015-06-09,2015-06-09 14:01
+81723,Smith,Gerhard,,,,71695,,,"","","","",,"",,,,,,,"",0,"","","",2015-02-02,2015-05-27,2015-05-08,2015-06-09,2015-06-09 14:01
 85056,Smith,Andreas,,,,71695,Child1,,"",,,"",,"",,,,,,,"",0,"","","",2015-04-17,2015-05-27,"","",""
-81725,Smith,Jeremy,,,,71695,Child2,,"","",,"",,"",,,,,,,"",0,"","","",2015-02-02,2015-05-27,"","",""
+81725,Smith,Jeremy,,,,71695,,,"","",,"",,"",,,,,,,"",0,"","","",2015-02-02,2015-05-27,"","",""
 81648,Peterson,Steve,,,,71696,Adult,,"","","","",,"",,,,,,,"",0,"",Shamble (Room 39),"",2015-02-02,2015-08-03,"","",""
 79681,Peterson,Mary ,,,,71696,Adult2,,"",,"",,,,,,,,,,"",0,"",Implementation;Shamble (Room 39),"",2014-12-17,2015-05-01,2015-03-15,2015-04-24,""
 81650,Peterson,Sara Jane,,,,71696,Child1,,"","",,"","","","",,,,,,"",0,"","","",2015-02-02,2015-02-02,"","",""
