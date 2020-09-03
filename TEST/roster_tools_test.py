@@ -74,5 +74,12 @@ class UT_ReadRosterFromFile(unittest.TestCase):
         self.assertEqual(2, len(result[0].adults))
         self.assertEqual(1, len(result[0].children))
 
+    def test_11_extra_space_in_parents(self):
+        roster_file_name = data_file_path + "/test_11_extra_space_in_parents.xlsx"
+        result = roster_tools.ReadRosterFromFile(roster_file_name, common_hub_map)
+        self.assertEqual(1, len(result))
+        self.assertEqual(2, len(result[0].adults))
+        self.assertEqual(3, len(result[0].children))
+
 if __name__ == '__main__':
     unittest.main()
