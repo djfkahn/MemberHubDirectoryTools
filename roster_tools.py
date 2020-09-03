@@ -27,23 +27,29 @@ def ReadRosterFromFile(file_name, hub_map):
     ws = wb.active
 
     rosterC       = roster.Roster()
-    student_count = 0
+    student_count = -1
 
     for fields in ws.values:
 
-        # Skip the first row
-        if student_count == 0:
-            student_count += 1
+        ## Skip the first row
+        if student_count < 0:
+            student_count = 0
             continue
 
-        if fields[0] == "" or fields[1] == "" or fields[2] == "" or \
-           fields[3] == "" or (int(fields[2]) < 6 and fields[4] == ""):
-            print("Found row with missing required fields:", fields)
+        ## Skip any row for which all fields are not populated
+        empty_field_found = False
+        for field in fields:
+            if field == None or field == "":
+                empty_field_found = True
+                print("Found row with missing required fields:", fields)
+                continue
+        if empty_field_found:
             continue
 
-        # each row represents one student
+        ## each row represents one student
         student_count += 1
 
+        ## treat the student as a member of a new family...for now
         new_family = family.Family()
         new_family.CreateFromRoster(fields  = fields,
                                     hub_map = hub_map,
@@ -112,56 +118,3 @@ def ReadRoster(hub_map):
     """
     return ReadRosterFromFile(GetRosterFileName(), hub_map)
 
-
-def PrintEntries(testRoster):
-    while True:
-        end_entry = int(input("Enter entry at which to stop printing (enter 0 to stop): "))
-        if end_entry == 0:
-            break
-        elif end_entry > len(testRoster):
-            end_entry = len(testRoster)
-
-        start_entry = int(input("Enter entry from which to start printing: "))
-        if start_entry < 0:
-            start_entry += end_entry
-
-        for x in testRoster[start_entry:end_entry]:
-            x.Print()
-
-
-def main():
-
-    test_roster_files = \
-        {"roster_tools_tests/test_roster_general.csv": \
-            {"error_expected":False,"number_read":2}, \
-         "roster_tools_tests/test_roster_no_parents.csv": \
-            {"error_expected":False,"number_read":0}, \
-         "roster_tools_tests/test_roster_no_teacher.csv": \
-            {"error_expected":False,"number_read":1},
-         "roster_tools_tests/test_roster_four_fields.csv": \
-            {"error_expected":True,"number_read":0}}
-
-    for roster_file in test_roster_files.keys():
-        try:
-            print("+++++++++++++++++++++++++++++++++++++++++++++++++++")
-            print("Testing roster file " + roster_file + ".")
-            test_roster = ReadRosterFromFile(roster_file,{})
-            print("Processed roster file successfully",)
-            if test_roster_files[roster_file]["error_expected"]:
-                print("which NOT EXPECTED.")
-            else:
-                print("as expected.")
-                if len(test_roster) == test_roster_files[roster_file]["number_read"]:
-                    print("The expected number of lines were processed.")
-                else:
-                    print("UNEXPECTED number of lines processed.")
-        except:
-            print("Error reading roster file " + roster_file,)
-            if test_roster_files[roster_file]["error_expected"]:
-                print("as expected.")
-            else:
-                print("where error was NOT EXPECTED.")
-
-
-if __name__ == '__main__':
-    main()

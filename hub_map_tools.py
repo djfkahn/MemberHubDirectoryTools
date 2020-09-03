@@ -68,24 +68,33 @@ def ReadHubMapFromFile(file_name):
     2. Additional fields after the 2nd field are comments
     3. Lines beginning with a hash, "#", are comments
     """
-    map_d = {}
+    map_d     = {}
+    file_line = 0
 
     with open(file_name) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter='|')
 
         for fields in csv_reader:
+            
+            ## increment the file line number
+            file_line += 1
+            
             ## skip line if the first character is a comment
             if fields[0][0] == "#":
                 continue
+            
             ## skip lines that do not have the right number of fields
             if len(fields) < 2:
                 PrintReadErrorMessage \
-                    (line, "Not enough fields found on this line.")
+                    (line    = fields, \
+                     message = "Only "+str(len(fields))+" fields found on line "+str(file_line)+".  Need at least 2.")
                 continue
+
             ## skip lines for which the teacher name is not unique
             if fields[0] in map_d.keys():
                 PrintReadErrorMessage \
-                    (line, "Duplicate teacher found on this line.")
+                    (line    = fields, \
+                     message = "Duplicate teacher found on this line.")
                 continue
 
             map_d.update({fields[0]:fields[1]})
