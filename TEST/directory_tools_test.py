@@ -43,6 +43,10 @@ class UT_ReadDirectoryFromFile(unittest.TestCase):
         result = directory_tools.ReadDirectoryFromFile(file_name, common_hub_map)
         self.assertEqual(3, len(result))
 
+    def test_7_adult_and_child_same_name(self):
+        file_name = data_file_path + "/test_7_adult_and_child_same_name.csv"
+        result = directory_tools.ReadDirectoryFromFile(file_name, common_hub_map)
+        self.assertEqual(1, len(result))
 
 
 if __name__ == '__main__':
