@@ -20,9 +20,18 @@ class Person:
         self.family_relation = family_relation
 
     def IsSame (self, other):
-        return self.last_name.lower()  == other.last_name.lower() and \
-                self.first_name.lower() == other.first_name.lower() and \
-                self.family_relation[:5].lower() == other.family_relation[:5].lower()
+        ##
+        ## Persons are not the same if they do not have the same family relation
+        if self.family_relation[:5].lower() != other.family_relation[:5].lower():
+            return False
+        
+        ##
+        ## Treat both names in total, to avoid situations in which multi-word names
+        ## are split in unexpected ways.  Also, convert all hyphens ("-") to spaces.
+        this_full_name = self.first_name.lower()  + " " + self.last_name.lower()
+        that_full_name = other.first_name.lower() + " " + other.last_name.lower()
+        return this_full_name.replace("-", " ")  == that_full_name.replace("-", " ")
+                
 
     def SetHubs (self, hub_list):
         for hub_id in hub_list:
