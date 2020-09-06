@@ -100,13 +100,8 @@ def ReadDirectoryFromFile(file_name, hub_map):
                 # store the family ID currently working on
                 family_id = fields[6]
 
-            if fields[7][:5].lower() == "adult":
-                new_family.AddAdultFromDirectory(fields, hub_map)
-            elif fields[7][:5].lower() == "child":
-                new_family.AddChildFromDirectory(fields, hub_map)
-            else:
-                PrintErrorMessage \
-                    (fields, "Found entry in directory that is neither an adult nor a child.")
+            # add the person to the new family
+            new_family.AddFromDirectory(fields, hup_map)
 
         else:
             # once the last row is read, append the last family processed to the

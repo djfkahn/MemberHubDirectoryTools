@@ -67,15 +67,19 @@ class Family:
                                 hub_map         = hub_map)
         self.children.append(new_child)
 
-    def AddAdultFromDirectory(self, fields, hub_map):
-        new_adult = person.DirectoryPerson()
-        new_adult.SetFromDirectory(fields, hub_map)
-        self.adults.append(new_adult)
+    def AddFromDirectory(self, fields, hub_map):
+        if fields[7][:5].lower() == 'adult':
+            new_adult = person.DirectoryPerson()
+            new_adult.SetFromDirectory(fields, hub_map)
+            self.adults.append(new_adult)
+        elif fields[7][:5].lower() == 'child':
+            new_child = person.DirectoryPerson()
+            new_child.SetFromDirectory(fields, hub_map)
+            self.children.append(new_child)
+        else:
+            print("Attempting to add person from Directory to family with unrecognized family relation.")
+            print(fields)
 
-    def AddChildFromDirectory(self, fields, hub_map):
-        new_child = person.DirectoryPerson()
-        new_child.SetFromDirectory(fields, hub_map)
-        self.children.append(new_child)
 
     def IsSameFamily(self, other):
         """Family.IsSameFamily
@@ -105,6 +109,7 @@ class Family:
                     return True
 
         return False
+
 
     def HasNewChildren(self, other):
         """Family.HasNewChildren

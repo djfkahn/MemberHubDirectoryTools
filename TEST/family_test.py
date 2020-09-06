@@ -110,11 +110,11 @@ class UT_CreateFromRoster(unittest.TestCase):
         self.assertEqual(0, len(result.adults))
         self.assertEqual(0, len(result.children))
 
-class UT_AddAdultFromDirectory(unittest.TestCase):
-    def test_01_normal(self):
+class UT_AddFromDirectory(unittest.TestCase):
+    def test_01_adult_input(self):
         fields = ['1234','C','A','','','email','5678','Adult','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
         result = family.Family()
-        result.AddAdultFromDirectory(fields, common_hub_map)
+        result.AddFromDirectory(fields, common_hub_map)
         self.assertEqual(1, len(result.adults))
         self.assertEqual('A', result.adults[0].first_name)
         self.assertEqual('C', result.adults[0].last_name)
@@ -128,29 +128,28 @@ class UT_AddAdultFromDirectory(unittest.TestCase):
     def test_02_child_input(self):
         fields = ['1234','C','A','','','email','5678','Child','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
         result = family.Family()
-        result.AddAdultFromDirectory(fields, common_hub_map)
-        self.assertEqual(0, len(result.adults))
-        self.assertEqual(0, len(result.children))
-
-class UT_AddChildFromDirectory(unittest.TestCase):
-    def test_01_normal(self):
-        fields = ['1234','C','A','','','email','5678','Child','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        result = family.Family()
-        result.AddChildFromDirectory(fields, common_hub_map)
+        result.AddFromDirectory(fields, common_hub_map)
         self.assertEqual(0, len(result.adults))
         self.assertEqual(1, len(result.children))
-        self.assertEqual('A', result.children[0].first_name)
-        self.assertEqual('C', result.children[0].last_name)
-        self.assertEqual('1234', result.children[0].person_id)
-        self.assertEqual('5678', result.children[0].family_id)
-        self.assertEqual('Child',result.children[0].family_relation)
-        self.assertEqual('email',result.children[0].email)
-        self.assertEqual(['0000'],result.children[0].hubs)
 
-    def test_02_adult_input(self):
-        fields = ['1234','C','A','','','email','5678','Adult','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
+    def test_03_adult_lower_input(self):
+        fields = ['1234','C','A','','','email','5678','adult','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
         result = family.Family()
-        result.AddChildFromDirectory(fields, common_hub_map)
+        result.AddFromDirectory(fields, common_hub_map)
+        self.assertEqual(1, len(result.adults))
+        self.assertEqual(0, len(result.children))
+
+    def test_04_child_lower_input(self):
+        fields = ['1234','C','A','','','email','5678','child','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
+        result = family.Family()
+        result.AddFromDirectory(fields, common_hub_map)
+        self.assertEqual(0, len(result.adults))
+        self.assertEqual(1, len(result.children))
+
+    def test_05_other_input(self):
+        fields = ['1234','C','A','','','email','5678','Other','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
+        result = family.Family()
+        result.AddFromDirectory(fields, common_hub_map)
         self.assertEqual(0, len(result.adults))
         self.assertEqual(0, len(result.children))
 
@@ -158,9 +157,9 @@ class UT_IsSameFamily(unittest.TestCase):
     def test_01_same_family(self):
         this = family.Family()
         directory_fields = ['1234','C','A','','','email','5678','Adult','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddAdultFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         directory_fields = ['1235','C','D','','','email','5678','Child','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddChildFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         that = family.Family()
         that.CreateFromRoster(['C', 'D', '0', 'A C', 'Kinder, Jane'], common_hub_map, common_RosterC)
         self.assertTrue(this.IsSameFamily(that))
@@ -168,9 +167,9 @@ class UT_IsSameFamily(unittest.TestCase):
     def test_02_same_adult_different_child(self):
         this = family.Family()
         directory_fields = ['1234','C','A','','','email','5678','Adult','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddAdultFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         directory_fields = ['1235','C','D','','','email','5678','Child','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddChildFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         that = family.Family()
         that.CreateFromRoster(['C', 'E', '0', 'A C', 'Kinder, Jane'], common_hub_map, common_RosterC)
         self.assertTrue(this.IsSameFamily(that))
@@ -178,7 +177,7 @@ class UT_IsSameFamily(unittest.TestCase):
     def test_03_directory_orphan(self):
         this = family.Family()
         directory_fields = ['1235','C','D','','','email','5678','Child','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddChildFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         that = family.Family()
         that.CreateFromRoster(['C', 'E', '0', 'A C', 'Kinder, Jane'], common_hub_map, common_RosterC)
         self.assertFalse(this.IsSameFamily(that))
@@ -186,9 +185,9 @@ class UT_IsSameFamily(unittest.TestCase):
     def test_04_roster_orphan(self):
         this = family.Family()
         directory_fields = ['1234','C','A','','','email','5678','Adult','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddAdultFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         directory_fields = ['1235','C','D','','','email','5678','Child','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddChildFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         that = family.Family()
         that.CreateFromRoster(['C', 'E', '0', ' ', 'Kinder, Jane'], common_hub_map, common_RosterC)
         self.assertFalse(this.IsSameFamily(that))
@@ -196,9 +195,9 @@ class UT_IsSameFamily(unittest.TestCase):
     def test_05_different_adult_same_child(self):
         this = family.Family()
         directory_fields = ['1234','C','A','','','email','5678','Adult','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddAdultFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         directory_fields = ['1235','C','D','','','email','5678','Child','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddChildFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         that = family.Family()
         that.CreateFromRoster(['C', 'D', '0', 'E C', 'Kinder, Jane'], common_hub_map, common_RosterC)
         self.assertFalse(this.IsSameFamily(that))
@@ -206,11 +205,11 @@ class UT_IsSameFamily(unittest.TestCase):
     def test_06_more_adults_in_directory(self):
         this = family.Family()
         directory_fields = ['1234','C','A','','','email','5678','Adult','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddAdultFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         directory_fields = ['1236','C','B','','','email','5678','Adult','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddAdultFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         directory_fields = ['1235','C','D','','','email','5678','Child','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddChildFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         that = family.Family()
         that.CreateFromRoster(['C', 'D', '0', 'A C', 'Kinder, Jane'], common_hub_map, common_RosterC)
         self.assertTrue(this.IsSameFamily(that))
@@ -218,9 +217,9 @@ class UT_IsSameFamily(unittest.TestCase):
     def test_07_more_adults_in_roster(self):
         this = family.Family()
         directory_fields = ['1234','C','A','','','email','5678','Adult','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddAdultFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         directory_fields = ['1235','C','D','','','email','5678','Child','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddChildFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         that = family.Family()
         that.CreateFromRoster(['C', 'D', '0', 'A and B C', 'Kinder, Jane'], common_hub_map, common_RosterC)
         self.assertTrue(this.IsSameFamily(that))
@@ -229,9 +228,9 @@ class UT_HasNewChildren(unittest.TestCase):
     def test_01_same_family(self):
         this = family.Family()
         directory_fields = ['1234','C','A','','','email','5678','Adult','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddAdultFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         directory_fields = ['1235','C','D','','','email','5678','Child','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddChildFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         that = family.Family()
         that.CreateFromRoster(['C', 'D', '0', 'A C', 'Kinder, Jane'], common_hub_map, common_RosterC)
         self.assertFalse(this.HasNewChildren(that))
@@ -239,9 +238,9 @@ class UT_HasNewChildren(unittest.TestCase):
     def test_02_same_adult_different_child(self):
         this = family.Family()
         directory_fields = ['1234','C','A','','','email','5678','Adult','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddAdultFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         directory_fields = ['1235','C','D','','','email','5678','Child','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddChildFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         that = family.Family()
         that.CreateFromRoster(['C', 'E', '0', 'A C', 'Kinder, Jane'], common_hub_map, common_RosterC)
         self.assertTrue(this.HasNewChildren(that))
@@ -249,7 +248,7 @@ class UT_HasNewChildren(unittest.TestCase):
     def test_03_directory_orphan(self):
         this = family.Family()
         directory_fields = ['1235','C','D','','','email','5678','Child','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddChildFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         that = family.Family()
         that.CreateFromRoster(['C', 'E', '0', 'A C', 'Kinder, Jane'], common_hub_map, common_RosterC)
         self.assertTrue(this.HasNewChildren(that))
@@ -257,9 +256,9 @@ class UT_HasNewChildren(unittest.TestCase):
     def test_04_roster_orphan(self):
         this = family.Family()
         directory_fields = ['1234','C','A','','','email','5678','Adult','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddAdultFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         directory_fields = ['1235','C','D','','','email','5678','Child','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddChildFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         that = family.Family()
         that.CreateFromRoster(['C', 'E', '0', ' ', 'Kinder, Jane'], common_hub_map, common_RosterC)
         self.assertTrue(this.HasNewChildren(that))
@@ -267,9 +266,9 @@ class UT_HasNewChildren(unittest.TestCase):
     def test_05_different_adult_same_child(self):
         this = family.Family()
         directory_fields = ['1234','C','A','','','email','5678','Adult','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddAdultFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         directory_fields = ['1235','C','D','','','email','5678','Child','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddChildFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         that = family.Family()
         that.CreateFromRoster(['C', 'D', '0', 'E C', 'Kinder, Jane'], common_hub_map, common_RosterC)
         self.assertFalse(this.HasNewChildren(that))
@@ -277,11 +276,11 @@ class UT_HasNewChildren(unittest.TestCase):
     def test_06_more_adults_in_directory(self):
         this = family.Family()
         directory_fields = ['1234','C','A','','','email','5678','Adult','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddAdultFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         directory_fields = ['1236','C','B','','','email','5678','Adult','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddAdultFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         directory_fields = ['1235','C','D','','','email','5678','Child','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddChildFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         that = family.Family()
         that.CreateFromRoster(['C', 'D', '0', 'A C', 'Kinder, Jane'], common_hub_map, common_RosterC)
         self.assertFalse(this.HasNewChildren(that))
@@ -289,9 +288,9 @@ class UT_HasNewChildren(unittest.TestCase):
     def test_07_more_adults_in_roster(self):
         this = family.Family()
         directory_fields = ['1234','C','A','','','email','5678','Adult','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddAdultFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         directory_fields = ['1235','C','D','','','email','5678','Child','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddChildFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         that = family.Family()
         that.CreateFromRoster(['C', 'D', '0', 'A and B C', 'Kinder, Jane'], common_hub_map, common_RosterC)
         self.assertFalse(this.HasNewChildren(that))
@@ -300,9 +299,9 @@ class UT_FormFamilyWithNewChildren(unittest.TestCase):
     def test_01_family_with_new_child(self):
         this = family.Family()
         directory_fields = ['1234','C','A','','','email','5678','Adult','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddAdultFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         directory_fields = ['1235','C','D','','','email','5678','Child','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddChildFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         that = family.Family()
         that.CreateFromRoster(['C', 'E', '0', 'A C', 'Kinder, Jane'], common_hub_map, common_RosterC)
         result = family.Family()
@@ -315,9 +314,9 @@ class UT_FormFamilyWithNewChildren(unittest.TestCase):
     def test_02_family_without_new_child(self):
         this = family.Family()
         directory_fields = ['1234','C','A','','','email','5678','Adult','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddAdultFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         directory_fields = ['1235','C','D','','','email','5678','Child','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddChildFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         that = family.Family()
         that.CreateFromRoster(['C', 'D', '0', 'A C', 'Kinder, Jane'], common_hub_map, common_RosterC)
         result = family.Family()
@@ -329,9 +328,9 @@ class UT_CombineWith(unittest.TestCase):
     def test_01_add_new_child(self):
         this = family.Family()
         directory_fields = ['1234','C','A','','','email','5678','Adult','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddAdultFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         directory_fields = ['1235','C','D','','','email','5678','Child','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddChildFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         that = family.Family()
         that.CreateFromRoster(['C', 'E', '0', 'A C', 'Kinder, Jane'], common_hub_map, common_RosterC)
         this.CombineWith(that)
@@ -344,9 +343,9 @@ class UT_CombineWith(unittest.TestCase):
     def test_02_existing_child(self):
         this = family.Family()
         directory_fields = ['1234','C','A','','','email','5678','Adult','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddAdultFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         directory_fields = ['1235','C','D','','','email','5678','Child','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddChildFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         that = family.Family()
         that.CreateFromRoster(['C', 'D', '0', 'A C', 'Kinder, Jane'], common_hub_map, common_RosterC)
         this.CombineWith(that)
@@ -358,55 +357,55 @@ class UT_IsChildless(unittest.TestCase):
     def test_01_parent_and_chlid(self):
         this = family.Family()
         directory_fields = ['1234','C','A','','','email','5678','Adult','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddAdultFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         directory_fields = ['1235','C','D','','','email','5678','Child','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddChildFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         self.assertFalse(this.IsChildless())
 
     def test_02_parent_no_chlid(self):
         this = family.Family()
         directory_fields = ['1234','C','A','','','email','5678','Adult','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddAdultFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         self.assertTrue(this.IsChildless())
 
     def test_03_teacher(self):
         this = family.Family()
         directory_fields = ['1234','C','A','','','email','5678','Adult','','','','','','','','','','','','','','','0','','Teachers','all','','','','','']
-        this.AddAdultFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         self.assertFalse(this.IsChildless())
 
     def test_04_Staff(self):
         this = family.Family()
         directory_fields = ['1234','C','A','','','email','5678','Adult','','','','','','','','','','','','','','','0','','Staff','all','','','','','']
-        this.AddAdultFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         self.assertFalse(this.IsChildless())
 
     def test_05_volunteer(self):
         this = family.Family()
         directory_fields = ['1234','C','A','','','email','5678','Adult','','','','','','','','','','','','','','','0','','Volunteers','all','','','','','']
-        this.AddAdultFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         self.assertFalse(this.IsChildless())
 
 class UT_IsOrphan(unittest.TestCase):
     def test_01_child_and_parent(self):
         this = family.Family()
         directory_fields = ['1234','C','A','','','email','5678','Adult','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddAdultFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         directory_fields = ['1235','C','D','','','email','5678','Child','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddChildFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         self.assertFalse(this.IsOrphan())
 
     def test_02_child_no_parent(self):
         this = family.Family()
         directory_fields = ['1234','C','A','','','email','5678','Child','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddChildFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         self.assertTrue(this.IsOrphan())
 
 class UT_FindAdultInFamily(unittest.TestCase):
     def test_01_one_adult_one_match(self):
         this = family.Family()
         directory_fields = ['1234','C','A','','','email','5678','Adult','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddAdultFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         to_find = person.RosterPerson()
         to_find.SetFromRoster('C', 'A', 'Kinder, Jane', 'Adult', common_hub_map)
         self.assertIsNotNone(this.FindAdultInFamily(to_find))
@@ -414,9 +413,9 @@ class UT_FindAdultInFamily(unittest.TestCase):
     def test_02_two_adult_one_match(self):
         this = family.Family()
         directory_fields = ['1234','C','A','','','email','5678','Adult','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddAdultFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         directory_fields = ['1235','C','D','','','email','5678','Adult','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddAdultFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         to_find = person.RosterPerson()
         to_find.SetFromRoster('C', 'A', 'Kinder, Jane', 'Adult', common_hub_map)
         self.assertIsNotNone(this.FindAdultInFamily(to_find))
@@ -424,11 +423,11 @@ class UT_FindAdultInFamily(unittest.TestCase):
     def test_03_three_adult_one_match(self):
         this = family.Family()
         directory_fields = ['1234','C','A','','','email','5678','Adult','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddAdultFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         directory_fields = ['1235','C','D','','','email','5678','Adult','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddAdultFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         directory_fields = ['1235','C','E','','','email','5678','Adult','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddAdultFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         to_find = person.RosterPerson()
         to_find.SetFromRoster('C', 'A', 'Kinder, Jane', 'Adult', common_hub_map)
         self.assertIsNotNone(this.FindAdultInFamily(to_find))
@@ -436,9 +435,9 @@ class UT_FindAdultInFamily(unittest.TestCase):
     def test_04_two_adult_no_match(self):
         this = family.Family()
         directory_fields = ['1234','C','A','','','email','5678','Adult','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddAdultFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         directory_fields = ['1235','C','D','','','email','5678','Adult','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddAdultFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         to_find = person.RosterPerson()
         to_find.SetFromRoster('C', 'E', 'Kinder, Jane', 'Adult', common_hub_map)
         self.assertIsNone(this.FindAdultInFamily(to_find))
@@ -446,7 +445,7 @@ class UT_FindAdultInFamily(unittest.TestCase):
     def test_05_no_adult(self):
         this = family.Family()
         directory_fields = ['1234','C','A','','','email','5678','Child','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddChildFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         to_find = person.RosterPerson()
         to_find.SetFromRoster('C', 'A', 'Kinder, Jane', 'Adult', common_hub_map)
         self.assertIsNone(this.FindAdultInFamily(to_find))
@@ -455,7 +454,7 @@ class UT_FindChildInFamily(unittest.TestCase):
     def test_01_one_child_one_match(self):
         this = family.Family()
         directory_fields = ['1234','C','A','','','email','5678','Child','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddChildFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         to_find = person.RosterPerson()
         to_find.SetFromRoster('C', 'A', 'Kinder, Jane', 'Child', common_hub_map)
         self.assertIsNotNone(this.FindChildInFamily(to_find))
@@ -463,9 +462,9 @@ class UT_FindChildInFamily(unittest.TestCase):
     def test_02_two_child_one_match(self):
         this = family.Family()
         directory_fields = ['1234','C','A','','','email','5678','Child','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddChildFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         directory_fields = ['1234','C','B','','','email','5678','Child','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddChildFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         to_find = person.RosterPerson()
         to_find.SetFromRoster('C', 'A', 'Kinder, Jane', 'Child', common_hub_map)
         self.assertIsNotNone(this.FindChildInFamily(to_find))
@@ -473,11 +472,11 @@ class UT_FindChildInFamily(unittest.TestCase):
     def test_03_three_child_one_match(self):
         this = family.Family()
         directory_fields = ['1234','C','A','','','email','5678','Child','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddChildFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         directory_fields = ['1234','C','B','','','email','5678','Child','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddChildFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         directory_fields = ['1234','C','D','','','email','5678','Child','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddChildFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         to_find = person.RosterPerson()
         to_find.SetFromRoster('C', 'A', 'Kinder, Jane', 'Child', common_hub_map)
         self.assertIsNotNone(this.FindChildInFamily(to_find))
@@ -485,11 +484,11 @@ class UT_FindChildInFamily(unittest.TestCase):
     def test_04_three_child_no_match(self):
         this = family.Family()
         directory_fields = ['1234','C','A','','','email','5678','Child','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddChildFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         directory_fields = ['1234','C','B','','','email','5678','Child','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddChildFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         directory_fields = ['1234','C','D','','','email','5678','Child','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddChildFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         to_find = person.RosterPerson()
         to_find.SetFromRoster('C', 'E', 'Kinder, Jane', 'Child', common_hub_map)
         self.assertIsNone(this.FindChildInFamily(to_find))
@@ -497,9 +496,9 @@ class UT_FindChildInFamily(unittest.TestCase):
     def test_05_no_child(self):
         this = family.Family()
         directory_fields = ['1234','C','A','','','email','5678','Adult','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddAdultFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         directory_fields = ['1234','C','B','','','email','5678','Adult','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        this.AddAdultFromDirectory(directory_fields, common_hub_map)
+        this.AddFromDirectory(directory_fields, common_hub_map)
         to_find = person.RosterPerson()
         to_find.SetFromRoster('C', 'A', 'Kinder, Jane', 'Child', common_hub_map)
         self.assertIsNone(this.FindChildInFamily(to_find))
