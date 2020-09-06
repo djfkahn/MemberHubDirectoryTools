@@ -147,7 +147,7 @@ class UT_AddChildFromDirectory(unittest.TestCase):
         self.assertEqual('email',result.children[0].email)
         self.assertEqual(['0000'],result.children[0].hubs)
 
-    def test_02_child_input(self):
+    def test_02_adult_input(self):
         fields = ['1234','C','A','','','email','5678','Adult','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
         result = family.Family()
         result.AddChildFromDirectory(fields, common_hub_map)

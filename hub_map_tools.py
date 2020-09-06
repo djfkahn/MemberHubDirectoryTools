@@ -125,7 +125,8 @@ def IsInClassroomHub(map_d, hub_id):
     ASSUMPTIONS:
     None
     """
-    return hub_id in map_d.values() or \
+    return hub_id in map_d.keys() or \
+           hub_id in map_d.values() or \
            hub_id == "Teachers" or \
            hub_id == "Staff" or \
            hub_id == "Volunteers"

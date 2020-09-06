@@ -3,6 +3,7 @@
 """
 import person
 import name_parser
+import hub_map_tools
 
 class Family:
     """Class Family
@@ -36,10 +37,20 @@ class Family:
     def CreateFromRoster(self, fields, hub_map, rosterC):
         # for elementary school (< 6th grade) teacher name is retained
         # for middle school, teacher name is replaced with grade level
-        if int(fields[2]) < 6:
-            teacher = fields[4]
-        else:
+        if 0 <= int(fields[2]) <= 5:
+            if hub_map_tools.IsInClassroomHub(hub_map, fields[4]):
+                teacher = fields[4]
+            else:
+                print("Elementry school student from Roster found with unknown teacher.")
+                print(fields)
+                return
+        elif 6 <= int(fields[2]) <= 8:
             teacher = fields[2]
+        else:
+            print("Student from Roster found with unknown teacher and unknown grade level.")
+            print(fields)
+            return
+           
 
         # add adults to the family
         self.AddAdultsFromCombinedField(teacher    = teacher,
@@ -170,7 +181,7 @@ class Family:
                 return child
         return None
 
-   def Print(self):
+    def Print(self):
         print("Adults:")
         for adult in self.adults:
             adult.Print()
