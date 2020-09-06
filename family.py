@@ -77,7 +77,7 @@ class Family:
         """
         # Families cannot be the same, if either one of them contain orphans
         if self.IsOrphan() or other.IsOrphan():
-        	return False
+            return False
 
         adults_found = 0
         for other_adult in other.adults:
@@ -157,7 +157,7 @@ class Family:
     def FindAdultInFamily(self, to_find):
         # Cannot find adult in a family if family is orphan
         if self.IsOrphan():
-        	return None
+            return None
 
         for adult in self.adults:
             if to_find.IsSame(adult):
@@ -170,14 +170,7 @@ class Family:
                 return child
         return None
 
-    def FindPersonInFamily(self, to_find):
-        try_person = self.FindAdultInFamily(to_find)
-        if try_person == None:
-            try_person = self.FindChildInFamily(to_find)
-
-        return try_person
-
-    def Print(self):
+   def Print(self):
         print("Adults:")
         for adult in self.adults:
             adult.Print()
