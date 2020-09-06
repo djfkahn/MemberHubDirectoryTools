@@ -353,6 +353,19 @@ class UT_CombineWith(unittest.TestCase):
         self.assertEqual('D',this.children[0].first_name)
         self.assertEqual('C',this.children[0].last_name)
 
+    def test_03_different_family(self):
+        this = family.Family()
+        directory_fields = ['1234','C','A','','','email','5678','Adult','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
+        this.AddFromDirectory(directory_fields, common_hub_map)
+        directory_fields = ['1235','C','B','','','email','5678','Child','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
+        this.AddFromDirectory(directory_fields, common_hub_map)
+        that = family.Family()
+        that.CreateFromRoster(['C', 'E', '0', 'A D', 'Kinder, Jane'], common_hub_map, common_RosterC)
+        this.CombineWith(that)
+        self.assertEqual(1,len(this.children))
+        self.assertEqual('B',this.children[0].first_name)
+        self.assertEqual('C',this.children[0].last_name)
+
 class UT_IsChildless(unittest.TestCase):
     def test_01_parent_and_chlid(self):
         this = family.Family()

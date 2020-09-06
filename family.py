@@ -140,6 +140,9 @@ class Family:
                 self.children.append(roster_child)
 
     def CombineWith(self, other):
+        if not self.IsSameFamily(other):
+            return
+        
         for possible_child in other.children:
             # if the possible_child cannot be found in this family...
             if self.FindChildInFamily(possible_child) == None:
