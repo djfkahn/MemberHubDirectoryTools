@@ -28,7 +28,7 @@ class UT_Init(unittest.TestCase):
         self.assertEqual(1, len(result.errata))
         
     def test_04_unknown_show_errors(self):
-        with patch('builtins.input', side_effect=['x']):
+        with patch('builtins.input', side_effect=['x',None]):
             result = roster.Roster()
         self.assertEqual(0, len(result.table))
         self.assertTrue(result.hideErrataOutput)
