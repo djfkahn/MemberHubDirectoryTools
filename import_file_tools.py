@@ -12,13 +12,6 @@ def FormTimeTag():
     tag = strftime("%Y-%m-%d-%H-%M-%S", localtime())
     return tag
 
-# def ConvertHubListToImportString(hub_list):
-#     hub_str = "/"
-#     for hub in hub_list:
-#         hub_str += str(hub) + "/"
-# 
-#     return hub_str  # strip off the trailing ';'
-
 def WriteNewMemberLine(open_file, family_relation, first_name, last_name, person_id):
     line = "%s,%s,%s,%s\n" % (family_relation, first_name, last_name, person_id)
     open_file.write(line)
