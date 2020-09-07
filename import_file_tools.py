@@ -12,12 +12,12 @@ def FormTimeTag():
     tag = strftime("%Y-%m-%d-%H-%M-%S", localtime())
     return tag
 
-def ConvertHubListToImportString(hub_list):
-    hub_str = "/"
-    for hub in hub_list:
-        hub_str += str(hub) + "/"
-
-    return hub_str  # strip off the trailing ';'
+# def ConvertHubListToImportString(hub_list):
+#     hub_str = "/"
+#     for hub in hub_list:
+#         hub_str += str(hub) + "/"
+# 
+#     return hub_str  # strip off the trailing ';'
 
 def WriteNewMemberLine(open_file, family_relation, first_name, last_name, person_id):
     line = "%s,%s,%s,%s\n" % (family_relation, first_name, last_name, person_id)
@@ -85,11 +85,11 @@ Summary: 1. opens file for writing, and writes the column titles
         WriteHublessLine (open_file, "first_name", "last_name", "hubs", "person_id")
 
         for this_person in people:
-        	WriteHublessLine(open_file  = open_file,
-        					 first_name = this_person.first_name,
-        					 last_name  = this_person.last_name,
-        					 hubs       = this_person.hubs,
-        					 person_id  = this_person.person_id)
+            WriteHublessLine(open_file  = open_file,
+                             first_name = this_person.first_name,
+                             last_name  = this_person.last_name,
+                             hubs       = this_person.hubs,
+                             person_id  = this_person.person_id)
 
     finally:
         open_file.close()
@@ -98,14 +98,14 @@ Summary: 1. opens file for writing, and writes the column titles
 
 def CreateEmaillessFile(people, file_prefix):
 
-	file_name = file_prefix + "_" + FormTimeTag() + ".txt"
-	print("Writing to file called %s." % file_name)
-	try:
-		open_file = open(file_name,"w")
-		for person in people:
-			line = "%s|%s|%s|%s\n" % (person.first_name, person.last_name, person.family_relation, person.hubs)
-			open_file.write(line)
+    file_name = file_prefix + "_" + FormTimeTag() + ".txt"
+    print("Writing to file called %s." % file_name)
+    try:
+        open_file = open(file_name,"w")
+        for person in people:
+            line = "%s|%s|%s|%s\n" % (person.first_name, person.last_name, person.family_relation, person.hubs)
+            open_file.write(line)
 
 
-	finally:
-		open_file.close()
+    finally:
+        open_file.close()

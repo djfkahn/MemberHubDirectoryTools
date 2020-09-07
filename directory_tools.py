@@ -101,7 +101,7 @@ def ReadDirectoryFromFile(file_name, hub_map):
                 family_id = fields[6]
 
             # add the person to the new family
-            new_family.AddFromDirectory(fields, hup_map)
+            new_family.AddFromDirectory(fields, hub_map)
 
         else:
             # once the last row is read, append the last family processed to the
