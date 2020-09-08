@@ -1,0 +1,41 @@
+#
+# This is a sample file.  It must be updated to match school hubs.
+#
+# Kinder Teachers
+Kinder, Jane|0000
+Kinder (Room 0)|0000
+#
+# 1st Grade Teachers
+First, John|1111
+First (Room 1)|1111
+#
+# 2nd Grade Teachers
+#
+Second, Jane|2222
+Second (Room 2)|2222
+#
+# 3rd Grade Teachers
+Third, John|3333
+Third (Room 3)|3333
+#
+# 4th Grade Teachers
+#
+Fourth, Jane|4444
+Fourth (Room 4)|4444
+#
+# 5th Grade Teachers
+Fifth, John|5555
+Fifth (Room 5)|5555
+#
+# Middle School
+6|6666
+7|7777
+8|8888
+6th|6666
+7th|7777
+8th|8888
+6th Grade|6666
+7th Grade|7777
+8th Grade|8888
+#
+# To be Deleted

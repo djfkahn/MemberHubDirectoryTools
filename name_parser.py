@@ -131,26 +131,3 @@ def IsCompoundLastName(word):
     prefix_words = ('vere','von','van','de','del','della','di','da','d',\
              'pietro','vanden','du','st.','st','la','ter','o')
     return word.lower() in prefix_words
-
-
-def main():
-    test_names = ("Jane Doe", \
-                  "Zane D Souza", \
-                  "Stephanie de Rayal", \
-                  "Edward de Sa", \
-                  "Stewart O Flynn",\
-                  "Claude van Damme",
-                  "John and Jane Smith",
-                  "John And Jane Smith",
-                  "John & Jane Smith",
-                  "Joe Schmoe and Betty Davis",
-                  "Joan and Marc Edward Vlasic",
-                  "Marc Edward and Joan Vlasic") ## TBD - expect this one will not parse correctly
-
-    testRosterC = roster.Roster()
-    for name in test_names:
-        answer = ParseFullName(name, testRosterC)
-        print(answer)
-
-if __name__ == '__main__':
-    main()
