@@ -16,7 +16,7 @@ class Roster:
         self.table            = []
         # Ask whether to show errors, and then hide the errata output as the opposite of that answer
         show_errors = " "
-        while show_errors not in (None, 'y', 'Y'):
+        while show_errors not in (None, '', 'y', 'Y'):
             show_errors       = input("Print corrected roster errors to the screen? (press <enter> for \"no\", press \"y\" for \"yes\"): ")
     
         self.hideErrataOutput = not show_errors

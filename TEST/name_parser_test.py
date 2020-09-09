@@ -31,12 +31,12 @@ class UT_ParseType1Name(unittest.TestCase):
 
     def test_04_hyphenated_last_name(self):
         result = name_parser.ParseType1Name(['John', 'Jane Smith-Doe'])
-        expect = [{'first' : 'John', 'last' : 'Smith-Doe'}, {'first' : 'Jane Smith', 'last' : 'Smith-Doe'}]
+        expect = [{'first' : 'John', 'last' : 'Smith-Doe'}, {'first' : 'Jane', 'last' : 'Smith-Doe'}]
         self.assertEqual(expect, result)
 
     def test_05_more_than_2_fields(self):
         result = name_parser.ParseType1Name(['John', 'Susan', 'Jane Doe'])
-        expect = [{'first' : 'John', 'last' : 'Doe'}, {'first' : 'Susan', 'last' : 'Doe'}, {'first' : 'Jane Smith', 'last' : 'Doe'}]
+        expect = [{'first' : 'John', 'last' : 'Doe'}, {'first' : 'Susan', 'last' : 'Doe'}, {'first' : 'Jane', 'last' : 'Doe'}]
         self.assertEqual(expect, result)
 
 
@@ -151,6 +151,58 @@ class UT_ParseFullName(unittest.TestCase):
         expect = [{'first' : 'John', 'last' : 'Doe'}, {'first' : 'Jane', 'last' : 'Doe'}]
         self.assertEqual(expect, result)
 
+class UT_SplitNameString(unittest.TestCase):
+    def test_01_one_name(self):
+        result = name_parser.SplitNameString('John Doe')
+        self.assertEqual(['John Doe'], result)
+
+    def test_02_two_names(self):
+        result = name_parser.SplitNameString('John and Jane Doe')
+        self.assertEqual(['John', 'Jane Doe'], result)
+        result = name_parser.SplitNameString('John And Jane Doe')
+        self.assertEqual(['John', 'Jane Doe'], result)
+        result = name_parser.SplitNameString('John & Jane Doe')
+        self.assertEqual(['John', 'Jane Doe'], result)
+        result = name_parser.SplitNameString('John, Jane Doe')
+        self.assertEqual(['John', 'Jane Doe'], result)
+
+    def test_03_three_names(self):
+        result = name_parser.SplitNameString('John and Jane and Bob Doe')
+        self.assertEqual(['John', 'Jane', 'Bob Doe'], result)
+        result = name_parser.SplitNameString('John And Jane And Bob Doe')
+        self.assertEqual(['John', 'Jane', 'Bob Doe'], result)
+        result = name_parser.SplitNameString('John & Jane & Bob Doe')
+        self.assertEqual(['John', 'Jane', 'Bob Doe'], result)
+        result = name_parser.SplitNameString('John, Jane, Bob Doe')
+        self.assertEqual(['John', 'Jane', 'Bob Doe'], result)
+
+    def test_04_three_names_mixed(self):
+        result = name_parser.SplitNameString('John and Jane And Bob Doe')
+        self.assertEqual(['John', 'Jane', 'Bob Doe'], result)
+        result = name_parser.SplitNameString('John and Jane & Bob Doe')
+        self.assertEqual(['John', 'Jane', 'Bob Doe'], result)
+        result = name_parser.SplitNameString('John and Jane , Bob Doe')
+        self.assertEqual(['John', 'Jane', 'Bob Doe'], result)
+        result = name_parser.SplitNameString('John And Jane and Bob Doe')
+        self.assertEqual(['John', 'Jane', 'Bob Doe'], result)
+        result = name_parser.SplitNameString('John And Jane & Bob Doe')
+        self.assertEqual(['John', 'Jane', 'Bob Doe'], result)
+        result = name_parser.SplitNameString('John And Jane , Bob Doe')
+        self.assertEqual(['John', 'Jane', 'Bob Doe'], result)
+        result = name_parser.SplitNameString('John & Jane and Bob Doe')
+        self.assertEqual(['John', 'Jane', 'Bob Doe'], result)
+        result = name_parser.SplitNameString('John & Jane And Bob Doe')
+        self.assertEqual(['John', 'Jane', 'Bob Doe'], result)
+        result = name_parser.SplitNameString('John & Jane , Bob Doe')
+        self.assertEqual(['John', 'Jane', 'Bob Doe'], result)
+        result = name_parser.SplitNameString('John, Jane and Bob Doe')
+        self.assertEqual(['John', 'Jane', 'Bob Doe'], result)
+        result = name_parser.SplitNameString('John, Jane And Bob Doe')
+        self.assertEqual(['John', 'Jane', 'Bob Doe'], result)
+        result = name_parser.SplitNameString('John, Jane & Bob Doe')
+        self.assertEqual(['John', 'Jane', 'Bob Doe'], result)
+        result = name_parser.SplitNameString('John, Jane, and Bob Doe')
+        self.assertEqual(['John', 'Jane', 'Bob Doe'], result)
 
 if __name__ == '__main__':
     unittest.main()
