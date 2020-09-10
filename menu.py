@@ -218,8 +218,8 @@ def FindAdultsWithoutAccounts(directory):
 
 
 
-def FindEntriless(arg_list):
-    """menu.FindEntriless
+def PrintNotInDirectory(arg_list):
+    """menu.PrintNotInDirectory
     INPUTS:
     - directory -- list containing the MemberHub directory families
     - roster    -- list containing the school roster families
@@ -231,64 +231,61 @@ def FindEntriless(arg_list):
     ASSUMPTIONS:
     None.
     """
-    directory = arg_list[0]
-    roster    = arg_list[1]
+    ##
+    ## extract copies of the arguments so they are not accidentally modified,
+    ## and initialize method variables
+    directory = arg_list[0].copy()
+    roster    = arg_list[1].copy()
     entriless = []
 
-    print_to_screen = input("If anyone from the roster not found in the directory, print list to screen? " + \
-                            "(<return> for 'no' and 'y' for 'yes') ")
-
+    ##
+    ## loop over all the families in the roster...
     for roster_family in roster:
 
+        ##
+        ## ...to compare to each family in the directory
         for directory_family in directory:
+            ##
+            ## look for matches between roster and directory families
             if directory_family.IsSameFamily(roster_family):
+                ##
+                ## once a family match is found, check whether the roster family has
+                ## children who are not in the directory
                 if directory_family.HasNewChildren(roster_family):
                     temp_family = family.Family()
                     temp_family.FormFamilyWithNewChildren(directory_family,roster_family)
                     entriless.append(temp_family)
-                    if print_to_screen == 'y':
-                        print("Found family in directory with new child in roster:",)
-                        temp_family.Print()
                 break
-
+        ##
+        ## if the roster family was not found in the directory, add it to list of
+        ## families without directory entry
         else:
             entriless.append(roster_family)
-            if print_to_screen == 'y':
-                print("Did not find this family from the roster in the directory:",)
-                roster_family.Print()
 
+    ##
+    ## tell the user how many entriless families were found
     print("Found %d people on the roster who were not in the directory" % len(entriless))
-    return entriless
+    if len(entriless) == 0:
+        return
+    
+    ##
+    ## ask the user how to output the list of entriless families
+    answer = " "
+    while answer not in (None, '', 'y', 'Y', 'f', 'F'):
+        answer = input("Print list to screen or file? ('y' for 'screen', 'f' for file, <return> for neither) ")
 
-def PrintNotInDirectory(arg_list):
-    """menu.PrintNotInDirectory
-    INPUTS:
-    - directory -- dictionary containing the MemberHub directory
-    - roster    -- dictionary containing the school roster
-    - map_d     -- dictionary mapping teacher names to hub IDs
-    OUTPUTS:
-    None.
-    ASSUMPTIONS:
-    None.
-    """
-    discard = FindEntriless(arg_list)
+    ##
+    ## output to the screen
+    if answer in ('y', 'Y'):
+        for entry in entriless:
+            print("-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-")
+            print("Did not find this family from the roster in the directory: ")
+            entry.Print()
+    ##
+    ## output to a file
+    elif answer in ('f', 'F'):
+        import_file_tools.CreateNewMemberImport(entriless)
 
-def MakeImportNotInDirectory(arg_list):
-    """menu.MakeImportNotInDirectory
-    INPUTS:
-    - directory -- dictionary containing the MemberHub directory
-    - roster    -- dictionary containing the school roster
-    - map_d     -- dictionary mapping teacher names to hub IDs
-    OUTPUTS:
-    Creates a comma-separated text file that can be imported into MemberHub to create
-    directory entries for people who are in the roster, but not already in the directory.
-    Includes hub ID assignments for these people.
-    ASSUMPTIONS:
-    None.
-    """
-    entriless = FindEntriless(arg_list)
-
-    import_file_tools.CreateNewMemberImport(entriless)
 
 
 def FindParentChildrenHubMismatches(directory):
@@ -357,51 +354,66 @@ def FindUnsedErrata(roster):
 
 
 def MakePrompt(choices):
-    choice_list = sorted(choices)
-    guts = '\n'.join(['(%s)%s' % (choice[0], choice[1:])
-                      for choice in choice_list])
+    guts = '\n'.join(['(%s) - %s' % (choice, choices[choice]['Description'])
+                      for choice in sorted(choices.keys())])
     return '\n===============\nChoose:\n' + guts + '\nOr press <enter> to quit '
 
 def RunMenu(directory, roster, map_d):
     """Runs the user interface for dictionary manipulation."""
-    # The choices dictionary has function names for values.
-    choices = {'a - Find Missing Email':
-                    {'Function':FindMissingEmail,'Arg':[directory,map_d]},
-               'b - Find Orphans':
-                    {'Function':FindOrphans,'Arg':directory},
-               'c - Find Childless':
-                    {'Function':FindChildless,'Arg':directory},
-               'd - Find Not In Classroom Hub':
-                    {'Function':FindHubless,'Arg':[directory,map_d]},
-               'e - Find Adults without Accounts':
-                    {'Function':FindAdultsWithoutAccounts,'Arg':directory},
-               'f - Find Not in Directory':
-                    {'Function':PrintNotInDirectory,'Arg':[directory,roster]},
-               'g - Make Import File for Not In Directory':
-                    {'Function':MakeImportNotInDirectory,'Arg':[directory,roster,map_d]},
-               'h - Find Adults/Children Hub Mismatches':
-                    {'Function':FindParentChildrenHubMismatches,'Arg':directory},
-               'i - Find Unused Errata':
-                    {'Function':FindUnsedErrata,'Arg':roster},
-               'j - Find students who are in multipe classroom hubs':
-                    {'Function':FindChildrenInMultipleClassroom,'Arg':[directory,map_d]}}
+    ##
+    ## The choices dictionary has function names for values.
+    choices = {'a': {'Description':'Find Missing Email',
+                     'Function'   :FindMissingEmail,
+                     'Arg'        :[directory,map_d]},
+               'b': {'Description':'Find Orphans',
+                     'Function'   :FindOrphans,
+                     'Arg'        :directory},
+               'c': {'Description':'Find Childless',
+                     'Function'   :FindChildless,
+                     'Arg'        :directory},
+               'd': {'Description':'Find Not In Classroom Hub',
+                     'Function'   :FindHubless,
+                     'Arg'        :[directory,map_d]},
+               'e': {'Description':'Find Adults without Accounts',
+                     'Function'   :FindAdultsWithoutAccounts,
+                     'Arg'        :directory},
+               'f': {'Description':'Find Not in Directory',
+                     'Function'   :PrintNotInDirectory,
+                     'Arg'        :[directory,roster]},
+               'g': {'Description':'Find Adults/Children Hub Mismatches',
+                     'Function'   :FindParentChildrenHubMismatches,
+                     'Arg'        :directory},
+               'h': {'Description':'Find Unused Errata',
+                     'Function'   :FindUnsedErrata,
+                     'Arg'        :roster},
+               'i': {'Description':'Find students who are in multipe classroom hubs',
+                     'Function'   :FindChildrenInMultipleClassroom,
+                     'Arg'        :[directory,map_d]}}
 
     prompt = MakePrompt(choices)
 
+    ##
+    ## repeat until exit condition breaks the loop
     while True:
-        raw_choice = input(prompt)
-        if not raw_choice:
+        ##
+        ## get the user's selection
+        this_choice = input(prompt).lower()
+        ##
+        ## if the selection is empty (<enter>), the break out of the loop and
+        ## terminate the program
+        if not this_choice:
             break
-        given_choice = raw_choice[0].lower()
-        for maybe_choice in choices:
-            if maybe_choice[0] == given_choice:
-                # The appropriate function is called
-                # using the dictionary value for the name
-                # of the function.
-                choices[maybe_choice]['Function'](choices[maybe_choice]['Arg'])
-                break
+        ##
+        ## otherwise, perform the selected action if the selection is recognized
+        elif this_choice in choices.keys():
+            # The appropriate function is called
+            # using the dictionary value for the name
+            # of the function.
+            choices[this_choice]['Function']( choices[this_choice]['Arg'] )
+        ##
+        ## the selection was not recognized, so tell the user to retry
         else:
-            print("%s is not an acceptible choice." % raw_choice)
+            print("%s is not an acceptible choice.  Try again." % this_choice)
 
 
 def main():
