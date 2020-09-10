@@ -8,6 +8,23 @@ from openpyxl import load_workbook
 
 NUM_ROSTER_FIELDS = 5
 
+def ReadRosterAdultsFromMostRecent():
+    file_path = os.path.abspath("./Roster/")
+    with os.scandir(file_path) as raw_files:
+        files = [file for file in raw_files \
+                    if not(file.name.startswith('~')) and (file.name.endswith('.xlsx'))]
+        files.sort(key=lambda x: os.stat(x).st_mtime, reverse=True)
+        file_name = file_path + "/" +files[0].name
+    
+    wb = load_workbook(file_name)
+    ws = wb.active
+    adults_list = []
+    for fields in ws.values:
+        adults_list.append(fields[3])
+        
+    return adults_list
+
+
 def ReadRosterFromFile(file_name, hub_map):
     """ roster_tools.ReadRosterFromFile
     PURPOSE:

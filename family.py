@@ -196,3 +196,11 @@ class Family:
         print("Children:")
         for child in self.children:
             child.Print()
+
+    def PrintWithHubs(self):
+        print("Adults:")
+        for adult in self.adults:
+            adult.PrintWithHubs()
+        print("Children:")
+        for child in self.children:
+            child.PrintWithHubs()

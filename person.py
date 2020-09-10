@@ -57,6 +57,9 @@ class Person:
     def Print(self):
         print("%s %s" % (self.first_name, self.last_name))
 
+    def PrintWithHubs(self):
+        print("%s %s - <%s>" % (self.first_name, self.last_name, self.hubs))
+
 class DirectoryPerson (Person):
     """This class extends the Person class with Directory-only fields."""
     def __init__(self):
