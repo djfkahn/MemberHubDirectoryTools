@@ -25,35 +25,69 @@ def FindMissingEmail(arg_list):
     ASSUMPTIONS:
     None.
     """
-    directory   = arg_list[0]
-    hub_map_d   = arg_list[1]
-    map_d       = hub_map_tools.CreateEmptyHubDictionary(hub_map_d)
-    adult_count = no_email_adult = 0
-    no_email_person = []
-    no_email_family = []
-    partial_family = []
+    ##
+    ## extract copies of the arguments so they are not accidentally modified,
+    ## and initialize method variables
+    directory         = arg_list[0].copy()
+    hub_map_d         = arg_list[1].copy()
+    total_adult_count = 0
+    no_email_person   = []
+    no_email_family   = []
+    partial_family    = []
 
+    ##
+    ## create a dictionary of classroom hubs that will hold lists of
+    ## adults without emails
+    map_d = hub_map_tools.CreateEmptyHubDictionary(hub_map_d)
+
+    ##
+    ## loop over all the families in the directory
     for entry_family in directory:
-        no_email_count = 0
+        ##
+        ## add the number of adults in this family to the count of all the adults
+        ## in the directory
+        total_adult_count += len(entry_family.adults)
+
+        ##
+        ## for each family, count number of adults without emails
+        this_family_no_email_count = 0
+        
+        ##
+        ## loop over each adult in the family
         for adult in entry_family.adults:
-            adult_count += 1
+            ##
+            ## check whether this adult DOES NOT an email address
             if adult.DoesNotListEmailAddress():
+                ##
+                ## found adult without an email, so add to list of persons without email
                 no_email_person.append(adult)
-                no_email_adult += 1
-                no_email_count += 1
+                ##
+                ## increment the number of adults in this family without email
+                this_family_no_email_count += 1
+                ##
+                ## loop over all the adult's hubs, and add them to the hub
+                ## dictionary
                 for hub in adult.hubs:
                     if hub in map_d.keys():
                         map_d[hub].append(adult)
 
-        if no_email_count == len(entry_family.adults):
+        ##
+        ## if this family's no email count is the same as number of adults,
+        ## then append this family to the no_email_family list
+        if this_family_no_email_count == len(entry_family.adults):
             no_email_family.append(entry_family)
-        elif no_email_count > 0:
+        ##
+        ## otherwise, if fewer adults do not have email than are in the family
+        ## then append this family to the partial_family list
+        elif this_family_no_email_count > 0:
             partial_family.append(entry_family)
 
+    ##
+    ## print some of the counts to the screen for the user to review
     print("The directory has %d families and %d adults." % \
-          (len(directory), adult_count))
-    print("Of the %d adults, %d have no email address." % \
-          (adult_count, no_email_adult))
+          (len(directory), total_adult_count))
+    print("%d out of the %d adults have no email address." % \
+          (len(no_email_person), total_adult_count))
     print("%d out of %d families have no adult with an email address." % \
           (len(no_email_family), len(directory)))
     print("%d out of %d families have some adults without and some with email addresses." % \
@@ -63,9 +97,9 @@ def FindMissingEmail(arg_list):
     print("%d out of %d families have at least one adult with an email address." % \
           ((len(directory)-len(no_email_family)), len(directory)))
 
-    print("")
-
-    import_file_tools.CreateEmaillessFile(map_d, hub_map_d, "emailless")
+    ##
+    ## create a list of people in each hub who do not have an email
+    import_file_tools.CreateEmaillessByHubFile(map_d, hub_map_d, "emailless_by_hub")
 
 
 
@@ -206,7 +240,7 @@ def FindAdultsWithoutAccounts(directory):
         for this_person in no_account_without_email:
             this_person.Print()
     elif answer == "f":
-        import_file_tools.CreateEmaillessFile(no_account_without_email, "no_account_without_email")
+        import_file_tools.CreateAccountlessFile(no_account_without_email, "no_account_without_email")
 
     print("Found %d adults without accounts, but with emails." % len(no_account_with_email))
     answer = input("Print list to screen or file? ('y' for 'screen', 'f' for file, <return> for neither) ")
@@ -214,7 +248,7 @@ def FindAdultsWithoutAccounts(directory):
         for this_person in no_account_with_email:
             print("%s %s <%s>" % (this_person.first_name, this_person.last_name, this_person.email))
     elif answer == "f":
-        import_file_tools.CreateEmaillessFile(no_account_with_email, "no_account_with_email")
+        import_file_tools.CreateAccountlessFile(no_account_with_email, "no_account_with_email")
 
 
 
@@ -356,7 +390,7 @@ def FindUnsedErrata(roster):
 def MakePrompt(choices):
     guts = '\n'.join(['(%s) - %s' % (choice, choices[choice]['Description'])
                       for choice in sorted(choices.keys())])
-    return '\n===============\nChoose:\n' + guts + '\nOr press <enter> to quit '
+    return '\n===============\nChoose:\n' + guts + '\nOr press <enter> to quit.  Your selection -->'
 
 def RunMenu(directory, roster, map_d):
     """Runs the user interface for dictionary manipulation."""
