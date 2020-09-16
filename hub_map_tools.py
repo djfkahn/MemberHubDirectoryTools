@@ -40,17 +40,28 @@ def ConvertToHubIDList(hub_name_list):
 
 
 
-def CreateEmptyHubDictionary(raw_map):
-    raw_values = raw_map.values()
-    temp = ['0']
-    for val in sorted(raw_values):
-        if temp[-1] != val:
-            temp.append(val)
-    reduced_values = temp[1:]
-    new_map = {}
-    for val in reduced_values:
-        new_map[val] = []
-    return new_map
+def CreateEmptyHubDictionary(input_map):
+    """hub_map_tools.CreateEmptyHubDictionary()
+    INPUTS:
+    - input_map  -- a hub map dictionary with teacher or grade name keys, and
+                    hub IDs for values
+    OUTPUTS:
+    - output_map -- a new dictionary keyed by unique hub IDs, and having
+                    empty lists for values.
+    ASSUMPTONS:
+    - none
+    """
+    new_keys = list(input_map.values())
+    i = 0
+    while i < len(new_keys)-1:
+        while new_keys.count( new_keys[i] ) > 1:
+            new_keys.pop( new_keys.index( new_keys[i], i+1 ) )
+        i+=1
+
+    output_map = {}
+    for key in new_keys:
+        output_map[key] = []
+    return output_map
 
 def PrintReadErrorMessage(line, message):
     print(message, "Skipping this line.")

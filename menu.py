@@ -132,7 +132,9 @@ def FindMissingEmail(arg_list):
     ## create a list of people in each hub who do not have an email
     action = PrintToScreenFileOrNeither("Print list of adults without email")
     if action == 'y':
-        print(map_d)
+        for this_list in map_d.keys():
+            for this_person in map_d[this_list]:
+                this_person.PrintWithHubs()
     elif action == 'f':
         import_file_tools.CreateEmaillessByHubFile(map_d, hub_map_d, "emailless_by_hub")
 
