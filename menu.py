@@ -294,6 +294,20 @@ def FindChildrenInMultipleClassroom(arg_list):
                 print("%s %s <%s>" % (this_person.first_name, this_person.last_name, this_person.hubs))
 
 
+def ListShowAndAct(this_list, statement, file_name, hide_email=True):
+    print(len(this_list), statement)
+    if len(this_list) > 0:
+        action = PrintToScreenFileOrNeither('Print list to screen or file')
+        if action == "y":
+            for this_person in this_list:
+                if hide_email:
+                    this_person.Print()
+                else:
+                    this_person.PrintWithEmail()
+        elif action == "f":
+            import_file_tools.CreateAccountlessFile(this_list, file_name)
+
+
 def FindAdultsWithoutAccounts(directory):
     """menu.FindAdultsWithoutAccounts
     INPUTS:
@@ -308,6 +322,8 @@ def FindAdultsWithoutAccounts(directory):
     local_dir                = directory.copy()
     no_account_with_email    = []
     no_account_without_email = []
+    teacher_with_no_account  = []
+    teacher_without_email    = []
 
     ##
     ## loop over all the families in the directory, and find those with
@@ -317,33 +333,38 @@ def FindAdultsWithoutAccounts(directory):
         for this_adult in this_family.adults:
             if this_adult.account_created == "":
                 if this_adult.email == "":
-                    no_account_without_email.append(this_adult)
+                    if this_adult.IsWithSchool():
+                        teacher_without_email.append(this_adult)
+                    else:
+                        no_account_without_email.append(this_adult)
+                elif this_adult.IsWithSchool():
+                    teacher_with_no_account.append(this_adult)
                 else:
                     no_account_with_email.append(this_adult)
 
     ##
     ## show the user the number of adults with neither account nor email, and prompt
     ## whether to print to the screen or save to a file.
-    print("Found %d adults without accounts or emails." % len(no_account_without_email))
-    if len(no_account_without_email) > 0:
-        action = PrintToScreenFileOrNeither('Print list to screen or file')
-        if action == "y":
-            for this_person in no_account_without_email:
-                this_person.Print()
-        elif action == "f":
-            import_file_tools.CreateAccountlessFile(no_account_without_email, "no_account_without_email")
+    ListShowAndAct(this_list = teacher_without_email,
+                   statement = "people found who work for the school without accounts or emails.",
+                   file_name = "teachers_without_email")
+
+    ListShowAndAct(this_list = no_account_without_email,
+                   statement = "adults found without accounts or emails.",
+                   file_name = "no_account_without_email")
 
     ##
     ## show the user the number of adults with no account but with email, and prompt
     ## whether to print to the screen or save to a file.
-    print("Found %d adults without accounts, but with emails." % len(no_account_with_email))
-    if len(no_account_with_email) > 0:
-        action = PrintToScreenFileOrNeither('Print list to screen or file')
-        if action == "y":
-            for this_person in no_account_with_email:
-                print("%s %s <%s>" % (this_person.first_name, this_person.last_name, this_person.email))
-        elif action == "f":
-            import_file_tools.CreateAccountlessFile(no_account_with_email, "no_account_with_email")
+    ListShowAndAct(this_list = teacher_with_no_account,
+                   statement = "people found who work for the school without accounts, but with emails.",
+                   file_name = "teachers_without_account",
+                   hide_email = False)
+
+    ListShowAndAct(this_list = no_account_with_email,
+                   statement = "adults found without accounts, but with emails.",
+                   file_name = "no_account_with_email",
+                   hide_email = False)
 
 
 

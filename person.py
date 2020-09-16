@@ -43,6 +43,9 @@ class Person:
         that_full_name = other.first_name.lower() + " " + other.last_name.lower()
         return this_full_name.replace("-", " ")  == that_full_name.replace("-", " ")
                 
+    def IsWithSchool(self):
+        return 'Staff'   in self.hubs or \
+               'Teacher' in self.hubs
 
     def SetHubs (self, hub_list):
         for hub_id in hub_list:
@@ -59,6 +62,9 @@ class Person:
 
     def PrintWithHubs(self):
         print("%s %s - <%s>" % (self.first_name, self.last_name, self.hubs))
+
+    def PrintWithEmail(self):
+        print("%s %s - <%s>" % (self.first_name, self.last_name, self.email))
 
 class DirectoryPerson (Person):
     """This class extends the Person class with Directory-only fields."""
