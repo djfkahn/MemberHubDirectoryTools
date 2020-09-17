@@ -109,8 +109,18 @@ class UT_SetFromDirectory(unittest.TestCase):
         self.assertIsNone(result.family_relation)
         self.assertEqual([], result.hubs)
         
-        fields = ['1234','C','A','','','email','5678','Adult','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        result.SetFromDirectory(fields, common_hub_map)
+        result.SetFromDirectory(person_id       = '1234',
+                                last_name       = 'C',
+                                first_name      = 'A',
+                                middle_name     = '',
+                                suffix          = '',
+                                email           = 'email',
+                                family_id       = '5678',
+                                family_relation = 'Adult',
+                                hub_name_list   = 'Kinder (Room 0)'.split(';'),
+                                account_created = '',
+                                account_updated = '',
+                                hub_map         = common_hub_map)
         self.assertEqual('A', result.first_name)
         self.assertEqual('C', result.last_name)
         self.assertEqual('1234', result.person_id)
@@ -121,8 +131,18 @@ class UT_SetFromDirectory(unittest.TestCase):
 
     def test_02_set_child(self):
         result = person.DirectoryPerson()
-        fields = ['1234','C','A','','','email','5678','Child','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        result.SetFromDirectory(fields, common_hub_map)
+        result.SetFromDirectory(person_id       = '1234',
+                                last_name       = 'C',
+                                first_name      = 'A',
+                                middle_name     = '',
+                                suffix          = '',
+                                email           = 'email',
+                                family_id       = '5678',
+                                family_relation = 'Child',
+                                hub_name_list   = 'Kinder (Room 0)'.split(';'),
+                                account_created = '',
+                                account_updated = '',
+                                hub_map         = common_hub_map)
         self.assertEqual('A', result.first_name)
         self.assertEqual('C', result.last_name)
         self.assertEqual('1234', result.person_id)
@@ -133,8 +153,18 @@ class UT_SetFromDirectory(unittest.TestCase):
 
     def test_03_set_no_first_name(self):
         result = person.DirectoryPerson()
-        fields = ['1234','C','','','','email','5678','Child','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        result.SetFromDirectory(fields, common_hub_map)
+        result.SetFromDirectory(person_id       = '1234',
+                                last_name       = 'C',
+                                first_name      = '',
+                                middle_name     = '',
+                                suffix          = '',
+                                email           = 'email',
+                                family_id       = '5678',
+                                family_relation = 'Child',
+                                hub_name_list   = 'Kinder (Room 0)'.split(';'),
+                                account_created = '',
+                                account_updated = '',
+                                hub_map         = common_hub_map)
         self.assertIsNone(result.last_name)
         self.assertIsNone(result.first_name)
         self.assertIsNone(result.family_relation)
@@ -142,8 +172,18 @@ class UT_SetFromDirectory(unittest.TestCase):
 
     def test_04_set_no_last_name(self):
         result = person.DirectoryPerson()
-        fields = ['1234','','A','','','email','5678','Child','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        result.SetFromDirectory(fields, common_hub_map)
+        result.SetFromDirectory(person_id       = '1234',
+                                last_name       = '',
+                                first_name      = 'A',
+                                middle_name     = '',
+                                suffix          = '',
+                                email           = 'email',
+                                family_id       = '5678',
+                                family_relation = 'Child',
+                                hub_name_list   = 'Kinder (Room 0)'.split(';'),
+                                account_created = '',
+                                account_updated = '',
+                                hub_map         = common_hub_map)
         self.assertIsNone(result.last_name)
         self.assertIsNone(result.first_name)
         self.assertIsNone(result.family_relation)
@@ -151,8 +191,18 @@ class UT_SetFromDirectory(unittest.TestCase):
 
     def test_05_set_no_relation(self):
         result = person.DirectoryPerson()
-        fields = ['1234','C','A','','','email','5678','','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        result.SetFromDirectory(fields, common_hub_map)
+        result.SetFromDirectory(person_id       = '1234',
+                                last_name       = 'C',
+                                first_name      = 'A',
+                                middle_name     = '',
+                                suffix          = '',
+                                email           = 'email',
+                                family_id       = '5678',
+                                family_relation = '',
+                                hub_name_list   = 'Kinder (Room 0)'.split(';'),
+                                account_created = '',
+                                account_updated = '',
+                                hub_map         = common_hub_map)
         self.assertIsNone(result.last_name)
         self.assertIsNone(result.first_name)
         self.assertIsNone(result.family_relation)
@@ -160,8 +210,18 @@ class UT_SetFromDirectory(unittest.TestCase):
 
     def test_06_set_other_relation(self):
         result = person.DirectoryPerson()
-        fields = ['1234','C','','','','email','5678','Other','','','','','','','','','','','','','','','0','','Kinder (Room 0)','all','','','','','']
-        result.SetFromDirectory(fields, common_hub_map)
+        result.SetFromDirectory(person_id       = '1234',
+                                last_name       = 'C',
+                                first_name      = 'A',
+                                middle_name     = '',
+                                suffix          = '',
+                                email           = 'email',
+                                family_id       = '5678',
+                                family_relation = 'Other',
+                                hub_name_list   = 'Kinder (Room 0)'.split(';'),
+                                account_created = '',
+                                account_updated = '',
+                                hub_map         = common_hub_map)
         self.assertIsNone(result.last_name)
         self.assertIsNone(result.first_name)
         self.assertIsNone(result.family_relation)
@@ -169,8 +229,18 @@ class UT_SetFromDirectory(unittest.TestCase):
 
     def test_07_set_no_hubs(self):
         result = person.DirectoryPerson()
-        fields = ['1234','C','A','','','email','5678','Child','','','','','','','','','','','','','','','0','','','all','','','','','']
-        result.SetFromDirectory(fields, common_hub_map)
+        result.SetFromDirectory(person_id       = '1234',
+                                last_name       = 'C',
+                                first_name      = 'A',
+                                middle_name     = '',
+                                suffix          = '',
+                                email           = 'email',
+                                family_id       = '5678',
+                                family_relation = 'Child',
+                                hub_name_list   = ''.split(';'),
+                                account_created = '',
+                                account_updated = '',
+                                hub_map         = common_hub_map)
         self.assertEqual('A', result.first_name)
         self.assertEqual('C', result.last_name)
         self.assertEqual('1234', result.person_id)
@@ -181,8 +251,18 @@ class UT_SetFromDirectory(unittest.TestCase):
 
     def test_02_set_multiple_hubs(self):
         result = person.DirectoryPerson()
-        fields = ['1234','C','A','','','email','5678','Child','','','','','','','','','','','','','','','0','','Kinder (Room 0);First (Room 1)','all','','','','','']
-        result.SetFromDirectory(fields, common_hub_map)
+        result.SetFromDirectory(person_id       = '1234',
+                                last_name       = 'C',
+                                first_name      = 'A',
+                                middle_name     = '',
+                                suffix          = '',
+                                email           = 'email',
+                                family_id       = '5678',
+                                family_relation = 'Child',
+                                hub_name_list   = 'Kinder (Room 0);First (Room 1)'.split(';'),
+                                account_created = '',
+                                account_updated = '',
+                                hub_map         = common_hub_map)
         self.assertEqual('A', result.first_name)
         self.assertEqual('C', result.last_name)
         self.assertEqual('1234', result.person_id)

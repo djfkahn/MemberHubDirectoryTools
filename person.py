@@ -79,22 +79,27 @@ class DirectoryPerson (Person):
         self.account_created = None
         self.account_updated = None
 
-    def SetFromDirectory (self, fields, hub_map):
-        if self.Set(last_name       = fields[1].strip('"'),
-                    first_name      = fields[2].strip('"'),
-                    family_relation = fields[7].strip('"'),
-                    hub_name_list   = fields[24].split(';'),
+
+    def SetFromDirectory(self, person_id, last_name, first_name, middle_name, suffix, email, family_id, family_relation,
+                         hub_name_list, account_created, account_updated, hub_map):
+        
+        if self.Set(last_name       = last_name,
+                    first_name      = first_name,
+                    family_relation = family_relation,
+                    hub_name_list   = hub_name_list,
                     hub_map         = hub_map):
 
             ##
             ## Store attributes that are only given by the Directory
-            self.person_id       = fields[0].strip('"')
-            self.middle_name     = fields[3].strip('"')
-            self.suffix          = fields[4].strip('"')
-            self.email           = fields[5].strip('"')
-            self.family_id       = fields[6].strip('"')
-            self.account_created = fields[28].strip('"')
-            self.account_updated = fields[29].strip('"')
+            self.person_id       = person_id
+            self.middle_name     = middle_name
+            self.suffix          = suffix
+            self.email           = email
+            self.family_id       = family_id
+            self.account_created = account_created
+            self.account_updated = account_updated
+
+
 
 class RosterPerson (Person):
     """This class extends the Person class with Roster-only fields."""
