@@ -171,7 +171,14 @@ class Family:
 
 
     def IsOrphan(self):
-        return len(self.adults) == 0
+        ##
+        ## Consider the family an "orphan" if there are no adults, or
+        ## if all the adults have no first or last name
+        none_cnt = 0
+        for this_adult in self.adults:
+            if not this_adult.first_name or not this_adult.last_name:
+                none_cnt += 1
+        return len(self.adults) == 0 or len(self.adults) == none_cnt
 
     def FindAdultInFamily(self, to_find):
         # Cannot find adult in a family if family is orphan
