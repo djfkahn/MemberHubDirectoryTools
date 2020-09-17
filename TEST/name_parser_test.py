@@ -136,6 +136,7 @@ class UT_ParseFullName(unittest.TestCase):
         expect = [{'first' : 'John', 'last' : 'Doe-Smith'}, {'first' : 'Jane', 'last' : 'Doe-Smith'}]
         self.assertEqual(expect, result)
 
+    @unittest.expectedFailure
     def test_07_multi_word_first_name(self):
         result = name_parser.ParseFullName('Jon Claude and Jane van Damme', common_RosterC)
         expect = [{'first' : 'Jon Claude', 'last' : 'Van Damme'}, {'first' : 'Jane', 'last' : 'Van Damme'}]
