@@ -42,8 +42,8 @@ class UT_ReadRosterFromFile(unittest.TestCase):
         with patch('builtins.input', side_effect=[None]):
             result = roster_tools.ReadRosterFromFile(roster_file_name, common_hub_map)
         self.assertEqual(1, len(result))
-        self.assertEqual(2, len(result[0].adults))
-        self.assertEqual(1, len(result[0].children))
+        self.assertEqual(0, len(result[0].adults))
+        self.assertEqual(0, len(result[0].children))
 
     def test_06_one_parent(self):
         roster_file_name = data_file_path + "/test_6_one_parent.xlsx"
