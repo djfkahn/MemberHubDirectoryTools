@@ -49,5 +49,8 @@ class UT_ReadDirectoryFromFile(unittest.TestCase):
         self.assertEqual(1, len(result))
 
 
+def Run():
+    unittest.main()
+
 if __name__ == '__main__':
     unittest.main()
