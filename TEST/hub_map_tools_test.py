@@ -98,7 +98,40 @@ class UT_IsInMultipleClassroomHubs(unittest.TestCase):
     def test_6_three_hubs_none_classroom(self):
         self.assertFalse(hub_map_tools.IsInMultipleClassroomHubs(map_d, ['Bogus', 'Really Bogus', 'Really Really Bogus']))
 
-    
+class UT_CreateEmptyHubDictionary(unittest.TestCase):
+    def test_1_one_hub_in_map(self):
+        input_map = {'Name 1': '11'}
+        self.assertEqual({'11':[]},
+                         hub_map_tools.CreateEmptyHubDictionary(input_map))
+        
+    def test_2_two_hubs_in_map(self):
+        input_map = {'Name 1': '11',
+                     'Name 2': '22'}
+        self.assertEqual({'11':[], '22':[]},
+                         hub_map_tools.CreateEmptyHubDictionary(input_map))
+        
+    def test_3_three_hubs_in_map(self):
+        input_map = {'Name 1': '11',
+                     'Name 2': '22',
+                     'Name 3': '33'}
+        self.assertEqual({'11':[], '22':[], '33':[]},
+                         hub_map_tools.CreateEmptyHubDictionary(input_map))
+        
+    def test_4_three_hubs_with_dups(self):
+        input_map = {'Name 1': '11',
+                     'Name 2': '22',
+                     'Name 3': '11'}
+        self.assertEqual({'11':[], '22':[]},
+                         hub_map_tools.CreateEmptyHubDictionary(input_map))
+        
+    def test_5_three_hubs_all_dups(self):
+        input_map = {'Name 1': '11',
+                     'Name 2': '11',
+                     'Name 3': '11'}
+        self.assertEqual({'11':[]},
+                         hub_map_tools.CreateEmptyHubDictionary(input_map))
+        
+        
 
 if __name__ == '__main__':
     unittest.main()

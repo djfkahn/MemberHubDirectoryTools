@@ -8,6 +8,41 @@ from openpyxl import load_workbook
 
 NUM_ROSTER_FIELDS = 5
 
+def ReadRosterAdultsFromMostRecent():
+    """ roster_tools.ReadRosterAdultsFromMostRecent
+    PURPOSE:
+    Generates a list of adult names in the newest roster file.
+    INPUT:
+    - none
+    OUTPUTS:
+    - adults_list -- list of adult name fields in the newest roster file.
+    ASSUMPTIONS:
+    - none
+    """
+    ##
+    ## Find the files in the "Roster" folder with ".xlsx" extension, sort them by
+    ## date, and pick the most recently added
+    file_path = os.path.abspath("./Roster/")
+    with os.scandir(file_path) as raw_files:
+        files = [file for file in raw_files \
+                    if not(file.name.startswith('~')) and (file.name.endswith('.xlsx'))]
+        files.sort(key=lambda x: os.stat(x).st_mtime, reverse=True)
+        file_name = file_path + "/" +files[0].name
+    
+    ##
+    ## Load the workbook, and select the active/only worksheet
+    wb = load_workbook(file_name)
+    ws = wb.active
+    ##
+    ## Copy all the values in column 'D' for all rows beyond the title row into
+    ## the output list
+    adults_list = []
+    for fields in ws.iter_rows(min_row=2, max_row=ws.max_row, min_col=4, max_col=4):
+        adults_list.append(fields[0].value)
+        
+    return adults_list
+
+
 def ReadRosterFromFile(file_name, hub_map):
     """ roster_tools.ReadRosterFromFile
     PURPOSE:
@@ -50,10 +85,14 @@ def ReadRosterFromFile(file_name, hub_map):
         student_count += 1
 
         ## treat the student as a member of a new family...for now
-        new_family = family.Family()
-        new_family.CreateFromRoster(fields  = fields,
-                                    hub_map = hub_map,
-                                    rosterC = rosterC)
+        new_family = family.RosterFamily(adults_raw_name=fields[3])
+        new_family.AddToFamily(child_first  = fields[1],
+                               child_last   = fields[0],
+                               grade        = fields[2],
+                               adult_names  = fields[3],
+                               teacher_name = fields[4],
+                               hub_map      = hub_map,
+                               rosterC      = rosterC)
 
         # if new_family is the same as a family already in the roster, then combine
         # families.  Otherwise, append new_family at the end of the roster.

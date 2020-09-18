@@ -2,6 +2,40 @@
 
 import roster
 
+def SplitNameString(full_name):
+    possible_conjunctions = [' and ', ' And ', ' & ', ',']
+    split_name            = [full_name.strip()]
+    num_found             = 0
+    for x in range(len(possible_conjunctions)):
+        ##
+        ## stop processing the possible conjuction if it cannot be found
+        if full_name.find(possible_conjunctions[x]) < 1:
+            continue
+
+        ##
+        ## split the name by the current conjunction
+        split_name = full_name.split(possible_conjunctions[x])
+        num_found  = len(split_name)
+        
+        if num_found > 1:
+            ##
+            ## full_name was split into more thann one entry, but other conjunctions
+            ## may be also be used, so try to split each entry in the split_name array
+            ## by the other conjunctions, and insert any found
+            for y in range(num_found):
+                split_name[y] = split_name[y].strip()
+                temp = SplitNameString(split_name[y])
+                if len(temp) > 1:
+                    split_name.pop(y)
+                    for z in reversed(temp):
+                        if len(z.strip()) > 0:
+                            split_name.insert(y, z.strip())
+            ##
+            ## and exit the loop
+            break
+    
+    return split_name
+
 def ParseFullName(full_name, rosterC):
     """name_parser.ParseFullName
     Purpose:  Advanced name field Parseting that recognizes most multi-word last
@@ -29,16 +63,9 @@ def ParseFullName(full_name, rosterC):
     full_name = rosterC.ApplyErrata(full_name)
 
     ## separate the name field based on the conjunction
-    conjunction = None
-    if full_name.find(" and ") > 0:
-        conjunction = " and "
-    elif full_name.find(" And ") > 0:
-        conjunction = " And "
-    elif full_name.find(" & ") > 0:
-        conjunction = " & "
+    full_name_list = SplitNameString(full_name)
 
-    if conjunction != None:
-        full_name_list = full_name.split(conjunction)
+    if len(full_name_list) > 1:
 
         ## if parents have same last name, then there is only one name
         ## before the conjuction
@@ -63,10 +90,11 @@ def ParseType1Name(name_list):
                  a single person's first and last names.
     """
     ## last name for this type of name field resides in the name after the conjuction
-    second_name = ParseType3Name(name_list[1])
-    first_name  = [{'first': name_list[0].strip(),
-                    'last' : second_name[0]['last']}]
-    return first_name + second_name
+    answer    = ParseType3Name(name_list[-1])
+    last_name = answer[0]['last']
+    for name in reversed(name_list[:-1]):
+        answer.insert(0, {'first': name, 'last' : last_name})
+    return answer
 
 def ParseType2Name(name_list):
     """name_parser.ParseType2Name
@@ -77,8 +105,9 @@ def ParseType2Name(name_list):
     names     -- A list of name dictionaries.  Each name dictionary contains
                  a single person's first and last names.
     """
-    answer  = ParseType3Name(name_list[0])
-    answer += ParseType3Name(name_list[1])
+    answer = []
+    for name in name_list:
+        answer.extend(ParseType3Name(name))
     return answer
 
 def ParseType3Name(full_name):
@@ -131,26 +160,3 @@ def IsCompoundLastName(word):
     prefix_words = ('vere','von','van','de','del','della','di','da','d',\
              'pietro','vanden','du','st.','st','la','ter','o')
     return word.lower() in prefix_words
-
-
-def main():
-    test_names = ("Jane Doe", \
-                  "Zane D Souza", \
-                  "Stephanie de Rayal", \
-                  "Edward de Sa", \
-                  "Stewart O Flynn",\
-                  "Claude van Damme",
-                  "John and Jane Smith",
-                  "John And Jane Smith",
-                  "John & Jane Smith",
-                  "Joe Schmoe and Betty Davis",
-                  "Joan and Marc Edward Vlasic",
-                  "Marc Edward and Joan Vlasic") ## TBD - expect this one will not parse correctly
-
-    testRosterC = roster.Roster()
-    for name in test_names:
-        answer = ParseFullName(name, testRosterC)
-        print(answer)
-
-if __name__ == '__main__':
-    main()

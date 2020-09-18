@@ -14,16 +14,14 @@ def PrintErrorMessage(fields, error_text):
 def ReadDirectoryFromFile(file_name, hub_map):
     """directory_tools.ReadDirectory
     INPUTS:
-    Prompts user for name of comma-separated text file containing MemberHub directory dump.
-    INPUTS:
     - file_name -- name of the file containing the MemberHub directory dump
     - hub_map   -- dictionary that maps hub names to hub IDs
     OUTPUTS:
     - directory -- list of families read from the MemberHub directory dump
     ASSUMPTIONS:
-    1. The MemberHub directory dump file is a comman separated text file comprised
-       of exactly 31 fields in the following order:
-        1.  <person_id> **
+    1. The MemberHub directory dump file is a comma-separated text file comprised
+       of any number of fields.  However, it is assumed the following fields appear in the file:
+        1.  <id> **
         2.  <last_name> **
         3.  <first_name> **
         4.  <middle_name>
@@ -31,100 +29,110 @@ def ReadDirectoryFromFile(file_name, hub_map):
         6.  <email>
         7.  <family_id>
         8.  <family_relation> **
-        9.  <maiden_name>
-        10. <born_on>
-        11. <gender>
-        12. <parents>
-        13. <street>
-        14. <city>
-        15. <state>
-        16. <zip>
-        17. <home_number>
-        18. <work_number>
-        19. <work_number_ext>
-        20. <fax_number>
-        21. <mobile_number>:
-        22. <mobile_provider>
-        23. <allow_sms>
-        24. <pta_member>
-        25. <hubs>
-        26. <hubs_administered>
-        27. <person_created>
-        28. <person_updated>
-        29. <account_created>
-        30. <account_updated>
-        31. <last_login>
-        ** - indicates required field
-    2. None of the fields contain commas.
-    3. Lines that contain blank required fields will be flagged, but not added to the
-    output dictionary.
+        9.  <hubs>
+        10. <account_created>
+        11. <account_updated>
+        ** - these fields are required
+        
+    2. Lines that contain blank required fields (denoted with '**') will be flagged, but
+       not added to the output dictionary.
     """
 
-    directory  = []
-    rows_read = rows_processed = families_created = 0
-    new_family = False
-    family_id  = 0
+    directory         = []
+    family_id_list    = []
+    rows_read         = -1
+    rows_processed    = 0
+    this_family       = False
 
     with open(file_name) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
 
         for fields in csv_reader:
-            # Skip the first row
-            if rows_read == 0:
-                rows_read += 1
+            ##
+            ## Use the first row to determine indices of fields used
+            if rows_read < 0:
+                rows_read = 0
+                num_fields          = len(fields)
+                person_id_idx       = fields.index('id')
+                last_name_idx       = fields.index('last_name')
+                first_name_idx      = fields.index('first_name')
+                middle_name_idx     = fields.index('middle_name')
+                suffix_idx          = fields.index('suffix')
+                email_idx           = fields.index('email')
+                family_id_idx       = fields.index('family_id')
+                family_relation_idx = fields.index('family_relation')
+                hub_name_list_idx   = fields.index('hub_membership')
+                account_created_idx = fields.index('account_created')
+                account_updated_idx = fields.index('account_updated')
                 continue
 
+            ##
+            ## After the first row...
+            ## ...increment the number of rows read, regardless of validity
             rows_read += 1
-            if not len(fields) == 31:
-                PrintErrorMessage \
-                    (fields, "Found row with incorrect number of fields.")
+            ##
+            ## ...perform validity checks on the current row
+            if not len(fields) == num_fields:
+                PrintErrorMessage (fields, "Found row with incorrect number of fields.")
                 continue
 
-            if fields[1] == "" or fields[2] == "" or \
-               fields[0] == "" or fields[7] == "":
-                PrintErrorMessage \
-                    (fields, "Found a row with missing required fields.")
+            if fields[last_name_idx] == "" or fields[first_name_idx] == "" or \
+               fields[person_id_idx] == "" or fields[family_relation_idx] == "":
+                PrintErrorMessage (fields, "Found a row with missing required fields.")
                 continue
 
+            ##
+            ## ...by reaching this point, the row is valid.  so increment the number of
+            ## rows processed.
             rows_processed += 1
-            # create a new family every time a new family ID is found
-            if fields[6] != family_id:
-                # to start processing a new family, append the family previously worked on
-                # (if it exists)
-                if new_family:
-                    directory.append(new_family)
-                # instantiate new family object
-                new_family = family.Family()
-                # increment number of families created
-                families_created += 1
-                # store the family ID currently working on
-                family_id = fields[6]
-
-            if fields[7][:5].lower() == "adult":
-                new_family.AddAdultFromDirectory(fields, hub_map)
-            elif fields[7][:5].lower() == "child":
-                new_family.AddChildFromDirectory(fields, hub_map)
+            ##
+            ## if the current row's family ID has not been processed previously...
+            if family_id_list.count(fields[family_id_idx]) == 0: 
+                ##
+                ## instantiate new directory family object and append it to the directory
+                this_family = family.DirectoryFamily(fields[family_id_idx])
+                directory.append(this_family)
+                ##
+                ## store the family ID currently working on
+                family_id_list.append(fields[family_id_idx])
+            
+            ##
+            ## otherwise, the current row's family ID has been processed before...
             else:
-                PrintErrorMessage \
-                    (fields, "Found entry in directory that is neither an adult nor a child.")
+                ##
+                ## find the family based on its family ID to use for further processing
+                for possible_family in reversed(directory):
+                    if possible_family.family_id == fields[family_id_idx]:
+                        this_family = possible_family
+                        break
 
-        else:
-            # once the last row is read, append the last family processed to the
-            # directory list
-            if new_family:
-                directory.append(new_family)
-            # remove one from the rows read to take away the header row
-            rows_read -= 1
+            ##
+            ## add the person to the family identified
+            this_family.AddToFamily(person_id       = fields[person_id_idx],
+                                    last_name       = fields[last_name_idx],
+                                    first_name      = fields[first_name_idx],
+                                    middle_name     = fields[middle_name_idx],
+                                    suffix          = fields[suffix_idx],
+                                    email           = fields[email_idx],
+                                    family_id       = fields[family_id_idx],
+                                    family_relation = fields[family_relation_idx],
+                                    hub_name_list   = fields[hub_name_list_idx].split(';'),
+                                    account_created = fields[account_created_idx],
+                                    account_updated = fields[account_updated_idx],
+                                    hub_map         = hub_map)
 
 
-        print("Read %d rows, processed %d rows, and created %d families from directory file" % \
-            (rows_read, rows_processed, families_created))
+        ##
+        ## show the user the number rows read, processed, and number of families created.
+        ## these numbers can be sanity checked manually against the website directory.
+        print('Read', rows_read, 'rows, processed', rows_processed, 'rows, and',
+              'created', len(directory), 'families from directory file')
 
     return directory
 
 
 def ReadDirectory(hub_map):
-    """ roster_tools.ReadDirectory
+    """ directory_tools.ReadDirectory
     PURPOSE:
     Prompts the user for directory file name and proceeds to read the file.
     INPUT:
@@ -147,11 +155,15 @@ def ReadDirectory(hub_map):
             index += 1
             print("%d) %s" % (index, file.name))
 
-        file_number = input("Enter list number of file or press <enter> to use '" + files[0].name + "':")
-        if not file_number:
-            return ReadDirectoryFromFile(file_path + "/" +files[0].name, hub_map)
-        elif 0 < int(file_number) and int(file_number) <= index:
-            return ReadDirectoryFromFile(file_path + "/" + files[int(file_number)-1].name, hub_map)
-        else:
-            print("The selection made is out of range.  Please try again.")
-            ReadDirectory(hub_map)
+        file_number = -1
+        while file_number < 1 or file_number > len(files):
+            
+            file_str = input("Enter list number of file or press <enter> to use '" + files[0].name + "':")
+            if not file_str:
+                file_number = 1
+            elif 0 < int(file_str) <= len(files):
+                file_number = int(file_str)
+            else:
+                print("The selection made is out of range.  Please try again.")
+
+        return ReadDirectoryFromFile(file_path + "/" + files[file_number-1].name, hub_map)

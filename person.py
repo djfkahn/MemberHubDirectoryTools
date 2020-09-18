@@ -2,7 +2,7 @@
 """This module defines the person and family classes.
 """
 
-import hub_map_tools
+from hub_map_tools import ConvertHubStringListToIDList
 
 class Person:
     """Class Person
@@ -14,10 +14,22 @@ class Person:
     family_relation - A string of the form "Adult#" or "Child#", where "#" is either blank or a number.
     """
 
-    def Set(self, last_name, first_name, family_relation):
-        self.last_name       = last_name
-        self.first_name      = first_name
-        self.family_relation = family_relation
+    def __init__(self, last_name, first_name, family_relation, hub_name_list, hub_map):
+
+        if last_name and first_name and family_relation and family_relation[:5].lower() in ('adult', 'child'):
+            self.last_name       = last_name
+            self.first_name      = first_name
+            self.family_relation = family_relation
+            if hub_name_list and hub_map:
+                self.hubs        = ConvertHubStringListToIDList (hub_name_list, hub_map)
+            else:
+                self.hubs        = []
+        else:
+            self.last_name       = None
+            self.first_name      = None
+            self.family_relation = None
+            self.hubs            = []
+
 
     def IsSame (self, other):
         ##
@@ -32,6 +44,9 @@ class Person:
         that_full_name = other.first_name.lower() + " " + other.last_name.lower()
         return this_full_name.replace("-", " ")  == that_full_name.replace("-", " ")
                 
+    def IsWithSchool(self):
+        return 'Staff'   in self.hubs or \
+               'Teacher' in self.hubs
 
     def SetHubs (self, hub_list):
         for hub_id in hub_list:
@@ -46,32 +61,40 @@ class Person:
     def Print(self):
         print("%s %s" % (self.first_name, self.last_name))
 
+    def PrintWithHubs(self):
+        print("%s %s - <%s>" % (self.first_name, self.last_name, self.hubs))
+
+    def PrintWithEmail(self):
+        print("%s %s - <%s>" % (self.first_name, self.last_name, self.email))
+
 class DirectoryPerson (Person):
     """This class extends the Person class with Directory-only fields."""
+    def __init__(self, last_name, first_name, family_relation, hub_name_list, hub_map,
+                 person_id=None, middle_name=None,suffix=None, email=None, family_id=None,
+                 account_created=None, account_updated=None):
 
-    def SetFromDirectory (self, fields, hub_map):
-        self.Set(last_name       = fields[1].strip('"'),
-                 first_name      = fields[2].strip('"'),
-                 family_relation = fields[7].strip('"'))
+        super(DirectoryPerson, self).__init__(last_name       = last_name,
+                                              first_name      = first_name,
+                                              family_relation = family_relation,
+                                              hub_name_list   = hub_name_list,
+                                              hub_map         = hub_map)
+        self.person_id       = person_id
+        self.middle_name     = middle_name
+        self.suffix          = suffix
+        self.email           = email
+        self.family_id       = family_id
+        self.account_created = account_created
+        self.account_updated = account_updated
 
-        self.person_id = fields[0].strip('"')
-        self.middle_name = fields[3].strip('"')
-        self.suffix = fields[4].strip('"')
-        self.email = fields[5].strip('"')
-        self.family_id = fields[6].strip('"')
-        self.parents = fields[11].strip('"')
-        hub_name_list = fields[24].split(';')
-        self.hubs = hub_map_tools.ConvertHubStringListToIDList \
-                        (hub_name_list, hub_map)
-        self.account_created = fields[28].strip('"')
-        self.account_updated = fields[29].strip('"')
+
 
 class RosterPerson (Person):
     """This class extends the Person class with Roster-only fields."""
+    def __init__(self, last_name, first_name, family_relation, teacher, hub_map):
 
-    def SetFromRoster(self, last_name, first_name, teacher, family_relation, hub_map):
-        self.Set(last_name       = last_name,
-                 first_name      = first_name,
-                 family_relation = family_relation)
-        self.hubs = hub_map_tools.ConvertHubStringListToIDList \
-                        ([teacher], hub_map)
+        super(RosterPerson, self).__init__(last_name       = last_name,
+                                           first_name      = first_name,
+                                           family_relation = family_relation,
+                                           hub_name_list   = [teacher],
+                                           hub_map         = hub_map)
+

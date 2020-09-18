@@ -12,13 +12,6 @@ def FormTimeTag():
     tag = strftime("%Y-%m-%d-%H-%M-%S", localtime())
     return tag
 
-def ConvertHubListToImportString(hub_list):
-    hub_str = "/"
-    for hub in hub_list:
-        hub_str += str(hub) + "/"
-
-    return hub_str  # strip off the trailing ';'
-
 def WriteNewMemberLine(open_file, family_relation, first_name, last_name, person_id):
     line = "%s,%s,%s,%s\n" % (family_relation, first_name, last_name, person_id)
     open_file.write(line)
@@ -62,8 +55,8 @@ Summary: 1. asks user to name file to be written to.  this file will be
         open_file.close()
 
 
-def WriteHublessLine(open_file, first_name, last_name, hubs, person_id):
-    line = "%s,%s,%s,%s\n" % (first_name, last_name, hubs, person_id)
+def WriteHublessLine(open_file, first_name, last_name, hubs, person_id, sep):
+    line = "%s%s%s%s%s%s%s\n" % (first_name, sep, last_name, sep, hubs, sep, person_id)
     open_file.write(line)
 
 
@@ -82,30 +75,70 @@ Summary: 1. opens file for writing, and writes the column titles
     print("Writing to import file called %s." % file_name)
     try:
         open_file = open(file_name,"w")
-        WriteHublessLine (open_file, "first_name", "last_name", "hubs", "person_id")
+        WriteHublessLine(open_file  = open_file,
+                         first_name = "first_name",
+                         last_name  = "last_name",
+                         hubs       = "hubs",
+                         person_id  = "person_id",
+                         sep        = ",")
 
         for this_person in people:
-        	WriteHublessLine(open_file  = open_file,
-        					 first_name = this_person.first_name,
-        					 last_name  = this_person.last_name,
-        					 hubs       = this_person.hubs,
-        					 person_id  = this_person.person_id)
+            WriteHublessLine(open_file  = open_file,
+                             first_name = this_person.first_name,
+                             last_name  = this_person.last_name,
+                             hubs       = this_person.hubs,
+                             person_id  = this_person.person_id,
+                             sep        = ",")
 
     finally:
         open_file.close()
 
 
 
-def CreateEmaillessFile(people, file_prefix):
+def CreateAccountlessFile(people, file_prefix):
 
-	file_name = file_prefix + "_" + FormTimeTag() + ".txt"
-	print("Writing to file called %s." % file_name)
-	try:
-		open_file = open(file_name,"w")
-		for person in people:
-			line = "%s|%s|%s|%s\n" % (person.first_name, person.last_name, person.family_relation, person.hubs)
-			open_file.write(line)
+    file_name = file_prefix + "_" + FormTimeTag() + ".txt"
+    print("Writing to file called %s." % file_name)
+    try:
+        open_file = open(file_name,"w")
+        for person in people:
+            WriteHublessLine(open_file  = open_file,
+                             first_name = person.first_name,
+                             last_name  = person.last_name,
+                             hubs       = person.hubs,
+                             person_id  = person.person_id,
+                             sep        = "|")
 
 
-	finally:
-		open_file.close()
+    finally:
+        open_file.close()
+
+def CreateEmaillessByHubFile(map_d, hub_map, file_prefix):
+
+    file_name = file_prefix + "_" + FormTimeTag() + ".txt"
+    print("Writing to file called %s." % file_name)
+    try:
+        open_file = open(file_name,"w")
+        for hub in map_d.keys():
+            open_file.write("-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-\n")
+            open_file.write('Hub ID: ' + hub + "\n")
+            ##
+            ## find a way to print the hub's teacher name
+            for map_key in hub_map.keys():
+                if hub_map[map_key] == hub:
+                    open_file.write('\t+Possible Hub Name: ' + map_key + '\n')
+            ##
+            ## print a different message if the hub has no adults without emails
+            if len(map_d[hub]) < 1:
+                open_file.write('All adults in this hub have email addresses in the directory')
+            else:
+                ##
+                ## add each person in the hub's list
+                number = 1
+                for person in map_d[hub]:
+                    line = str(number) + ") " + person.last_name + ", " + person.first_name + "\n"
+                    open_file.write(line)
+                    number += 1
+
+    finally:
+        open_file.close()
