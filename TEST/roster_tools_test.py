@@ -8,7 +8,7 @@ data_file_path = os.path.abspath("./roster_tools_tests/")
 hub_file_name  = data_file_path + "/hub_map.csv"
 common_hub_map = hub_map_tools.ReadHubMapFromFile(hub_file_name)
 
-class UT_ReadRosterFromFile(unittest.TestCase):
+class UT_01_ReadRosterFromFile(unittest.TestCase):
     def test_01_simple(self):
         roster_file_name = data_file_path + "/test_1_simple.xlsx"
         with patch('builtins.input', side_effect=[None]):
@@ -92,6 +92,32 @@ class UT_ReadRosterFromFile(unittest.TestCase):
         self.assertEqual(1, len(result))
         self.assertEqual(2, len(result[0].adults))
         self.assertEqual(3, len(result[0].children))
+
+class UT_02_ReadDirectory(unittest.TestCase):
+    @patch('builtins.input', side_effect=[None, None])
+    def test_01_use_default(self, mock_input):
+        with patch('os.path.abspath', return_value=data_file_path):
+            result = roster_tools.ReadRoster(common_hub_map)
+        self.assertEqual(1, len(result))
+
+    @patch('builtins.input', side_effect=['0', '1', None])
+    def test_02_select_under_range(self, mock_input):
+        with patch('os.path.abspath', return_value=data_file_path):
+            result = roster_tools.ReadRoster(common_hub_map)
+        self.assertEqual(1, len(result))
+
+    @patch('builtins.input', side_effect=['12', None, None])
+    def test_03_select_over_range(self, mock_input):
+        with patch('os.path.abspath', return_value=data_file_path):
+            result = roster_tools.ReadRoster(common_hub_map)
+        self.assertEqual(1, len(result))
+
+class UT_03_ReadRosterAdultsFromMostRecent(unittest.TestCase):
+    def test_01_use_default(self):
+        with patch('os.path.abspath', return_value=data_file_path):
+            result = roster_tools.ReadRosterAdultsFromMostRecent()
+        self.assertEqual(3, len(result))
+
 
 if __name__ == '__main__':
     unittest.main()

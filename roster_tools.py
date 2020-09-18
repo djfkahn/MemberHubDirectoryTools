@@ -9,6 +9,19 @@ from openpyxl import load_workbook
 NUM_ROSTER_FIELDS = 5
 
 def ReadRosterAdultsFromMostRecent():
+    """ roster_tools.ReadRosterAdultsFromMostRecent
+    PURPOSE:
+    Generates a list of adult names in the newest roster file.
+    INPUT:
+    - none
+    OUTPUTS:
+    - adults_list -- list of adult name fields in the newest roster file.
+    ASSUMPTIONS:
+    - none
+    """
+    ##
+    ## Find the files in the "Roster" folder with ".xlsx" extension, sort them by
+    ## date, and pick the most recently added
     file_path = os.path.abspath("./Roster/")
     with os.scandir(file_path) as raw_files:
         files = [file for file in raw_files \
@@ -16,11 +29,16 @@ def ReadRosterAdultsFromMostRecent():
         files.sort(key=lambda x: os.stat(x).st_mtime, reverse=True)
         file_name = file_path + "/" +files[0].name
     
+    ##
+    ## Load the workbook, and select the active/only worksheet
     wb = load_workbook(file_name)
     ws = wb.active
+    ##
+    ## Copy all the values in column 'D' for all rows beyond the title row into
+    ## the output list
     adults_list = []
-    for fields in ws.values:
-        adults_list.append(fields[3])
+    for fields in ws.iter_rows(min_row=2, max_row=ws.max_row, min_col=4, max_col=4):
+        adults_list.append(fields[0].value)
         
     return adults_list
 

@@ -155,11 +155,15 @@ def ReadDirectory(hub_map):
             index += 1
             print("%d) %s" % (index, file.name))
 
-        file_number = input("Enter list number of file or press <enter> to use '" + files[0].name + "':")
-        if not file_number:
-            return ReadDirectoryFromFile(file_path + "/" +files[0].name, hub_map)
-        elif 0 < int(file_number) and int(file_number) <= index:
-            return ReadDirectoryFromFile(file_path + "/" + files[int(file_number)-1].name, hub_map)
-        else:
-            print("The selection made is out of range.  Please try again.")
-            ReadDirectory(hub_map)
+        file_number = -1
+        while file_number < 1 or file_number > len(files):
+            
+            file_str = input("Enter list number of file or press <enter> to use '" + files[0].name + "':")
+            if not file_str:
+                file_number = 1
+            elif 0 < int(file_str) <= len(files):
+                file_number = int(file_str)
+            else:
+                print("The selection made is out of range.  Please try again.")
+
+        return ReadDirectoryFromFile(file_path + "/" + files[file_number-1].name, hub_map)

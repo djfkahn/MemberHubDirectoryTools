@@ -1,3 +1,19 @@
+'''
+Name:          run_all_tests
+
+Description:   Scans the TEST directory, and execute all the unit tests it finds.
+
+Options:       Execute Only
+                  $ python3 -m run_all_tests
+            
+               Execute with Test Coverage
+                  $ coverage run -m run_all_tests          <-- runs the unit tests and collects coverage data
+                  $ coverage report -m                     <-- shows coverage of unittest
+                  
+                  (this option requires installation of Coverage.py using
+                      $ pip install coverage
+                  )
+'''
 import os
 from unittest import TestLoader
 from unittest import TestResult
