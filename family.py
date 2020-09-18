@@ -68,46 +68,6 @@ class Family:
         self.children.append(new_child)
 
 
-    def AddFromDirectory(self, person_id, last_name, first_name, middle_name, suffix, email, family_id, family_relation,
-                         hub_name_list, account_created, account_updated, hub_map):
-
-        if family_relation[:5].lower() == 'adult':
-            new_adult = person.DirectoryPerson()
-            new_adult.SetFromDirectory(person_id       = person_id,
-                                       last_name       = last_name,
-                                       first_name      = first_name,
-                                       middle_name     = middle_name,
-                                       suffix          = suffix,
-                                       email           = email,
-                                       family_id       = family_id,
-                                       family_relation = family_relation,
-                                       hub_name_list   = hub_name_list,
-                                       account_created = account_created,
-                                       account_updated = account_updated,
-                                       hub_map         = hub_map)
-
-            self.adults.append(new_adult)
-
-        elif family_relation[:5].lower() == 'child':
-            new_child = person.DirectoryPerson()
-            new_child.SetFromDirectory(person_id       = person_id,
-                                       last_name       = last_name,
-                                       first_name      = first_name,
-                                       middle_name     = middle_name,
-                                       suffix          = suffix,
-                                       email           = email,
-                                       family_id       = family_id,
-                                       family_relation = family_relation,
-                                       hub_name_list   = hub_name_list,
-                                       account_created = account_created,
-                                       account_updated = account_updated,
-                                       hub_map         = hub_map)
-            self.children.append(new_child)
-
-        else:
-            print("Attempting to add person from Directory to family with unrecognized family relation:", family_relation)
-
-
     def IsSameFamily(self, other):
         """Family.IsSameFamily
         INPUTS:
@@ -238,3 +198,51 @@ class Family:
         print("Children:")
         for child in self.children:
             child.PrintWithHubs()
+
+class DirectoryFamily(Family):
+    def __init__(self, family_id):
+        super(DirectoryFamily, self).__init__()
+        self.family_id = family_id
+
+
+    def AddToFamily(self, person_id, last_name, first_name, middle_name, suffix, email,
+                    family_id, family_relation, hub_name_list, account_created, account_updated, hub_map):
+        
+        if family_relation[:5].lower() == 'adult':
+            new_adult = person.DirectoryPerson()
+            new_adult.SetFromDirectory(person_id       = person_id,
+                                       last_name       = last_name,
+                                       first_name      = first_name,
+                                       middle_name     = middle_name,
+                                       suffix          = suffix,
+                                       email           = email,
+                                       family_id       = family_id,
+                                       family_relation = family_relation,
+                                       hub_name_list   = hub_name_list,
+                                       account_created = account_created,
+                                       account_updated = account_updated,
+                                       hub_map         = hub_map)
+
+            self.adults.append(new_adult)
+
+        elif family_relation[:5].lower() == 'child':
+            new_child = person.DirectoryPerson()
+            new_child.SetFromDirectory(person_id       = person_id,
+                                       last_name       = last_name,
+                                       first_name      = first_name,
+                                       middle_name     = middle_name,
+                                       suffix          = suffix,
+                                       email           = email,
+                                       family_id       = family_id,
+                                       family_relation = family_relation,
+                                       hub_name_list   = hub_name_list,
+                                       account_created = account_created,
+                                       account_updated = account_updated,
+                                       hub_map         = hub_map)
+            self.children.append(new_child)
+
+        else:
+            print("Attempting to add person from Directory to family with unrecognized family relation:", family_relation)
+
+
+    

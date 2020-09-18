@@ -33,16 +33,16 @@ def ReadDirectoryFromFile(file_name, hub_map):
         10. <account_created>
         11. <account_updated>
         ** - these fields are required
+        
     2. Lines that contain blank required fields (denoted with '**') will be flagged, but
        not added to the output dictionary.
-    3. Families appear in the directory in consecutive rows
     """
 
     directory         = []
+    family_id_list    = []
     rows_read         = -1
     rows_processed    = 0
-    current_family_id = ''
-    new_family        = False
+    this_family       = False
 
     with open(file_name) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
@@ -86,52 +86,53 @@ def ReadDirectoryFromFile(file_name, hub_map):
             ## rows processed.
             rows_processed += 1
             ##
-            ## create a new family every time a new family ID is found
-            if fields[family_id_idx] != current_family_id:
+            ## if the current row's family ID has not been processed previously...
+            if family_id_list.count(fields[family_id_idx]) == 0: 
                 ##
-                ## to start processing a new family, append the family previously worked on
-                ## (if it exists)
-                if new_family:
-                    directory.append(new_family)
-                ##
-                ## instantiate new family object
-                new_family = family.Family()
+                ## instantiate new directory family object and append it to the directory
+                this_family = family.DirectoryFamily(fields[family_id_idx])
+                directory.append(this_family)
                 ##
                 ## store the family ID currently working on
-                current_family_id = fields[family_id_idx]
+                family_id_list.append(fields[family_id_idx])
+            
+            ##
+            ## otherwise, the current row's family ID has been processed before...
+            else:
+                ##
+                ## find the family based on its family ID to use for further processing
+                for possible_family in reversed(directory):
+                    if possible_family.family_id == fields[family_id_idx]:
+                        this_family = possible_family
+                        break
 
             ##
-            ## add the person to the new family
-            new_family.AddFromDirectory(person_id       = fields[person_id_idx],
-                                        last_name       = fields[last_name_idx],
-                                        first_name      = fields[first_name_idx],
-                                        middle_name     = fields[middle_name_idx],
-                                        suffix          = fields[suffix_idx],
-                                        email           = fields[email_idx],
-                                        family_id       = fields[family_id_idx],
-                                        family_relation = fields[family_relation_idx],
-                                        hub_name_list   = fields[hub_name_list_idx].split(';'),
-                                        account_created = fields[account_created_idx],
-                                        account_updated = fields[account_updated_idx],
-                                        hub_map         = hub_map)
+            ## add the person to the family identified
+            this_family.AddToFamily(person_id       = fields[person_id_idx],
+                                    last_name       = fields[last_name_idx],
+                                    first_name      = fields[first_name_idx],
+                                    middle_name     = fields[middle_name_idx],
+                                    suffix          = fields[suffix_idx],
+                                    email           = fields[email_idx],
+                                    family_id       = fields[family_id_idx],
+                                    family_relation = fields[family_relation_idx],
+                                    hub_name_list   = fields[hub_name_list_idx].split(';'),
+                                    account_created = fields[account_created_idx],
+                                    account_updated = fields[account_updated_idx],
+                                    hub_map         = hub_map)
 
-        else:
-            ##
-            ## once the last row is read, append the last family processed to the directory list
-            if new_family:
-                directory.append(new_family)
 
         ##
         ## show the user the number rows read, processed, and number of families created.
         ## these numbers can be sanity checked manually against the website directory.
-        print("Read %d rows, processed %d rows, and created %d families from directory file" % \
-            (rows_read, rows_processed, len(directory)))
+        print('Read', rows_read, 'rows, processed', rows_processed, 'rows, and',
+              'created', len(directory), 'families from directory file')
 
     return directory
 
 
 def ReadDirectory(hub_map):
-    """ roster_tools.ReadDirectory
+    """ directory_tools.ReadDirectory
     PURPOSE:
     Prompts the user for directory file name and proceeds to read the file.
     INPUT:
