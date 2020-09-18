@@ -17,57 +17,6 @@ class Family:
         self.adults   = []
         self.children = []
 
-    def AddAdultsFromCombinedField(self, teacher, name_field, hub_map, rosterC):
-        parent_count = 1
-        parent_num = ""
-
-        parent_names = name_parser.ParseFullName(name_field, rosterC)
-        for parent in parent_names:
-            new_adult = person.RosterPerson()
-            new_adult.SetFromRoster(last_name       = parent['last'],
-                                    first_name      = parent['first'],
-                                    teacher         = teacher,
-                                    family_relation = "Adult"+parent_num,
-                                    hub_map         = hub_map)
-            self.adults.append(new_adult)
-            parent_count += 1
-            parent_num = str(parent_count)
-
-
-    def CreateFromRoster(self, child_first, child_last, grade, adult_names, teacher_name, hub_map, rosterC):
-        # for elementary school (< 6th grade) teacher name is retained
-        # for middle school, teacher name is replaced with grade level
-        if 0 <= int(grade) <= 5:
-            if hub_map_tools.IsInClassroomHub(hub_map, teacher_name):
-                teacher = teacher_name
-            else:
-                print("Elementry school student from Roster found with unknown teacher.")
-                print('Child name:',child_first, child_last, '- Adult name(s):', adult_names, '- Grade and Teacher:', grade, teacher_name)
-                return
-        elif 6 <= int(grade) <= 8:
-            teacher = grade
-        else:
-            print("Student from Roster found with unknown teacher and unknown grade level.")
-            print('Child name:',child_first, child_last, '- Adult name(s):', adult_names, '- Grade and Teacher:', grade, teacher_name)
-            return
-           
-
-        # add adults to the family
-        self.AddAdultsFromCombinedField(teacher    = teacher,
-                                        name_field = adult_names,
-                                        hub_map    = hub_map,
-                                        rosterC    = rosterC)
-
-        # add the child to the family
-        new_child = person.RosterPerson()
-        new_child.SetFromRoster(last_name       = child_last,
-                                first_name      = child_first,
-                                teacher         = teacher,
-                                family_relation = "Child1",
-                                hub_map         = hub_map)
-        self.children.append(new_child)
-
-
     def IsSameFamily(self, other):
         """Family.IsSameFamily
         INPUTS:
@@ -209,40 +158,91 @@ class DirectoryFamily(Family):
                     family_id, family_relation, hub_name_list, account_created, account_updated, hub_map):
         
         if family_relation[:5].lower() == 'adult':
-            new_adult = person.DirectoryPerson()
-            new_adult.SetFromDirectory(person_id       = person_id,
-                                       last_name       = last_name,
-                                       first_name      = first_name,
-                                       middle_name     = middle_name,
-                                       suffix          = suffix,
-                                       email           = email,
-                                       family_id       = family_id,
-                                       family_relation = family_relation,
-                                       hub_name_list   = hub_name_list,
-                                       account_created = account_created,
-                                       account_updated = account_updated,
-                                       hub_map         = hub_map)
+            new_adult = person.DirectoryPerson(person_id       = person_id,
+                                               last_name       = last_name,
+                                               first_name      = first_name,
+                                               middle_name     = middle_name,
+                                               suffix          = suffix,
+                                               email           = email,
+                                               family_id       = family_id,
+                                               family_relation = family_relation,
+                                               hub_name_list   = hub_name_list,
+                                               account_created = account_created,
+                                               account_updated = account_updated,
+                                               hub_map         = hub_map)
 
             self.adults.append(new_adult)
 
         elif family_relation[:5].lower() == 'child':
-            new_child = person.DirectoryPerson()
-            new_child.SetFromDirectory(person_id       = person_id,
-                                       last_name       = last_name,
-                                       first_name      = first_name,
-                                       middle_name     = middle_name,
-                                       suffix          = suffix,
-                                       email           = email,
-                                       family_id       = family_id,
-                                       family_relation = family_relation,
-                                       hub_name_list   = hub_name_list,
-                                       account_created = account_created,
-                                       account_updated = account_updated,
-                                       hub_map         = hub_map)
+            new_child = person.DirectoryPerson(person_id       = person_id,
+                                               last_name       = last_name,
+                                               first_name      = first_name,
+                                               middle_name     = middle_name,
+                                               suffix          = suffix,
+                                               email           = email,
+                                               family_id       = family_id,
+                                               family_relation = family_relation,
+                                               hub_name_list   = hub_name_list,
+                                               account_created = account_created,
+                                               account_updated = account_updated,
+                                               hub_map         = hub_map)
             self.children.append(new_child)
 
         else:
             print("Attempting to add person from Directory to family with unrecognized family relation:", family_relation)
 
 
-    
+class RosterFamily(Family):
+    def __init__(self, adults_raw_name):
+        super(RosterFamily, self).__init__()
+        self.adults_raw_name = adults_raw_name
+
+    def AddAdultsFromCombinedField(self, teacher, name_field, hub_map, rosterC):
+        parent_count = 1
+        parent_num = ""
+
+        parent_names = name_parser.ParseFullName(name_field, rosterC)
+        for parent in parent_names:
+            new_adult = person.RosterPerson(last_name       = parent['last'],
+                                            first_name      = parent['first'],
+                                            teacher         = teacher,
+                                            family_relation = "Adult"+parent_num,
+                                            hub_map         = hub_map)
+            self.adults.append(new_adult)
+            parent_count += 1
+            parent_num = str(parent_count)
+
+
+    def AddToFamily(self, child_first, child_last, grade, adult_names, teacher_name, hub_map, rosterC):
+        # for elementary school (< 6th grade) teacher name is retained
+        # for middle school, teacher name is replaced with grade level
+        if 0 <= int(grade) <= 5:
+            if hub_map_tools.IsInClassroomHub(hub_map, teacher_name):
+                teacher = teacher_name
+            else:
+                print("Elementry school student from Roster found with unknown teacher.")
+                print('Child name:',child_first, child_last, '- Adult name(s):', adult_names, '- Grade and Teacher:', grade, teacher_name)
+                return
+        elif 6 <= int(grade) <= 8:
+            teacher = grade
+        else:
+            print("Student from Roster found with unknown teacher and unknown grade level.")
+            print('Child name:',child_first, child_last, '- Adult name(s):', adult_names, '- Grade and Teacher:', grade, teacher_name)
+            return
+           
+
+        # add adults to the family
+        self.AddAdultsFromCombinedField(teacher    = teacher,
+                                        name_field = adult_names,
+                                        hub_map    = hub_map,
+                                        rosterC    = rosterC)
+
+        # add the child to the family
+        new_child = person.RosterPerson(last_name       = child_last,
+                                        first_name      = child_first,
+                                        teacher         = teacher,
+                                        family_relation = "Child1",
+                                        hub_map         = hub_map)
+        self.children.append(new_child)
+
+

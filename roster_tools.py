@@ -67,14 +67,14 @@ def ReadRosterFromFile(file_name, hub_map):
         student_count += 1
 
         ## treat the student as a member of a new family...for now
-        new_family = family.Family()
-        new_family.CreateFromRoster(child_first  = fields[1],
-                                    child_last   = fields[0],
-                                    grade        = fields[2],
-                                    adult_names  = fields[3],
-                                    teacher_name = fields[4],
-                                    hub_map      = hub_map,
-                                    rosterC      = rosterC)
+        new_family = family.RosterFamily(adults_raw_name=fields[3])
+        new_family.AddToFamily(child_first  = fields[1],
+                               child_last   = fields[0],
+                               grade        = fields[2],
+                               adult_names  = fields[3],
+                               teacher_name = fields[4],
+                               hub_map      = hub_map,
+                               rosterC      = rosterC)
 
         # if new_family is the same as a family already in the roster, then combine
         # families.  Otherwise, append new_family at the end of the roster.
