@@ -10,7 +10,12 @@ Options:       Execute Only
                   $ coverage run -m run_all_tests          <-- runs the unit tests and collects coverage data
                   $ coverage report -m                     <-- shows coverage of unittest
                   
-                  (this option requires installation of Coverage.py using
+               Execute with Test Coverage to HTML
+                  $ coverage run -m run_all_tests          <-- runs the unit tests and collects coverage data
+                  $ coverage html                          <-- shows coverage of unittest at
+                                                               file://<path to test folder>/htmlcov/index.html
+                  
+                  (coverage options require installation of Coverage.py using
                       $ pip install coverage
                   )
 '''

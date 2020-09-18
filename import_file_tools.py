@@ -130,7 +130,7 @@ def CreateEmaillessByHubFile(map_d, hub_map, file_prefix):
             ##
             ## print a different message if the hub has no adults without emails
             if len(map_d[hub]) < 1:
-                print('All adults in this hub have email addresses in the directory')
+                open_file.write('All adults in this hub have email addresses in the directory')
             else:
                 ##
                 ## add each person in the hub's list
