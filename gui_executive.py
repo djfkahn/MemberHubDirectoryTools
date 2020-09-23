@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 from tkinter import filedialog
-# from subprocess import Popen, PIPE, STDOUT
 import os
 import sys
 import actions
@@ -12,16 +11,7 @@ import roster
 import hub_map_tools
 import import_file_tools
 
-# def do_cmdline(cmd, text):
-#     """Execute program in 'cmd' and pass 'text' to STDIN.
-#     Returns STDOUT output.
-#     Code from: https://stackoverflow.com/questions/8475290/how-do-i-write-to-a-python-subprocess-stdin
-#     Note that any prompt the program writes is included in STDOUT.
-#     """
-# 
-#     process = Popen([cmd], stdout=PIPE, stdin=PIPE, stderr=PIPE)
-#     result = process.communicate(input=bytes(text, 'utf-8'))[0].decode('utf-8')
-#     return result.strip()
+
 
 class IORedirector(object):
     '''A general class for redirecting I/O to this Text widget.'''
@@ -39,12 +29,12 @@ class Application(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master)
         self.master = master
+        self.master["bg"] = "light grey"
         self.pack()
         self.frame_width = 800
         self.input_files_frame    = tk.Frame(master=master,
-                                             width=self.frame_width, height= 100, bg="light gray",
-                                             relief=tk.RAISED, borderwidth=1)
-        self.input_files_frame.pack(pady=5)
+                                             width=self.frame_width, height= 100, bg="light gray")
+        self.input_files_frame.pack(padx=1,pady=5)
 
         self.input_buttons_frame  = tk.Frame(master=master,
                                              width=self.frame_width, height= 100, bg="light gray")
@@ -128,7 +118,8 @@ class Application(tk.Frame):
 
 
     def get_hub_map_path(self):
-        self.hub_map_path = filedialog.askdirectory()
+        initialdir = os.path.abspath('~/Desktop')
+        self.hub_map_path = filedialog.askdirectory(initialdir=initialdir)
         print('Will look for directory files in', self.hub_map_path)
         with os.scandir(self.hub_map_path) as raw_files:
             files = [file for file in raw_files \
@@ -153,7 +144,8 @@ class Application(tk.Frame):
 
 
     def get_directory_path(self):
-        self.directory_path = filedialog.askdirectory()
+        initialdir = os.path.abspath('~/Desktop')
+        self.directory_path = filedialog.askdirectory(initialdir=initialdir)
         print('Will look for directory files in', self.directory_path)
         with os.scandir(self.directory_path) as raw_files:
             files = [file for file in raw_files \
@@ -168,8 +160,9 @@ class Application(tk.Frame):
 
 
     def get_roster_path(self):
-        self.roster_path = filedialog.askdirectory()
-        print('Will look for roster files in', self.directory_path)
+        initialdir = os.path.abspath('~/Desktop')
+        self.roster_path = filedialog.askdirectory(initialdir=initialdir)
+        print('Will look for roster files in', self.roster_path)
         with os.scandir(self.roster_path) as raw_files:
             files = [file for file in raw_files \
                         if not(file.name.startswith('~')) and (file.name.endswith('.xlsx'))]
