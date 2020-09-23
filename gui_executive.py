@@ -1,7 +1,8 @@
 import tkinter as tk
-import tkinter.ttk as ttk
-import tkinter.messagebox as messagebox
-from subprocess import Popen, PIPE, STDOUT
+from tkinter import ttk
+from tkinter import messagebox
+from tkinter import filedialog
+# from subprocess import Popen, PIPE, STDOUT
 import os
 import sys
 import actions
@@ -11,16 +12,16 @@ import roster
 import hub_map_tools
 import import_file_tools
 
-def do_cmdline(cmd, text):
-    """Execute program in 'cmd' and pass 'text' to STDIN.
-    Returns STDOUT output.
-    Code from: https://stackoverflow.com/questions/8475290/how-do-i-write-to-a-python-subprocess-stdin
-    Note that any prompt the program writes is included in STDOUT.
-    """
-
-    process = Popen([cmd], stdout=PIPE, stdin=PIPE, stderr=PIPE)
-    result = process.communicate(input=bytes(text, 'utf-8'))[0].decode('utf-8')
-    return result.strip()
+# def do_cmdline(cmd, text):
+#     """Execute program in 'cmd' and pass 'text' to STDIN.
+#     Returns STDOUT output.
+#     Code from: https://stackoverflow.com/questions/8475290/how-do-i-write-to-a-python-subprocess-stdin
+#     Note that any prompt the program writes is included in STDOUT.
+#     """
+# 
+#     process = Popen([cmd], stdout=PIPE, stdin=PIPE, stderr=PIPE)
+#     result = process.communicate(input=bytes(text, 'utf-8'))[0].decode('utf-8')
+#     return result.strip()
 
 class IORedirector(object):
     '''A general class for redirecting I/O to this Text widget.'''
@@ -45,33 +46,115 @@ class Application(tk.Frame):
                                              relief=tk.RAISED, borderwidth=1)
         self.input_files_frame.pack(pady=5)
 
+        self.input_buttons_frame  = tk.Frame(master=master,
+                                             width=self.frame_width, height= 100, bg="light gray")
+        self.input_buttons_frame.pack(pady=5)
+        self.create_input_file_widgets()
+
         self.user_selection_frame = tk.Frame(master=master,
                                              width=self.frame_width, height= 90, 
-                                             relief=tk.RAISED, borderwidth=1)
+                                             relief=tk.RAISED, borderwidth=1, bg="light gray")
         self.user_selection_frame.pack(pady=5)
         
         self.output_display_frame = tk.Frame(master=master, width=self.frame_width, height= 500,
-                                             relief=tk.RAISED, borderwidth=1)
+                                             relief=tk.RAISED, borderwidth=1, bg="light gray")
         self.output_display_frame.pack()
-        
-        self.master_hub_map       = hub_map_tools.ReadHubMap()
-
-        self.create_widgets()
-
-    def create_widgets(self):
-        self.create_input_file_widgets()
         self.create_text_output_widgets()
+        
 
     def create_input_file_widgets(self):
         
-        self.directory_label = tk.Label(master=self.input_files_frame, text="Directory File:")
-        self.directory_label.place(x=0, y=0)
+        frame = tk.Frame(master=self.input_files_frame, bg="light gray")
+        frame.grid(row=1, column=1)
+        label = tk.Label(master=frame, text="Directory File:", bg='light grey')
+        label.pack(padx=5, pady=5)
 
-        self.directory_file = ttk.Combobox(master=self.input_files_frame)
-        self.directory_file.place(x=100, y=0)
-        self.directory_file["width"] = 50
-        self.directory_path = os.path.abspath("./Directory/")
-        print(self.directory_path)
+        frame = tk.Frame(master=self.input_files_frame, bg="light gray")
+        frame.grid(row=1, column=2)
+        label = tk.Button(master = frame, text = "Select Folder", command = self.get_directory_path)
+        label.pack(padx=5, pady=5)
+
+        frame = tk.Frame(master=self.input_files_frame, bg="light gray")
+        frame.grid(row=1, column=3)
+        self.directory_file = ttk.Combobox(master=frame, width=50, values=[])
+        self.directory_file.pack(padx=5, pady=5)
+        
+        frame = tk.Frame(master=self.input_files_frame, bg="light gray")
+        frame.grid(row=2, column=1)
+        label = tk.Label(master=frame, text="Roster File:", bg='light grey')
+        label.pack(padx=5, pady=5)
+
+        frame = tk.Frame(master=self.input_files_frame, bg="light gray")
+        frame.grid(row=2, column=2)
+        label = tk.Button(master = frame, text = "Select Folder", command = self.get_roster_path)
+        label.pack(padx=5, pady=5)
+
+        frame = tk.Frame(master=self.input_files_frame, bg="light gray")
+        frame.grid(row=2, column=3)
+        self.roster_file = ttk.Combobox(master=frame, width=50, values=[])
+        self.roster_file.pack(padx=5, pady=5)
+        
+        frame = tk.Frame(master=self.input_files_frame, bg="light gray")
+        frame.grid(row=3, column=1)
+        label = tk.Label(master=frame, text="Hub Map and \nRoster Errata Files:", bg='light grey')
+        label.pack(padx=5, pady=5)
+
+        frame = tk.Frame(master=self.input_files_frame, bg="light gray")
+        frame.grid(row=3, column=2)
+        label = tk.Button(master = frame, text = "Select Folder", command = self.get_hub_map_path)
+        label.pack(padx=5, pady=5)
+
+        frame = tk.Frame(master=self.input_files_frame, bg="light gray")
+        frame.grid(row=3, column=3)
+        self.hub_map_file = ttk.Combobox(master=frame, width=50, values=[])
+        self.hub_map_file.pack(padx=5, pady=5)
+
+        frame = tk.Frame(master=self.input_files_frame, bg="light gray")
+        frame.grid(row=4, column=3)
+        self.errata_file = ttk.Combobox(master=frame, width=50, values=[])
+        self.errata_file.pack(padx=5, pady=5)
+
+
+
+        frame  = tk.Frame(master=self.input_buttons_frame, bg="light gray")
+        frame.grid(row=1, column=1)
+        button = tk.Button(master = frame, text = "Read Files", command = self.process_files)
+        button.pack(padx=20, pady=5)
+
+        frame  = tk.Frame(master=self.input_buttons_frame, bg="light gray")
+        frame.grid(row=1, column=2)
+        button = tk.Button(master = frame, text = "QUIT", command = self.master.destroy)
+        button.pack(padx=20, pady=5)
+
+
+    def get_hub_map_path(self):
+        self.hub_map_path = filedialog.askdirectory()
+        print('Will look for directory files in', self.hub_map_path)
+        with os.scandir(self.hub_map_path) as raw_files:
+            files = [file for file in raw_files \
+                        if file.name.startswith('hub') and (file.name.endswith('.csv'))]
+            files.sort(key=lambda x: os.stat(x).st_mtime, reverse=True)
+            file_names = []
+            for f in files:
+                file_names.append(f.name)
+        self.hub_map_file["values"] = file_names
+        self.hub_map_file.set(file_names[0])
+
+        with os.scandir(self.hub_map_path) as raw_files:
+            files = [file for file in raw_files \
+                        if file.name.startswith('roster') and (file.name.endswith('.csv'))]
+            files.sort(key=lambda x: os.stat(x).st_mtime, reverse=True)
+            file_names = []
+            for f in files:
+                file_names.append(f.name)
+        self.errata_file["values"] = file_names
+        self.errata_file.set(file_names[0])
+
+
+
+    def get_directory_path(self):
+        self.directory_path = filedialog.askdirectory()
+        print('Will look for directory files in', self.directory_path)
         with os.scandir(self.directory_path) as raw_files:
             files = [file for file in raw_files \
                         if not(file.name.startswith('~')) and (file.name.endswith('.csv'))]
@@ -80,15 +163,13 @@ class Application(tk.Frame):
             for f in files:
                 file_names.append(f.name)
         self.directory_file["values"] = file_names
-        
-        
-        self.roster_label = tk.Label(master=self.input_files_frame, text="Roster File:")
-        self.roster_label.place(x=0, y=30)
+        self.directory_file.set(file_names[0])
 
-        self.roster_file = ttk.Combobox(master=self.input_files_frame)
-        self.roster_path = os.path.abspath("./Roster/")
-        self.roster_file.place(x=100, y=30)
-        self.roster_file["width"] = 50
+
+
+    def get_roster_path(self):
+        self.roster_path = filedialog.askdirectory()
+        print('Will look for roster files in', self.directory_path)
         with os.scandir(self.roster_path) as raw_files:
             files = [file for file in raw_files \
                         if not(file.name.startswith('~')) and (file.name.endswith('.xlsx'))]
@@ -97,19 +178,7 @@ class Application(tk.Frame):
             for f in files:
                 file_names.append(f.name)
         self.roster_file["values"] = file_names
-        
-        
-        self.btn_process_inputs = tk.Button(master  = self.input_files_frame,
-                                            text    = "Process Files",
-                                            command = self.process_files)
-        self.btn_process_inputs.place(x=200, y=60)
-        
-
-        self.quit = tk.Button(master  = self.input_files_frame,
-                              text    = "QUIT", fg="red",
-                              command = self.master.destroy)
-        self.quit.place(x=400, y=60)
-#         self.quit["command"] = quit
+        self.roster_file.set(file_names[0])
 
 
 
@@ -144,13 +213,13 @@ class Application(tk.Frame):
                                  borderwidth=1)
                 frame.grid(row=i, column=j)
                 label = tk.Button(master=frame, text=choices[i][j], command=commands[i][j])
-                label.pack()
+                label.pack(padx=10, pady=5)
 
     def action_0_0(self):
         ##
         ## run the action
         total_adult_count, no_email_person, no_email_family, partial_family, emailless_map = \
-            actions.FindMissingEmail([self.directory, self.master_hub_map])
+            actions.FindMissingEmail([self.directory, self.hub_map])
         ##
         ## print some of the counts to the screen for the user to review
         message  = 'Directory contains: \n'
@@ -171,7 +240,7 @@ class Application(tk.Frame):
                 for this_person in emailless_map[this_list]:
                     this_person.PrintWithHubs()
             if action == True:
-                import_file_tools.CreateEmaillessByHubFile(emailless_map, self.master_hub_map, "emailless_by_hub")
+                import_file_tools.CreateEmaillessByHubFile(emailless_map, self.hub_map, "emailless_by_hub")
 
 
     def action_1_0(self):
@@ -235,7 +304,7 @@ class Application(tk.Frame):
     def action_1_1(self):
         ##
         ## run the action
-        hubless_adults, hubless_children = actions.FindHubless([self.directory, self.master_hub_map])
+        hubless_adults, hubless_children = actions.FindHubless([self.directory, self.hub_map])
         ##
         ## show user how many were found
         message  = 'Found '+str(len(hubless_adults))+' adults and '+str(len(hubless_children))+' children who are not in at least one classroom hub.\n'
@@ -316,7 +385,7 @@ class Application(tk.Frame):
     def action_1_2(self):
         ##
         ## run the action
-        hubful_children = actions.FindChildrenInMultipleClassroom([self.directory, self.master_hub_map])
+        hubful_children = actions.FindChildrenInMultipleClassroom([self.directory, self.hub_map])
         ##
         ## show user how many were found
         message  = 'Found '+str(len(hubful_children))+' students who are not in more than one classroom hub.\n'
@@ -334,7 +403,9 @@ class Application(tk.Frame):
     def action_2_2(self):
         ##
         ## run the action
-        unused_errata, all_errata = actions.FindUnsedErrata()
+        errata_file = self.hub_map_path+'/'+self.errata_file.get()
+        roster_file = self.roster_path+'/'+self.roster_file.get()
+        unused_errata, all_errata = actions.FindUnsedErrata(errata_file=errata_file, roster_file=roster_file)
         ##
         ## show user how many were found
         message  = 'Found '+str(len(unused_errata))+' entries in the default roster_errata.csv that do not correct any entries in the latest roster file.\n'
@@ -349,6 +420,14 @@ class Application(tk.Frame):
                 print(entry, '|', all_errata[entry])
     
     def process_files(self):
+        ##
+        ## ensure the user has selected a hub map file before proceeding
+        if not self.hub_map_file.get():
+            print("No directory file selected")
+            return
+        else:
+            hub_map_file = self.hub_map_path+'/'+self.hub_map_file.get()
+            errata_file  = self.hub_map_path+'/'+self.errata_file.get()
         ##
         ## ensure the user has selected a directory file before proceeding
         if not self.directory_file.get():
@@ -365,12 +444,17 @@ class Application(tk.Frame):
             roster_file = self.roster_path+'/'+self.roster_file.get()
         ##
         ## process the files
+        self.hub_map   = hub_map_tools.ReadHubMapFromFile(file_name = hub_map_file)
+        print('Hub map file read complete:  '+hub_map_file)
+
         self.directory = directory_tools.ReadDirectoryFromFile(file_name = directory_file,
-                                                               hub_map   = self.master_hub_map)
+                                                               hub_map   = self.hub_map)
         print('Directory file read complete:  '+directory_file)
+
+        rosterC        = roster.Roster(show_errors='', file_name=errata_file)
         self.roster    = roster_tools.ReadRosterFromFile(file_name = roster_file,
-                                                         hub_map   = self.master_hub_map,
-                                                         rosterC   = roster.Roster(show_errors=''))
+                                                         hub_map   = self.hub_map,
+                                                         rosterC   = rosterC)
         print('Roster file read complete:  '+roster_file)
         ##
         ## now that input files have been read, display the buttons to process them

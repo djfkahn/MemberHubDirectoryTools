@@ -325,7 +325,7 @@ def FindParentChildrenHubMismatches(directory):
     return mismatches
 
 
-def FindUnsedErrata():
+def FindUnsedErrata(errata_file='roster_errata.csv', roster_file=None):
     """menu.FindUnsedErrata
     INPUTS:
     - none
@@ -337,12 +337,12 @@ def FindUnsedErrata():
     """
     ##
     ## Read the adults from the most recent roster file
-    adults_list = roster_tools.ReadRosterAdultsFromMostRecent()
+    adults_list = roster_tools.ReadRosterAdultsFromMostRecent(file_name=roster_file)
 
     ##
     ## Next, instantiate a Roster class, which includes the default errata, and retrieve
     ## that dictionary
-    temp   = roster.Roster(show_errors='y')
+    temp   = roster.Roster(show_errors='y', file_name=errata_file)
     all_errata = temp.GetErrata()
     
     ##

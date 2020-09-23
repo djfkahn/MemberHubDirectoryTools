@@ -8,7 +8,7 @@ from openpyxl import load_workbook
 
 NUM_ROSTER_FIELDS = 5
 
-def ReadRosterAdultsFromMostRecent():
+def ReadRosterAdultsFromMostRecent(file_name=None):
     """ roster_tools.ReadRosterAdultsFromMostRecent
     PURPOSE:
     Generates a list of adult names in the newest roster file.
@@ -22,12 +22,13 @@ def ReadRosterAdultsFromMostRecent():
     ##
     ## Find the files in the "Roster" folder with ".xlsx" extension, sort them by
     ## date, and pick the most recently added
-    file_path = os.path.abspath("./Roster/")
-    with os.scandir(file_path) as raw_files:
-        files = [file for file in raw_files \
-                    if not(file.name.startswith('~')) and (file.name.endswith('.xlsx'))]
-        files.sort(key=lambda x: os.stat(x).st_mtime, reverse=True)
-        file_name = file_path + "/" +files[0].name
+    if not file_name:
+        file_path = os.path.abspath("./Roster/")
+        with os.scandir(file_path) as raw_files:
+            files = [file for file in raw_files \
+                        if not(file.name.startswith('~')) and (file.name.endswith('.xlsx'))]
+            files.sort(key=lambda x: os.stat(x).st_mtime, reverse=True)
+            file_name = file_path + "/" +files[0].name
     
     ##
     ## Load the workbook, and select the active/only worksheet
