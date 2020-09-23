@@ -7,9 +7,8 @@ import directory_tools
 import roster_tools
 import hub_map_tools
 import import_file_tools
-import family
-import person
 import roster
+import actions
 
 STUDENT_INDICATOR = "+SA"
 STDOUT_SEPERATOR  = "-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
@@ -56,62 +55,13 @@ def FindMissingEmail(arg_list):
     None.
     """
     ##
+    ## perform the action
+    total_adult_count, no_email_person, no_email_family, partial_family, map_d = \
+        actions.FindMissingEmail(arg_list)
+    ##
     ## extract copies of the arguments so they are not accidentally modified,
     ## and initialize method variables
     directory         = arg_list[0].copy()
-    hub_map_d         = arg_list[1].copy()
-    total_adult_count = 0
-    no_email_person   = []
-    no_email_family   = []
-    partial_family    = []
-
-    ##
-    ## create a dictionary of classroom hubs that will hold lists of
-    ## adults without emails
-    map_d = hub_map_tools.CreateEmptyHubDictionary(hub_map_d)
-
-    ##
-    ## loop over all the families in the directory
-    for entry_family in directory:
-        ##
-        ## add the number of adults in this family to the count of all the adults
-        ## in the directory
-        total_adult_count += len(entry_family.adults)
-
-        ##
-        ## for each family, count number of adults without emails
-        this_family_no_email_count = 0
-        
-        ##
-        ## loop over each adult in the family
-        for adult in entry_family.adults:
-            ##
-            ## check whether this adult DOES NOT an email address
-            if adult.DoesNotListEmailAddress():
-                ##
-                ## found adult without an email, so add to list of persons without email
-                no_email_person.append(adult)
-                ##
-                ## increment the number of adults in this family without email
-                this_family_no_email_count += 1
-                ##
-                ## loop over all the adult's hubs, and add them to the hub
-                ## dictionary
-                for hub in adult.hubs:
-                    if hub in map_d.keys():
-                        map_d[hub].append(adult)
-
-        ##
-        ## if this family's no email count is the same as number of adults,
-        ## then append this family to the no_email_family list
-        if this_family_no_email_count == len(entry_family.adults):
-            no_email_family.append(entry_family)
-        ##
-        ## otherwise, if fewer adults do not have email than are in the family
-        ## then append this family to the partial_family list
-        elif this_family_no_email_count > 0:
-            partial_family.append(entry_family)
-
     ##
     ## print some of the counts to the screen for the user to review
     print(STDOUT_SEPERATOR)
@@ -127,7 +77,6 @@ def FindMissingEmail(arg_list):
           ((len(directory)-len(no_email_family)-len(partial_family)), len(directory)))
     print("%d out of %d families have at least one adult with an email address." % \
           ((len(directory)-len(no_email_family)), len(directory)))
-
     ##
     ## create a list of people in each hub who do not have an email
     action = PrintToScreenFileOrNeither("Print list of adults without email")
@@ -151,21 +100,12 @@ def FindOrphans(directory):
     None.
     """
     ##
-    ## make copy of the argument so it is not accidentally modified,
-    ## and initialize method variables
-    local_dir       = directory.copy()
-    orphan_families = []
-
-    ##
-    ## loop over all families in the directory to find orphan families
-    for entry_family in local_dir:
-        if entry_family.IsOrphan():
-            orphan_families.append(entry_family)
-
+    ## perform the action
+    orphan_families = actions.FindOrphans(directory)
     ##
     ## show user how many were found
     print("Found %d families without adults out of %d families" % \
-          (len(orphan_families), len(local_dir)))
+          (len(orphan_families), len(directory)))
     ##
     ## if any orphans were found, prompt user whether to show on screen
     if len(orphan_families) > 0:
@@ -186,23 +126,12 @@ def FindChildless(directory):
     None.
     """
     ##
-    ## make copy of the argument so it is not accidentally modified,
-    ## and initialize method variables
-    local_dir          = directory.copy()
-    childless_families = []
-    family_count = childless_count = 0
-
-    ##
-    ## loop over all families in the directory to find childless families
-    for entry_family in local_dir:
-        if entry_family.IsChildless():
-            childless_families.append(entry_family)
-
+    ## perform the action
+    childless_families = actions.FindChildless(directory)
     ##
     ## show user how many were found
     print("Found %d families without children out of %d families" % \
-          (len(childless_families), len(local_dir)))
-
+          (len(childless_families), len(directory)))
     ##
     ## if any orphans were found, prompt user whether to show on screen
     if len(childless_families) > 0:
@@ -224,25 +153,8 @@ def FindHubless(arg_list):
     None.
     """
     ##
-    ## extract copies of the arguments so they are not accidentally modified,
-    ## and initialize method variables
-    directory        = arg_list[0].copy()
-    map_d            = arg_list[1].copy()
-    hubless_adults   = []
-    hubless_children = []
-
-    ##
-    ## loop over all the families to find any adults or children who are not
-    ## in at least one classroom hub
-    for directory_family in directory:
-        for adult in directory_family.adults:
-            if not hub_map_tools.IsAnyHubClassroomHub(map_d, adult.hubs):
-                hubless_adults.append(adult)
-
-        for child in directory_family.children:
-            if not hub_map_tools.IsAnyHubClassroomHub(map_d, child.hubs):
-                hubless_children.append(child)
-
+    ## perform the action
+    hubless_adults, hubless_children = actions.FindHubless(arg_list)
     ##
     ## show user number of adults not in hubs, and prompt whether to show on screen
     print("Found %d adults who are not in at least one classroom hub." % len(hubless_adults))
@@ -250,7 +162,6 @@ def FindHubless(arg_list):
         if PrintToScreenOrNot() == "y":
             for this_person in hubless_adults:
                 print("%s %s <%s>" % (this_person.first_name, this_person.last_name, this_person.hubs))
-
     ##
     ## show user number of children not in hubs, and prompt whether to show on screen
     print("Found %d children who are not in a classroom hub." % len(hubless_children))
@@ -272,20 +183,8 @@ def FindChildrenInMultipleClassroom(arg_list):
     None.
     """
     ##
-    ## extract copies of the arguments so they are not accidentally modified,
-    ## and initialize method variables
-    directory       = arg_list[0].copy()
-    map_d           = arg_list[1].copy()
-    hubful_children = []
-
-    ##
-    ## loop over all the families in the directory to find children who are in
-    ## more than one classroom hub
-    for directory_family in directory:
-        for child in directory_family.children:
-            if hub_map_tools.IsInMultipleClassroomHubs(map_d, child.hubs):
-                hubful_children.append(child)
-
+    ## perform the action
+    hubful_children = actions.FindChildrenInMultipleClassroom(arg_list)
     ##
     ## show user the number of students who are in multiple classroom hubs,
     ## and prompt whether to show them on the screen.
@@ -319,31 +218,9 @@ def FindAdultsWithoutAccounts(directory):
     do not have accounts, separated by whether their profile has an email address or not.
     """
     ##
-    ## make copy of the argument so it is not accidentally modified,
-    ## and initialize method variables
-    local_dir                = directory.copy()
-    no_account_with_email    = []
-    no_account_without_email = []
-    teacher_with_no_account  = []
-    teacher_without_email    = []
-
-    ##
-    ## loop over all the families in the directory, and find those with
-    ## no accounts, and separate those between those with an email and those
-    ## without an email.
-    for this_family in local_dir:
-        for this_adult in this_family.adults:
-            if this_adult.account_created == "":
-                if this_adult.email == "":
-                    if this_adult.IsWithSchool():
-                        teacher_without_email.append(this_adult)
-                    else:
-                        no_account_without_email.append(this_adult)
-                elif this_adult.IsWithSchool():
-                    teacher_with_no_account.append(this_adult)
-                else:
-                    no_account_with_email.append(this_adult)
-
+    ## perform the action
+    teacher_without_email, no_account_without_email, teacher_with_no_account, no_account_with_email = \
+        actions.FindAdultsWithoutAccounts(directory)
     ##
     ## show the user the number of adults with neither account nor email, and prompt
     ## whether to print to the screen or save to a file.
@@ -384,46 +261,16 @@ def PrintNotInDirectory(arg_list):
     None.
     """
     ##
-    ## extract copies of the arguments so they are not accidentally modified,
-    ## and initialize method variables
-    local_dir  = arg_list[0].copy()
-    local_rost = arg_list[1].copy()
-    entriless  = []
-
-    ##
-    ## loop over all the families in the roster...
-    for r_family in local_rost:
-
-        ##
-        ## ...to compare to each family in the directory
-        for d_family in local_dir:
-            ##
-            ## look for matches between roster and directory families
-            if d_family.IsSameFamily(r_family):
-                ##
-                ## once a family match is found, check whether the roster family has
-                ## children who are not in the directory
-                if d_family.HasNewChildren(r_family):
-                    temp_family = family.Family()
-                    temp_family.FormFamilyWithNewChildren(d_family,r_family)
-                    entriless.append(temp_family)
-                break
-        ##
-        ## if the roster family was not found in the directory, add it to list of
-        ## families without directory entry
-        else:
-            entriless.append(r_family)
-
+    ## perform the action
+    entriless = actions.PrintNotInDirectory(arg_list)
     ##
     ## tell the user how many entriless families were found
     print("Found %d people on the roster who were not in the directory" % len(entriless))
     if len(entriless) == 0:
         return
-    
     ##
     ## ask the user how to output the list of entriless families
     action = PrintToScreenFileOrNeither('Print list to screen or file')
-
     ##
     ## output to the screen
     if action == 'y':
@@ -449,29 +296,8 @@ def FindParentChildrenHubMismatches(directory):
     - None.
     """
     ##
-    ## extract copies of the arguments so they are not accidentally modified,
-    ## and initialize method variables
-    local_dir  = directory.copy()
-    mismatches = []
-
-    ##
-    ## loop over all the families in the directory
-    for this_family in local_dir:
-        ##
-        ## accumulate all the family's children's hubs into one list
-        children_hubs = []
-        for this_child in this_family.children:
-            children_hubs.extend(this_child.hubs)
-
-        ##
-        ## next, accumulate list of adults who are not members of their
-        ## children's hubs
-        for this_adult in this_family.adults:
-            for child_hub in children_hubs:
-                if child_hub not in this_adult.hubs:
-                    mismatches.append(this_family)
-                    break
-
+    ## perform the action
+    mismatches = actions.FindParentChildrenHubMismatches(directory)
     ##
     ## show user the number of families with adults who are not in all their
     ## children's hubs, and prompt whether to show them on the screen.
@@ -496,22 +322,8 @@ def FindUnsedErrata(arg_list):
     - none
     """
     ##
-    ## Read the adults from the most recent roster file
-    adults_list = roster_tools.ReadRosterAdultsFromMostRecent()
-
-    ##
-    ## Next, instantiate a Roster class, which includes the default errata, and retrieve
-    ## that dictionary
-    temp   = roster.Roster(show_errors='y')
-    errata = temp.GetErrata()
-    
-    ##
-    ## for each error listed in the errata, look for it in the adults list
-    unused_errata = []
-    for entry in errata.keys():
-        if entry not in adults_list:
-            unused_errata.append(entry)
-    
+    ## perform the action
+    unused_errata, all_errata = actions.FindUnsedErrata()
     ##
     ## show user the number of families with adults who are not in all their
     ## children's hubs, and prompt whether to show them on the screen.
@@ -519,7 +331,7 @@ def FindUnsedErrata(arg_list):
     if len(unused_errata) > 0:
         if PrintToScreenOrNot() == "y":
             for entry in unused_errata:
-                print(entry, '|', errata[entry])
+                print(entry, '|', all_errata[entry])
                 print(STDOUT_SEPERATOR)
 
 

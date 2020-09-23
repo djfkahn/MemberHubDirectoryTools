@@ -43,7 +43,7 @@ def ReadRosterAdultsFromMostRecent():
     return adults_list
 
 
-def ReadRosterFromFile(file_name, hub_map):
+def ReadRosterFromFile(file_name, hub_map, rosterC):
     """ roster_tools.ReadRosterFromFile
     PURPOSE:
     Reads a roster file with the following fields:
@@ -53,15 +53,14 @@ def ReadRosterFromFile(file_name, hub_map):
     INPUT:
     - file_name -- name of the roster file
     - hub_map   -- dictionary that maps hub names to hub IDs
+    - rosterC   -- the Roster object containing the errata
     OUTPUTS:
     - roster    -- list of families extracted from the roster
     ASSUMPTIONS:
     1. First row of the file is the column headers...not a member of the roster.
     """
-    wb = load_workbook(file_name)
-    ws = wb.active
-
-    rosterC       = roster.Roster()
+    wb            = load_workbook(file_name)
+    ws            = wb.active
     student_count = -1
 
     for fields in ws.values:
@@ -155,5 +154,5 @@ def ReadRoster(hub_map):
       run directory.
     - All candidate rosters are Microsoft Excel files.
     """
-    return ReadRosterFromFile(GetRosterFileName(), hub_map)
+    return ReadRosterFromFile(GetRosterFileName(), hub_map, roster.Roster())
 

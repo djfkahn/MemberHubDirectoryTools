@@ -1,12 +1,15 @@
 import tkinter as tk
 import tkinter.ttk as ttk
+import tkinter.messagebox as messagebox
 from subprocess import Popen, PIPE, STDOUT
 import os
 import sys
-import menu
+import actions
 import directory_tools
 import roster_tools
+import roster
 import hub_map_tools
+import import_file_tools
 
 def do_cmdline(cmd, text):
     """Execute program in 'cmd' and pass 'text' to STDIN.
@@ -36,22 +39,18 @@ class Application(tk.Frame):
         super().__init__(master)
         self.master = master
         self.pack()
-        frame_width = 800
+        self.frame_width = 800
         self.input_files_frame    = tk.Frame(master=master,
-                                             width=frame_width, height= 100, bg="light gray",
+                                             width=self.frame_width, height= 100, bg="light gray",
                                              relief=tk.RAISED, borderwidth=1)
         self.input_files_frame.pack(pady=5)
 
         self.user_selection_frame = tk.Frame(master=master,
-                                             width=frame_width, height= 90, 
+                                             width=self.frame_width, height= 90, 
                                              relief=tk.RAISED, borderwidth=1)
         self.user_selection_frame.pack(pady=5)
         
-        self.input_display_frame  = tk.Frame(master=master, width=frame_width, height=40,
-                                              relief=tk.RAISED, borderwidth=1)
-        self.input_display_frame.pack()
-        
-        self.output_display_frame = tk.Frame(master=master, width=frame_width, height= 500,
+        self.output_display_frame = tk.Frame(master=master, width=self.frame_width, height= 500,
                                              relief=tk.RAISED, borderwidth=1)
         self.output_display_frame.pack()
         
@@ -61,8 +60,7 @@ class Application(tk.Frame):
 
     def create_widgets(self):
         self.create_input_file_widgets()
-        self.create_user_selection_widgets()
-        self.create_input_display_frame()
+        self.create_text_output_widgets()
 
     def create_input_file_widgets(self):
         
@@ -111,30 +109,24 @@ class Application(tk.Frame):
                               text    = "QUIT", fg="red",
                               command = self.master.destroy)
         self.quit.place(x=400, y=60)
-        self.quit["command"] = quit
+#         self.quit["command"] = quit
 
 
-    def create_input_display_frame(self):
-        self.user_inputs = tk.Entry(self.input_display_frame, width=30)
-        self.user_inputs.pack(side="left")
 
-        self.btn_redirect_input = tk.Button(self.input_display_frame, text="Enter", command=self.redirect_input)
-        self.btn_redirect_input.pack(side="right")
-
-    def redirect_input(self):
-        pass
-#         # get the text we have to ROT13
-#         plaintext = self.user_inputs.get()
-# 
-#         # use the commandline program to do the translation
-#         rot13text = do_cmdline('./rot13.py', plaintext)
-# 
-#         # strip off the prompt stuff
-#         (_, rot13text) = rot13text.split(': ')
-# 
-#         # update the ROT13 display
-#         self.rot13.delete(0, END)
-#         self.rot13.insert(0, rot13text)
+    def create_text_output_widgets(self, inputStr=""):
+        ##
+        ## create Text widget to hold the output
+        Toutput = tk.Text(master=self.output_display_frame,
+                          width=100, #self.frame_width,
+                          relief=tk.RAISED)
+        ##
+        ## redirect STDOUT to this Text widget
+        sys.stdout = StdoutRedirector(text_area=Toutput)
+        Toutput.pack()
+        ##
+        ## insert new next into the Text widget
+        Toutput.insert(tk.END, inputStr)
+        
     
     def create_user_selection_widgets(self):
         choices = [['Find Missing Email', 'Find Not in Directory'       , 'Find Adults/Children Hub Mismatches' ],
@@ -147,66 +139,243 @@ class Application(tk.Frame):
 
         for i in range(3):
             for j in range(3):
-                frame = tk.Frame(
-                    master=self.user_selection_frame,
-                    relief=tk.RAISED,
-                    borderwidth=1
-                )
+                frame = tk.Frame(master=self.user_selection_frame,
+                                 relief=tk.RAISED, bg='light grey',
+                                 borderwidth=1)
                 frame.grid(row=i, column=j)
                 label = tk.Button(master=frame, text=choices[i][j], command=commands[i][j])
                 label.pack()
 
     def action_0_0(self):
-        menu.FindMissingEmail([self.directory, self.master_hub_map])
-    
+        ##
+        ## run the action
+        total_adult_count, no_email_person, no_email_family, partial_family, emailless_map = \
+            actions.FindMissingEmail([self.directory, self.master_hub_map])
+        ##
+        ## print some of the counts to the screen for the user to review
+        message  = 'Directory contains: \n'
+        message += '- ' +str(total_adult_count)+' adults, of which\n'
+        message += '   '+str(len(no_email_person))+' have no email address\n\n'
+        message += '- ' +str(len(self.directory)) +' families, of which\n'
+        message += '   '+str(len(no_email_family))+' have no email address\n'
+        message += '   '+str(len(partial_family)) +' have at least one email address.\n'
+        message += '\nThe results will be shown on the screen.  Would you like to save them in a file as well?'
+        message += '\n\n(Click "Cancel" to do neither)'
+        ##
+        ## prompt user whether to show on screen
+        action = messagebox.askyesnocancel(title  ='Next Steps', message=message)
+        if action is None:
+            print('Not showing or storing results')
+        else:
+            for this_list in emailless_map.keys():
+                for this_person in emailless_map[this_list]:
+                    this_person.PrintWithHubs()
+            if action == True:
+                import_file_tools.CreateEmaillessByHubFile(emailless_map, self.master_hub_map, "emailless_by_hub")
+
+
     def action_1_0(self):
-        menu.FindOrphans(self.directory)
+        ##
+        ## run the action
+        orphan_families = actions.FindOrphans(self.directory)
+        ##
+        ## show user how many were found
+        message  = 'Found '+str(len(orphan_families))+' families without adults.\n'
+        message += '\nThe results will be shown on the screen.  (Click "Cancel" to skip)'
+        ##
+        ## prompt user whether to show on screen
+        action = messagebox.askokcancel(title  ='Next Steps', message=message)
+        if not action:
+            print('Not showing results')
+        else:
+            for entry_family in orphan_families:
+                entry_family.Print()
+        
     
     def action_2_0(self):
-        menu.FindChildless(self.directory)
-    
+        ##
+        ## run the action
+        childless_families = actions.FindChildless(self.directory)
+        ##
+        ## show user how many were found
+        message  = 'Found '+str(len(childless_families))+' families without children.\n'
+        message += '\nThe results will be shown on the screen.  (Click "Cancel" to skip)'
+        ##
+        ## prompt user whether to show on screen
+        action = messagebox.askokcancel(title  ='Summary', message=message)
+        if not action:
+            print('Not showing results')
+        else:
+            for entry_family in childless_families:
+                entry_family.Print()
+
+
     def action_0_1(self):
-        menu.PrintNotInDirectory([self.directory, self.roster])
-    
+        ##
+        ## run the action
+        entriless = actions.PrintNotInDirectory([self.directory, self.roster])
+        ##
+        ## print some of the counts to the screen for the user to review
+        message  = 'Found '+str(len(entriless))+' people on the roster who were not in the directory.\n'
+        message += '\nThe results will be shown on the screen.  Would you like to save them in a file as well?'
+        message += '\n\n(Click "Cancel" to do neither)'
+        ##
+        ## prompt user whether to show on screen
+        action = messagebox.askyesnocancel(title  ='Next Steps', message=message)
+        if action is None:
+            print('Not showing or storing results')
+        else:
+            for entry in entriless:
+                print("Did not find this family from the roster in the directory: ")
+                entry.Print()
+            if action == True:
+                import_file_tools.CreateNewMemberImport(entriless)
+        
+
     def action_1_1(self):
-        menu.FindHubless([self.directory, self.master_hub_map])
+        ##
+        ## run the action
+        hubless_adults, hubless_children = actions.FindHubless([self.directory, self.master_hub_map])
+        ##
+        ## show user how many were found
+        message  = 'Found '+str(len(hubless_adults))+' adults and '+str(len(hubless_children))+' children who are not in at least one classroom hub.\n'
+        message += '\nThe results will be shown on the screen.  (Click "Cancel" to skip)'
+        ##
+        ## prompt user whether to show on screen
+        action = messagebox.askokcancel(title  ='Summary', message=message)
+        if not action:
+            print('Not showing results')
+        else:
+            print('ADULTS:  ')
+            for this_person in hubless_adults:
+                print("%s %s <%s>" % (this_person.first_name, this_person.last_name, this_person.hubs))
+            print('CHILDREN:  ')
+            for this_person in hubless_children:
+                print("%s %s <%s>" % (this_person.first_name, this_person.last_name, this_person.hubs))
+
     
     def action_2_1(self):
-        menu.FindAdultsWithoutAccounts(self.directory)
-    
+        ##
+        ## run the action
+        teacher_without_email, no_account_without_email, teacher_with_no_account, no_account_with_email = actions.FindAdultsWithoutAccounts(self.directory)
+        ##
+        ## print some of the counts to the screen for the user to review
+        message  = 'Directory contains:\n'
+        message += '  People without accounts or email:\n'
+        message += ' - '+str(len(teacher_without_email))   +' work for the school\n'
+        message += ' - '+str(len(no_account_without_email))+' student\'s parents\n'
+        message += '  People without accounts but with email:\n'
+        message += ' - '+str(len(teacher_with_no_account)) +' work for the school\n'
+        message += ' - '+str(len(no_account_with_email))   +' student\'s parents\n'
+        message += '\nThe results will be shown on the screen.  Would you like to save them in a file as well?'
+        message += '\n\n(Click "Cancel" to do neither)'
+        ##
+        ## prompt user whether to show on screen
+        action = messagebox.askyesnocancel(title  ='Next Steps', message=message)
+        if action is None:
+            print('Not showing or storing results')
+        else:
+            print('NO ACCOUNT, NO EMAIL, WORK FOR SCHOOL')
+            for this_person in teacher_without_email:
+                this_person.Print()
+            print('NO ACCOUNT, NO EMAIL, STUDENT PARENT')
+            for this_person in no_account_without_email:
+                this_person.Print()
+            print('EMAIL, BUT NO ACCOUNT, WORK FOR SCHOOL')
+            for this_person in teacher_with_no_account:
+                this_person.PrintWithEmail()
+            print('EMAIL, BUT NO ACCOUNT, STUDENT PARENT')
+            for this_person in no_account_with_email:
+                this_person.PrintWithEmail()
+
+            if action == True:
+                import_file_tools.CreateAccountlessFile(teacher_without_email   , 'teachers_without_email')
+                import_file_tools.CreateAccountlessFile(no_account_without_email, 'no_account_without_email')
+                import_file_tools.CreateAccountlessFile(teacher_with_no_account , 'teachers_without_account')
+                import_file_tools.CreateAccountlessFile(no_account_with_email   , 'no_account_with_email')
+
+
     def action_0_2(self):
-        menu.FindParentChildrenHubMismatches(self.directory)
-    
+        ##
+        ## run the action
+        mismatches = actions.FindParentChildrenHubMismatches(self.directory)
+        ##
+        ## show user how many were found
+        message  = 'Found '+str(len(mismatches))+' families that have at least one adult who is not in all thier children\'s classroom hubs.\n'
+        message += '\nThe results will be shown on the screen.  (Click "Cancel" to skip)'
+        ##
+        ## prompt user whether to show on screen
+        action = messagebox.askokcancel(title  ='Summary', message=message)
+        if not action:
+            print('Not showing results')
+        else:
+            for this_family in mismatches:
+                this_family.PrintWithHubs()
+
+
     def action_1_2(self):
-        menu.FindChildrenInMultipleClassroom([self.directory, self.master_hub_map])
+        ##
+        ## run the action
+        hubful_children = actions.FindChildrenInMultipleClassroom([self.directory, self.master_hub_map])
+        ##
+        ## show user how many were found
+        message  = 'Found '+str(len(hubful_children))+' students who are not in more than one classroom hub.\n'
+        message += '\nThe results will be shown on the screen.  (Click "Cancel" to skip)'
+        ##
+        ## prompt user whether to show on screen
+        action = messagebox.askokcancel(title  ='Summary', message=message)
+        if not action:
+            print('Not showing results')
+        else:
+            for this_person in hubful_children:
+                print("%s %s <%s>" % (this_person.first_name, this_person.last_name, this_person.hubs))
+
 
     def action_2_2(self):
-        menu.FindUnsedErrata([])
+        ##
+        ## run the action
+        unused_errata, all_errata = actions.FindUnsedErrata()
+        ##
+        ## show user how many were found
+        message  = 'Found '+str(len(unused_errata))+' entries in the default roster_errata.csv that do not correct any entries in the latest roster file.\n'
+        message += '\nThe results will be shown on the screen.  (Click "Cancel" to skip)'
+        ##
+        ## prompt user whether to show on screen
+        action = messagebox.askokcancel(title  ='Summary', message=message)
+        if not action:
+            print('Not showing results')
+        else:
+            for entry in unused_errata:
+                print(entry, '|', all_errata[entry])
     
-    def redirector(self, inputStr=""):
-        T = tk.Text(master=self.output_display_frame)
-        sys.stdout = StdoutRedirector(text_area=T)
-        T.pack()
-        T.insert(tk.END, inputStr)
-        
     def process_files(self):
+        ##
+        ## ensure the user has selected a directory file before proceeding
         if not self.directory_file.get():
             print("No directory file selected")
             return
         else:
-            print("Selected directory file is "+self.directory_path+'/'+self.directory_file.get())
-
+            directory_file = self.directory_path+'/'+self.directory_file.get()
+        ##
+        ## ensure the user has selected a roster file before proceeding
         if not self.roster_file.get():
             print("No roster file selected")
             return
         else:
-            print("Selected roster file is "+self.roster_path+'/'+self.roster_file.get())
-
+            roster_file = self.roster_path+'/'+self.roster_file.get()
+        ##
         ## process the files
-        self.directory = directory_tools.ReadDirectoryFromFile(file_name = self.directory_path+'/'+self.directory_file.get(),
+        self.directory = directory_tools.ReadDirectoryFromFile(file_name = directory_file,
                                                                hub_map   = self.master_hub_map)
-        self.roster    = roster_tools.ReadRosterFromFile(file_name = self.roster_path+'/'+self.roster_file.get(),
-                                                         hub_map   = self.master_hub_map)
+        print('Directory file read complete:  '+directory_file)
+        self.roster    = roster_tools.ReadRosterFromFile(file_name = roster_file,
+                                                         hub_map   = self.master_hub_map,
+                                                         rosterC   = roster.Roster(show_errors=''))
+        print('Roster file read complete:  '+roster_file)
+        ##
+        ## now that input files have been read, display the buttons to process them
+        self.create_user_selection_widgets()
+
 
 root = tk.Tk()
 
@@ -215,6 +384,5 @@ app = Application(master=root)
 
 # Window Manager 
 app.master.title("My Do-Nothing Application")
-# app.master.maxsize(1000, 400)
 # app.redirector()
 app.mainloop()
