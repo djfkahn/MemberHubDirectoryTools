@@ -202,10 +202,11 @@ def FindChildrenInMultipleClassroom(arg_list):
 
 
 
-def FindAdultsWithoutAccounts(directory):
+def FindAdultsWithoutAccounts(arg_list):
     """menu.FindAdultsWithoutAccounts
     INPUTS:
     - directory -- list of families from a MemberHub directory dump.
+    - hub_map   -- the school's hub map
     OUTPUTS:
     Provides the option to write to standard output or to a file the list of adults who
     do not have accounts, separated by whether their profile has an email address or not.
@@ -213,11 +214,18 @@ def FindAdultsWithoutAccounts(directory):
     ##
     ## make copy of the argument so it is not accidentally modified,
     ## and initialize method variables
-    local_dir                = directory.copy()
+    local_dir                = arg_list[0].copy()
+    local_hub_map            = arg_list[1].copy()
     no_account_with_email    = []
     no_account_without_email = []
     teacher_with_no_account  = []
     teacher_without_email    = []
+
+    ##
+    ## create a dictionary of classroom hubs that will hold lists of
+    ## adults without accounts
+    with_email_map    = hub_map_tools.CreateEmptyHubDictionary(local_hub_map)
+    without_email_map = hub_map_tools.CreateEmptyHubDictionary(local_hub_map)
 
     ##
     ## loop over all the families in the directory, and find those with
@@ -226,17 +234,28 @@ def FindAdultsWithoutAccounts(directory):
     for this_family in local_dir:
         for this_adult in this_family.adults:
             if this_adult.account_created == "":
-                if this_adult.email == "":
+                if this_adult.DoesNotListEmailAddress():
                     if this_adult.IsWithSchool():
                         teacher_without_email.append(this_adult)
                     else:
                         no_account_without_email.append(this_adult)
+                        for hub in this_adult.hubs:
+                            if hub in without_email_map.keys():
+                                without_email_map[hub].append(this_adult)
+                ##
+                ## this adult does have an email, so check if they are with the school
                 elif this_adult.IsWithSchool():
                     teacher_with_no_account.append(this_adult)
+                ##
+                ## this adult does have an email and is not with the school, so add to parents
+                ## without accounts but with emails
                 else:
                     no_account_with_email.append(this_adult)
+                    for hub in this_adult.hubs:
+                        if hub in with_email_map.keys():
+                            with_email_map[hub].append(this_adult)
 
-    return teacher_without_email, no_account_without_email, teacher_with_no_account, no_account_with_email
+    return teacher_without_email, no_account_without_email, teacher_with_no_account, no_account_with_email, without_email_map, with_email_map
 
 
 

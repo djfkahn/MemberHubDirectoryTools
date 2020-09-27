@@ -87,7 +87,7 @@ def FindMissingEmail(arg_list):
                 this_person.PrintWithHubs()
             print('\n-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-\n')
     elif action == 'f':
-        import_file_tools.CreateEmaillessByHubFile(map_d, hub_map_d, "emailless_by_hub")
+        import_file_tools.CreateByHubFile(map_d, hub_map_d, "emailless_by_hub")
 
 
 
@@ -208,10 +208,10 @@ def ListShowAndAct(this_list, statement, file_name, hide_email=True):
                 else:
                     this_person.PrintWithEmail()
         elif action == "f":
-            import_file_tools.CreateAccountlessFile(this_list, file_name)
+            import_file_tools.CreateFileFromPeople(this_list, file_name)
 
 
-def FindAdultsWithoutAccounts(directory):
+def FindAdultsWithoutAccounts(arg_list):
     """menu.FindAdultsWithoutAccounts
     INPUTS:
     - directory -- list of families from a MemberHub directory dump.
@@ -221,8 +221,8 @@ def FindAdultsWithoutAccounts(directory):
     """
     ##
     ## perform the action
-    teacher_without_email, no_account_without_email, teacher_with_no_account, no_account_with_email = \
-        actions.FindAdultsWithoutAccounts(directory)
+    teacher_without_email, no_account_without_email, teacher_with_no_account, no_account_with_email, without_email_map, with_email_map = \
+        actions.FindAdultsWithoutAccounts(arg_list)
     ##
     ## show the user the number of adults with neither account nor email, and prompt
     ## whether to print to the screen or save to a file.
@@ -283,7 +283,7 @@ def PrintNotInDirectory(arg_list):
     ##
     ## output to a file
     elif action == 'f':
-        import_file_tools.CreateNewMemberImport(entriless)
+        import_file_tools.CreateFileFromFamily(entriless)
 
 
 
@@ -361,7 +361,7 @@ def RunMenu(master_directory, master_roster, master_map):
                      'Arg'        :[master_directory, master_map]},
                'e': {'Description':'Find Adults without Accounts',
                      'Function'   :FindAdultsWithoutAccounts,
-                     'Arg'        :master_directory},
+                     'Arg'        :[master_directory, master_map]},
                'f': {'Description':'Find Not in Directory',
                      'Function'   :PrintNotInDirectory,
                      'Arg'        :[master_directory, master_roster]},

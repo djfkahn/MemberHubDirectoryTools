@@ -235,7 +235,7 @@ class Application(tk.Frame):
                     this_person.PrintWithHubs()
                 print('\n-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-\n')
             if action == True:
-                import_file_tools.CreateEmaillessByHubFile(emailless_map, self.hub_map, "emailless_by_hub")
+                import_file_tools.CreateByHubFile(emailless_map, self.hub_map, "emailless_by_hub")
 
 
     def action_1_0(self):
@@ -293,7 +293,7 @@ class Application(tk.Frame):
                 print("Did not find this family from the roster in the directory: ")
                 entry.Print()
             if action == True:
-                import_file_tools.CreateNewMemberImport(entriless)
+                import_file_tools.CreateFileFromFamily(entriless)
         
 
     def action_1_1(self):
@@ -321,7 +321,8 @@ class Application(tk.Frame):
     def action_2_1(self):
         ##
         ## run the action
-        teacher_without_email, no_account_without_email, teacher_with_no_account, no_account_with_email = actions.FindAdultsWithoutAccounts(self.directory)
+        teacher_without_email, no_account_without_email, teacher_with_no_account, no_account_with_email, without_email_map, with_email_map = \
+            actions.FindAdultsWithoutAccounts([self.directory, self.hub_map])
         ##
         ## print some of the counts to the screen for the user to review
         message  = 'Directory contains:\n'
@@ -357,10 +358,10 @@ class Application(tk.Frame):
             print('\n-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-\n')
 
             if action == True:
-                import_file_tools.CreateAccountlessFile(teacher_without_email   , 'teachers_without_email')
-                import_file_tools.CreateAccountlessFile(no_account_without_email, 'no_account_without_email')
-                import_file_tools.CreateAccountlessFile(teacher_with_no_account , 'teachers_without_account')
-                import_file_tools.CreateAccountlessFile(no_account_with_email   , 'no_account_with_email')
+                import_file_tools.CreateFileFromPeople(teacher_without_email  ,               'teachers_without_email')
+                import_file_tools.CreateByHubFile     (without_email_map      , self.hub_map, 'no_account_without_email')
+                import_file_tools.CreateFileFromPeople(teacher_with_no_account,               'teachers_without_account')
+                import_file_tools.CreateByHubFile     (with_email_map         , self.hub_map, 'no_account_with_email')
 
 
     def action_0_2(self):
