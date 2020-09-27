@@ -38,44 +38,6 @@ class UT_01_FormTimeTag(unittest.TestCase):
         self.assertEqual(datetime_str, import_file_tools.FormTimeTag())
 
 
-class UT_02_WriteNewMemberLine(unittest.TestCase):
-    def test_01_all_fields(self):
-        mocker = mock_open()
-        with patch('builtins.open', mocker):
-            with open('testfile', 'w') as open_file:
-                import_file_tools.WriteNewMemberLine(open_file       = open_file,
-                                                     family_relation = 'Adult',
-                                                     first_name      = 'A',
-                                                     last_name       = 'B',
-                                                     person_id       = '1111')
-                handle = mocker()
-                handle.write.assert_called_once_with('Adult,A,B,1111\n')
-
-    def test_02_empty_fields(self):
-        mocker = mock_open()
-        with patch('builtins.open', mocker):
-            with open('testfile', 'w') as open_file:
-                import_file_tools.WriteNewMemberLine(open_file       = open_file,
-                                                     family_relation = '',
-                                                     first_name      = '',
-                                                     last_name       = '',
-                                                     person_id       = '')
-                handle = mocker()
-                handle.write.assert_called_once_with(',,,\n')
-
-
-    def test_03_null_fields(self):
-        mocker = mock_open()
-        with patch('builtins.open', mocker):
-            with open('testfile', 'w') as open_file:
-                import_file_tools.WriteNewMemberLine(open_file       = open_file,
-                                                     family_relation = None,
-                                                     first_name      = None,
-                                                     last_name       = None,
-                                                     person_id       = None)
-                handle = mocker()
-                handle.write.assert_called_once_with('None,None,None,None\n')
-
 
 
 class UT_03_WriteNewMemberPerson(unittest.TestCase):
@@ -91,7 +53,8 @@ class UT_03_WriteNewMemberPerson(unittest.TestCase):
                 import_file_tools.WriteNewMemberPerson(open_file  = open_file,
                                                        new_person = test_person)
                 handle = mocker()
-                handle.write.assert_called_once_with('Adult,A,B,\n')
+                write_calls = [call('Adult'), call(',A'), call(',B'), call(','), call('\n')]
+                handle.write.assert_has_calls(calls=write_calls, any_order=False)
 
 
     def test_02_empty_roster_person(self):
@@ -106,7 +69,8 @@ class UT_03_WriteNewMemberPerson(unittest.TestCase):
                 import_file_tools.WriteNewMemberPerson(open_file  = open_file,
                                                        new_person = test_person)
                 handle = mocker()
-                handle.write.assert_called_once_with('None,None,None,\n')
+                write_calls = [call('None'), call(',None'), call(',None'), call(','), call('\n')]
+                handle.write.assert_has_calls(calls=write_calls, any_order=False)
 
 
     def test_03_null_roster_person(self):
@@ -121,7 +85,8 @@ class UT_03_WriteNewMemberPerson(unittest.TestCase):
                 import_file_tools.WriteNewMemberPerson(open_file  = open_file,
                                                        new_person = test_person)
                 handle = mocker()
-                handle.write.assert_called_once_with('None,None,None,\n')
+                write_calls = [call('None'), call(',None'), call(',None'), call(','), call('\n')]
+                handle.write.assert_has_calls(calls=write_calls, any_order=False)
 
 
     def test_04_valid_directory_person(self):
@@ -137,7 +102,8 @@ class UT_03_WriteNewMemberPerson(unittest.TestCase):
                 import_file_tools.WriteNewMemberPerson(open_file  = open_file,
                                                        new_person = test_person)
                 handle = mocker()
-                handle.write.assert_called_once_with('Adult,A,B,1111\n')
+                write_calls = [call('Adult'), call(',A'), call(',B'), call(',1111'), call('\n')]
+                handle.write.assert_has_calls(calls=write_calls, any_order=False)
 
 
     def test_05_empty_directory_person(self):
@@ -153,7 +119,8 @@ class UT_03_WriteNewMemberPerson(unittest.TestCase):
                 import_file_tools.WriteNewMemberPerson(open_file  = open_file,
                                                        new_person = test_person)
                 handle = mocker()
-                handle.write.assert_called_once_with('None,None,None,\n')
+                write_calls = [call('None'), call(',None'), call(',None'), call(','), call('\n')]
+                handle.write.assert_has_calls(calls=write_calls, any_order=False)
 
 
     def test_06_null_directory_person(self):
@@ -169,7 +136,8 @@ class UT_03_WriteNewMemberPerson(unittest.TestCase):
                 import_file_tools.WriteNewMemberPerson(open_file  = open_file,
                                                        new_person = test_person)
                 handle = mocker()
-                handle.write.assert_called_once_with('None,None,None,None\n')
+                write_calls = [call('None'), call(',None'), call(',None'), call(',None'), call('\n')]
+                handle.write.assert_has_calls(calls=write_calls, any_order=False)
 
 
 
@@ -185,12 +153,12 @@ class UT_04_CreateHubImportFile(unittest.TestCase):
         mock_localtime.return_value = time.strptime('2020-01-01-00-00-00',"%Y-%m-%d-%H-%M-%S")
         mocker = mock_open()
         with patch('builtins.open', mocker):
-            import_file_tools.CreateHubImportFile(people      = test_people,
-                                                  file_prefix = 'test')
-            mocker.assert_called_with('test_2020-01-01-00-00-00.csv','w')
+            import_file_tools.CreateFileFromPeople(people      = test_people,
+                                                   file_prefix = 'test')
+            mocker.assert_called_with(os.path.abspath('.')+'/test_2020-01-01-00-00-00.csv','w')
             handle = mocker()
-            write_calls = [call('first_name,last_name,hubs,person_id\n'),
-                           call('A,B,[\'1111\'],1234\n')]
+            write_calls = [call('First Name'), call(',Last Name'), call(',Affiliated Hub(s)'), call(',Email'), call('\n'),
+                           call('A'), call(',B'), call(',[\'1111\']'), call(',None'), call('\n')]
             handle.write.assert_has_calls(calls=write_calls, any_order=False)
 
 
@@ -201,6 +169,7 @@ class UT_04_CreateHubImportFile(unittest.TestCase):
                                               family_relation ='Adult',
                                               hub_name_list   =['Foo'],
                                               hub_map         ={'Foo':'1111'},
+                                              email           ='a@b.c',
                                               person_id       ='1234'),
                        person.DirectoryPerson(last_name       ='D',
                                               first_name      ='C',
@@ -211,13 +180,13 @@ class UT_04_CreateHubImportFile(unittest.TestCase):
         mock_localtime.return_value = time.strptime('2020-01-01-00-00-00',"%Y-%m-%d-%H-%M-%S")
         mocker = mock_open()
         with patch('builtins.open', mocker):
-            import_file_tools.CreateHubImportFile(people      = test_people,
-                                                  file_prefix = 'test')
-            mocker.assert_called_with('test_2020-01-01-00-00-00.csv','w')
+            import_file_tools.CreateFileFromPeople(people      = test_people,
+                                                   file_prefix = 'test')
+            mocker.assert_called_with(os.path.abspath('.')+'/test_2020-01-01-00-00-00.csv','w')
             handle = mocker()
-            write_calls = [call('first_name,last_name,hubs,person_id\n'),
-                           call('A,B,[\'1111\'],1234\n'),
-                           call('C,D,[\'1111\'],2345\n')]
+            write_calls = [call('First Name'), call(',Last Name'), call(',Affiliated Hub(s)'), call(',Email'), call('\n'),
+                           call('A'), call(',B'), call(',[\'1111\']'), call(',a@b.c'), call('\n'),
+                           call('C'), call(',D'), call(',[\'1111\']'), call(',None'), call('\n')]
             handle.write.assert_has_calls(calls=write_calls, any_order=False)
 
 
@@ -236,12 +205,12 @@ class UT_05_CreateNewMemberImport(unittest.TestCase):
         mock_localtime.return_value = time.strptime('2020-01-01-00-00-00',"%Y-%m-%d-%H-%M-%S")
         mocker = mock_open()
         with patch('builtins.open', mocker):
-            import_file_tools.CreateNewMemberImport(entriless = [test_family])
-            mocker.assert_called_with('new_member_import_2020-01-01-00-00-00.csv','w')
+            import_file_tools.CreateFileFromFamily(entriless = [test_family])
+            mocker.assert_called_with(os.path.abspath('.')+'/new_member_import_2020-01-01-00-00-00.csv','w')
             handle = mocker()
-            write_calls = [call('family_relation,first_name,last_name,person_id\n'),
-                           call('Adult,A,B,\n'),
-                           call('Child1,C,B,\n')]
+            write_calls = [call('family_relation'), call(',first_name'), call(',last_name'), call(',person_id'), call('\n'),
+                           call('Adult'), call(',A'), call(',B'), call(','), call('\n'),
+                           call('Child1'), call(',C'), call(',B'), call(','), call('\n')]
             handle.write.assert_has_calls(calls=write_calls, any_order=False)
 
 
@@ -267,14 +236,14 @@ class UT_05_CreateNewMemberImport(unittest.TestCase):
         mock_localtime.return_value = time.strptime('2020-01-01-00-00-00',"%Y-%m-%d-%H-%M-%S")
         mocker = mock_open()
         with patch('builtins.open', mocker):
-            import_file_tools.CreateNewMemberImport(entriless = entriless)
-            mocker.assert_called_with('new_member_import_2020-01-01-00-00-00.csv','w')
+            import_file_tools.CreateFileFromFamily(entriless = entriless)
+            mocker.assert_called_with(os.path.abspath('.')+'/new_member_import_2020-01-01-00-00-00.csv','w')
             handle = mocker()
-            write_calls = [call('family_relation,first_name,last_name,person_id\n'),
-                           call('Adult,A,B,\n'),
-                           call('Child1,C,B,\n'),
-                           call('Adult,Y,Z,\n'),
-                           call('Child1,X,Z,\n')]
+            write_calls = [call('family_relation'), call(',first_name'), call(',last_name'), call(',person_id'), call('\n'),
+                           call('Adult'), call(',A'), call(',B'), call(','), call('\n'),
+                           call('Child1'), call(',C'), call(',B'), call(','), call('\n'),
+                           call('Adult'), call(',Y'), call(',Z'), call(','), call('\n'),
+                           call('Child1'), call(',X'), call(',Z'), call(','), call('\n')]
             handle.write.assert_has_calls(calls=write_calls, any_order=False)
 
 
@@ -291,11 +260,12 @@ class UT_06_CreateAccountlessFile(unittest.TestCase):
         mock_localtime.return_value = time.strptime('2020-01-01-00-00-00',"%Y-%m-%d-%H-%M-%S")
         mocker = mock_open()
         with patch('builtins.open', mocker):
-            import_file_tools.CreateAccountlessFile(people      = test_people,
-                                                    file_prefix = 'test')
-            mocker.assert_called_with('test_2020-01-01-00-00-00.txt','w')
+            import_file_tools.CreateFileFromPeople(people      = test_people,
+                                                   file_prefix = 'test')
+            mocker.assert_called_with(os.path.abspath('.')+'/test_2020-01-01-00-00-00.csv','w')
             handle = mocker()
-            write_calls = [call('A|B|[\'1111\']|1234\n')]
+            write_calls = [call('First Name'), call(',Last Name'), call(',Affiliated Hub(s)'), call(',Email'), call('\n'),
+                           call('A'), call(',B'), call(',[\'1111\']'), call(',None'), call('\n')]
             handle.write.assert_has_calls(calls=write_calls, any_order=False)
 
 
@@ -316,12 +286,13 @@ class UT_06_CreateAccountlessFile(unittest.TestCase):
         mock_localtime.return_value = time.strptime('2020-01-01-00-00-00',"%Y-%m-%d-%H-%M-%S")
         mocker = mock_open()
         with patch('builtins.open', mocker):
-            import_file_tools.CreateAccountlessFile(people      = test_people,
-                                                    file_prefix = 'test')
-            mocker.assert_called_with('test_2020-01-01-00-00-00.txt','w')
+            import_file_tools.CreateFileFromPeople(people      = test_people,
+                                                   file_prefix = 'test')
+            mocker.assert_called_with(os.path.abspath('.')+'/test_2020-01-01-00-00-00.csv','w')
             handle = mocker()
-            write_calls = [call('A|B|[\'1111\']|1234\n'),
-                           call('C|D|[\'1111\']|2345\n')]
+            write_calls = [call('First Name'), call(',Last Name'), call(',Affiliated Hub(s)'), call(',Email'), call('\n'),
+                           call('A'), call(',B'), call(',[\'1111\']'), call(',None'), call('\n'),
+                           call('C'), call(',D'), call(',[\'1111\']'), call(',None'), call('\n')]
             handle.write.assert_has_calls(calls=write_calls, any_order=False)
 
 
@@ -338,15 +309,16 @@ class UT_07_CreateEmaillessByHubFile(unittest.TestCase):
         mock_localtime.return_value = time.strptime('2020-01-01-00-00-00',"%Y-%m-%d-%H-%M-%S")
         mocker = mock_open()
         with patch('builtins.open', mocker):
-            import_file_tools.CreateEmaillessByHubFile(map_d       = {'1111':test_people},
-                                                       hub_map     = {'Foo':'1111'},
-                                                       file_prefix = 'test')
-            mocker.assert_called_with('test_2020-01-01-00-00-00.txt','w')
+            import_file_tools.CreateByHubFile(map_d       = {'1111':test_people},
+                                              hub_map     = {'Foo':'1111'},
+                                              file_prefix = 'test')
+            mocker.assert_called_with(os.path.abspath('.')+'/test_2020-01-01-00-00-00.txt','w')
             handle = mocker()
             write_calls = [call('-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-\n'),
                            call('Hub ID: 1111\n'),
-                           call('\t+Possible Hub Name: Foo\n'),
-                           call('1) B, A\n')]
+                           call('\t\t--> Possible Hub Name: Foo\n'),
+                           call('1 people without emails found in this hub\n\n'),
+                           call('1'), call(', B'), call(', A'), call('\n'), call('\n')]
             handle.write.assert_has_calls(calls=write_calls, any_order=False)
 
 
@@ -355,15 +327,16 @@ class UT_07_CreateEmaillessByHubFile(unittest.TestCase):
         mock_localtime.return_value = time.strptime('2020-01-01-00-00-00',"%Y-%m-%d-%H-%M-%S")
         mocker = mock_open()
         with patch('builtins.open', mocker):
-            import_file_tools.CreateEmaillessByHubFile(map_d       = {'1111':[]},
-                                                       hub_map     = {'Foo':'1111'},
-                                                       file_prefix = 'test')
-            mocker.assert_called_with('test_2020-01-01-00-00-00.txt','w')
+            import_file_tools.CreateByHubFile(map_d       = {'1111':[]},
+                                              hub_map     = {'Foo':'1111'},
+                                              file_prefix = 'test')
+            mocker.assert_called_with(os.path.abspath('.')+'/test_2020-01-01-00-00-00.txt','w')
             handle = mocker()
             write_calls = [call('-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-\n'),
                            call('Hub ID: 1111\n'),
-                           call('\t+Possible Hub Name: Foo\n'),
-                           call('All adults in this hub have email addresses in the directory')]
+                           call('\t\t--> Possible Hub Name: Foo\n'),
+                           call('All adults in this hub have email addresses in the directory\n'),
+                           call('\n')]
             handle.write.assert_has_calls(calls=write_calls, any_order=False)
 
 
