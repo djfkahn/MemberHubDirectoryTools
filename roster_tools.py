@@ -6,7 +6,7 @@ import roster
 import os
 from openpyxl import load_workbook
 
-NUM_ROSTER_FIELDS = 5
+MIN_NUM_ROSTER_FIELDS = 5
 
 def ReadRosterAdultsFromMostRecent(file_name=None):
     """ roster_tools.ReadRosterAdultsFromMostRecent
@@ -73,11 +73,11 @@ def ReadRosterFromFile(file_name, hub_map, rosterC):
 
         ## Skip any row for which all fields are not populated
         empty_field_found = False
-        for field in fields:
-            if field == None or field == "":
+        for i in range(MIN_NUM_ROSTER_FIELDS):
+            if fields[i] == None or fields[i] == "":
                 empty_field_found = True
                 print("Found row with missing required fields:", fields)
-                continue
+                break
         if empty_field_found:
             continue
 

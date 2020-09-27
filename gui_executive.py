@@ -225,13 +225,15 @@ class Application(tk.Frame):
         message += '\n\n(Click "Cancel" to do neither)'
         ##
         ## prompt user whether to show on screen
-        action = messagebox.askyesnocancel(title  ='Next Steps', message=message)
+        action = messagebox.askyesnocancel(title='Next Steps', message=message)
         if action is None:
             print('Not showing or storing results')
         else:
             for this_list in emailless_map.keys():
+                print('Hub ID = ', this_list)
                 for this_person in emailless_map[this_list]:
                     this_person.PrintWithHubs()
+                print('\n-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-\n')
             if action == True:
                 import_file_tools.CreateEmaillessByHubFile(emailless_map, self.hub_map, "emailless_by_hub")
 
@@ -340,15 +342,19 @@ class Application(tk.Frame):
             print('NO ACCOUNT, NO EMAIL, WORK FOR SCHOOL')
             for this_person in teacher_without_email:
                 this_person.Print()
+            print('\n-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-\n')
             print('NO ACCOUNT, NO EMAIL, STUDENT PARENT')
             for this_person in no_account_without_email:
                 this_person.Print()
+            print('\n-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-\n')
             print('EMAIL, BUT NO ACCOUNT, WORK FOR SCHOOL')
             for this_person in teacher_with_no_account:
                 this_person.PrintWithEmail()
+            print('\n-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-\n')
             print('EMAIL, BUT NO ACCOUNT, STUDENT PARENT')
             for this_person in no_account_with_email:
                 this_person.PrintWithEmail()
+            print('\n-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-\n')
 
             if action == True:
                 import_file_tools.CreateAccountlessFile(teacher_without_email   , 'teachers_without_email')

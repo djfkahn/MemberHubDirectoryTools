@@ -59,9 +59,9 @@ def FindMissingEmail(arg_list):
     total_adult_count, no_email_person, no_email_family, partial_family, map_d = \
         actions.FindMissingEmail(arg_list)
     ##
-    ## extract copies of the arguments so they are not accidentally modified,
-    ## and initialize method variables
+    ## extract copies of the arguments so they are not accidentally modified
     directory         = arg_list[0].copy()
+    hub_map_d         = arg_list[1].copy()
     ##
     ## print some of the counts to the screen for the user to review
     print(STDOUT_SEPERATOR)
@@ -82,8 +82,10 @@ def FindMissingEmail(arg_list):
     action = PrintToScreenFileOrNeither("Print list of adults without email")
     if action == 'y':
         for this_list in map_d.keys():
+            print('Hub ID = ', this_list)
             for this_person in map_d[this_list]:
                 this_person.PrintWithHubs()
+            print('\n-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-\n')
     elif action == 'f':
         import_file_tools.CreateEmaillessByHubFile(map_d, hub_map_d, "emailless_by_hub")
 

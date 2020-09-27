@@ -5,8 +5,10 @@ imported into MemberHub.
 
 import person
 import family
+import os
 
 from time import localtime, strftime
+
 
 def FormTimeTag():
     tag = strftime("%Y-%m-%d-%H-%M-%S", localtime())
@@ -27,6 +29,24 @@ def WriteNewMemberPerson(open_file, new_person):
                        last_name       = new_person.last_name,
                        person_id       = person_id)
 
+
+def FormFullFileName(file_prefix, file_extention):
+    ##
+    ## by default, place the file in the current directory
+    file_path = os.path.abspath(".")
+    ##
+    ## if the current directory is the root directory or does not exist,
+    ## place the file on the current user's Desktop.
+    if file_path == "/" or not os.path.exists(file_path):
+        file_path = os.path.expanduser('~/Desktop')
+    ##
+    ## formulate the file name, and print it to the 
+    file_name = file_path + "/" + file_prefix + "_" + FormTimeTag() + file_extention
+    print("Writing to file:  " + file_name)
+    
+    return file_name
+
+
 def CreateNewMemberImport(entriless):
     """CreateHubUpdateCSV
 Inputs : entriless - list of families that need to be added to the directory
@@ -39,8 +59,7 @@ Summary: 1. asks user to name file to be written to.  this file will be
          4. closes the file
 """
 
-    file_name = "new_member_import_" + FormTimeTag() + ".csv"
-    print("Writing to import file called %s." % file_name)
+    file_name = FormFullFileName("new_member_import", ".csv")
     try:
         open_file = open(file_name,"w")
         WriteNewMemberLine(open_file,'family_relation', 'first_name', 'last_name', 'person_id')
@@ -71,8 +90,7 @@ Summary: 1. opens file for writing, and writes the column titles
          3. closes the file
 """
 
-    file_name = file_prefix + "_" + FormTimeTag() + ".csv"
-    print("Writing to import file called %s." % file_name)
+    file_name = FormFullFileName(file_prefix, ".csv")
     try:
         open_file = open(file_name,"w")
         WriteHublessLine(open_file  = open_file,
@@ -97,8 +115,7 @@ Summary: 1. opens file for writing, and writes the column titles
 
 def CreateAccountlessFile(people, file_prefix):
 
-    file_name = file_prefix + "_" + FormTimeTag() + ".txt"
-    print("Writing to file called %s." % file_name)
+    file_name = FormFullFileName(file_prefix, ".txt")
     try:
         open_file = open(file_name,"w")
         for person in people:
@@ -115,30 +132,32 @@ def CreateAccountlessFile(people, file_prefix):
 
 def CreateEmaillessByHubFile(map_d, hub_map, file_prefix):
 
-    file_name = file_prefix + "_" + FormTimeTag() + ".txt"
-    print("Writing to file called %s." % file_name)
+    file_name = FormFullFileName(file_prefix, ".txt")
     try:
         open_file = open(file_name,"w")
         for hub in map_d.keys():
-            open_file.write("-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-\n")
-            open_file.write('Hub ID: ' + hub + "\n")
+            open_file.write('-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-\n')
+            open_file.write('Hub ID: ' + hub + '\n')
             ##
-            ## find a way to print the hub's teacher name
+            ## print the hub's potential teacher name(s) by matching hub ID to hub map keys
             for map_key in hub_map.keys():
                 if hub_map[map_key] == hub:
-                    open_file.write('\t+Possible Hub Name: ' + map_key + '\n')
+                    open_file.write('\t\t--> Possible Hub Name: ' + map_key + '\n')
             ##
             ## print a different message if the hub has no adults without emails
             if len(map_d[hub]) < 1:
-                open_file.write('All adults in this hub have email addresses in the directory')
+                open_file.write('All adults in this hub have email addresses in the directory\n')
             else:
                 ##
                 ## add each person in the hub's list
+                open_file.write(str(len(map_d[hub])) + ' people without emails found in this hub\n\n')
                 number = 1
                 for person in map_d[hub]:
                     line = str(number) + ") " + person.last_name + ", " + person.first_name + "\n"
                     open_file.write(line)
                     number += 1
+
+            open_file.write("\n")
 
     finally:
         open_file.close()
