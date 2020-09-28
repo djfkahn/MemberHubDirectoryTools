@@ -5,7 +5,7 @@ a school roster, and a hub map to perform analyses on the MemberHub directory.
 import roster_tools
 import hub_map_tools
 import family
-import person
+# import person
 import roster
 
 
@@ -124,7 +124,6 @@ def FindChildless(directory):
     ## and initialize method variables
     local_dir          = directory.copy()
     childless_families = []
-    family_count = childless_count = 0
 
     ##
     ## loop over all families in the directory to find childless families

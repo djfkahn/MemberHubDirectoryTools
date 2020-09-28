@@ -127,7 +127,7 @@ def GetRosterFileName():
         files.sort(key=lambda x: os.stat(x).st_mtime, reverse=True)
 
         max_index = 0
-        file_number = 1
+        file_number = '1'
         while int(file_number) >= max_index:
             for file in files:
                 max_index += 1
@@ -136,7 +136,7 @@ def GetRosterFileName():
             file_number = input("Enter list number of file or press <enter> to use '" + files[0].name + "':")
             if not file_number:
                 return file_path + "/" +files[0].name
-            elif 0 < int(file_number) and int(file_number) <= max_index:
+            elif 0 < int(file_number) <= max_index:
                 return file_path + "/" + files[int(file_number)-1].name
             else:
                 max_index = 0

@@ -4,7 +4,7 @@ It assumes the presence of a file called 'hub_map.csv' in the directory from
 which the program is executed.
 """
 import csv
-import os
+# import os
 
 def ConvertHubStringListToIDList(hub_name_list, map_d):
     """hub_map_tools.ConvertHubStringListToIDList

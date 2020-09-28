@@ -4,7 +4,6 @@ imported into MemberHub.
 '''
 
 import person
-import family
 import os
 
 from time import localtime, strftime
