@@ -11,7 +11,7 @@ class Roster:
     hideErrataOutput - A flag indicating whether messages should be printed when roster errors are identified
     """
 
-    def __init__(self, show_errors = " "):
+    def __init__(self, show_errors = " ", file_name="roster_errata.csv"):
         # Initialize the roster table to an empty set
         self.table            = []
         # Ask whether to show errors, and then hide the errata output as the opposite of that answer
@@ -22,7 +22,7 @@ class Roster:
         # Initialize the errata dictionary to the contents of 'roster_errata.csv'
         self.errata           = {}
         try:
-            open_file = open('roster_errata.csv')
+            open_file = open(file_name)
             for line in open_file:
                 if line[0] != "#":
                     fields = line.split('|')

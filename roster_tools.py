@@ -6,9 +6,9 @@ import roster
 import os
 from openpyxl import load_workbook
 
-NUM_ROSTER_FIELDS = 5
+MIN_NUM_ROSTER_FIELDS = 5
 
-def ReadRosterAdultsFromMostRecent():
+def ReadRosterAdultsFromMostRecent(file_name=None):
     """ roster_tools.ReadRosterAdultsFromMostRecent
     PURPOSE:
     Generates a list of adult names in the newest roster file.
@@ -22,12 +22,13 @@ def ReadRosterAdultsFromMostRecent():
     ##
     ## Find the files in the "Roster" folder with ".xlsx" extension, sort them by
     ## date, and pick the most recently added
-    file_path = os.path.abspath("./Roster/")
-    with os.scandir(file_path) as raw_files:
-        files = [file for file in raw_files \
-                    if not(file.name.startswith('~')) and (file.name.endswith('.xlsx'))]
-        files.sort(key=lambda x: os.stat(x).st_mtime, reverse=True)
-        file_name = file_path + "/" +files[0].name
+    if not file_name:
+        file_path = os.path.abspath("./Roster/")
+        with os.scandir(file_path) as raw_files:
+            files = [file for file in raw_files \
+                        if not(file.name.startswith('~')) and (file.name.endswith('.xlsx'))]
+            files.sort(key=lambda x: os.stat(x).st_mtime, reverse=True)
+            file_name = file_path + "/" +files[0].name
     
     ##
     ## Load the workbook, and select the active/only worksheet
@@ -43,7 +44,7 @@ def ReadRosterAdultsFromMostRecent():
     return adults_list
 
 
-def ReadRosterFromFile(file_name, hub_map):
+def ReadRosterFromFile(file_name, hub_map, rosterC):
     """ roster_tools.ReadRosterFromFile
     PURPOSE:
     Reads a roster file with the following fields:
@@ -53,15 +54,14 @@ def ReadRosterFromFile(file_name, hub_map):
     INPUT:
     - file_name -- name of the roster file
     - hub_map   -- dictionary that maps hub names to hub IDs
+    - rosterC   -- the Roster object containing the errata
     OUTPUTS:
     - roster    -- list of families extracted from the roster
     ASSUMPTIONS:
     1. First row of the file is the column headers...not a member of the roster.
     """
-    wb = load_workbook(file_name)
-    ws = wb.active
-
-    rosterC       = roster.Roster()
+    wb            = load_workbook(file_name)
+    ws            = wb.active
     student_count = -1
 
     for fields in ws.values:
@@ -73,11 +73,11 @@ def ReadRosterFromFile(file_name, hub_map):
 
         ## Skip any row for which all fields are not populated
         empty_field_found = False
-        for field in fields:
-            if field == None or field == "":
+        for i in range(MIN_NUM_ROSTER_FIELDS):
+            if fields[i] == None or fields[i] == "":
                 empty_field_found = True
                 print("Found row with missing required fields:", fields)
-                continue
+                break
         if empty_field_found:
             continue
 
@@ -127,7 +127,7 @@ def GetRosterFileName():
         files.sort(key=lambda x: os.stat(x).st_mtime, reverse=True)
 
         max_index = 0
-        file_number = 1
+        file_number = '1'
         while int(file_number) >= max_index:
             for file in files:
                 max_index += 1
@@ -136,7 +136,7 @@ def GetRosterFileName():
             file_number = input("Enter list number of file or press <enter> to use '" + files[0].name + "':")
             if not file_number:
                 return file_path + "/" +files[0].name
-            elif 0 < int(file_number) and int(file_number) <= max_index:
+            elif 0 < int(file_number) <= max_index:
                 return file_path + "/" + files[int(file_number)-1].name
             else:
                 max_index = 0
@@ -155,5 +155,5 @@ def ReadRoster(hub_map):
       run directory.
     - All candidate rosters are Microsoft Excel files.
     """
-    return ReadRosterFromFile(GetRosterFileName(), hub_map)
+    return ReadRosterFromFile(GetRosterFileName(), hub_map, roster.Roster())
 
